@@ -21,7 +21,7 @@ git clone https://github.com/takashit16833/vscode-noctis-blue.git
 cd vscode-noctis-blue
 npm test
 npx --yes @vscode/vsce package --no-dependencies
-code --install-extension noctis-blue-0.4.0.vsix
+code --install-extension noctis-blue-0.4.1.vsix
 ```
 
 VS Codeの **Preferences: Color Theme** で `Noctis Blue` または `Noctis Blue Transparent` を選択する。
@@ -43,6 +43,26 @@ npm test
 
 MITライセンスの[Emacs版](https://github.com/takashit16833/emacs-retro-hacker-blue-theme)を配色設計の出発点とし、元になった [Retro Hacker Theme](https://github.com/elmersh/retro-hacker-theme) にも謝意を表する。著作権表示は `LICENSE` に残す。
 
+## 選択・入力欄などの半透明化（0.4.1）
+
+`Noctis Blue Transparent` に限り、標準の配色設定で次の背景色を**色を残した半透明**に変更した。`Noctis Blue`（通常版）は変更しない。
+
+| 表示箇所 | 透明度の試験値 |
+| --- | --- |
+| 現在行 | 不透明度50%（非アクティブ40%） |
+| 編集範囲の選択 | 不透明度約65%（非アクティブ50%） |
+| Explorerの選択ファイル | 不透明度約70%（非アクティブ60%） |
+| Explorerのキーボードフォーカス | 不透明度約70%（非アクティブ60%） |
+| 入力欄 | 不透明度約70% |
+| セレクトボックスの背景 | 不透明度約75% |
+| チャットのTip／チャット入力系背景 | 不透明度約70% |
+
+配色は `palette/colors.json` の元の色を使用する。文字色や選択自体の表示は維持し、背景色にだけ不透明度を指定する。
+
+**注意:** `dropdown.background` はVS Code公式の説明でmacOSでは使われない場合がある。チャットのTipは実装上 `agentsChatInput.background`（なければ `input.background`）を使用するが、ほかの下地との重複描画もあり得る。この２点を含め、実機の表示はまだ未検証。透明化に成功したと断定しない。実測後に必要な部分だけ追加のCSS対応を検討する。
+
+- [VS Code公式テーマ色一覧](https://code.visualstudio.com/api/references/theme-color)
+- [チャットTipの背景指定（VS Code本体）](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/contrib/chat/browser/widget/input/media/chatInputNotice.css)
 ## 実際のVS Codeで一度に透過を検証する
 
 **`Noctis Blue: Show Combined Transparency Test`** は、別々の検証スクリプトを何回も取得しなくて済むようにしたコマンド。**プレビューではなく実際のVS Codeの画面**に対して、一時的なCSSを適用する。
