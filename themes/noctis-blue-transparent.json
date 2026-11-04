@@ -54,7 +54,7 @@
     "editorGroupHeader.tabsBorder": "#153A75",
     "tab.activeForeground": "#5EAFFF",
     "tab.inactiveForeground": "#316CBD",
-    "tab.hoverBackground": "#052A59",
+    "tab.hoverBackground": "#052A59A6",
     "tab.hoverForeground": "#B8D9FF",
     "tab.border": "#153A75",
     "tab.activeBorderTop": "#5EAFFF",
@@ -99,7 +99,7 @@
     "list.activeSelectionForeground": "#B8D9FF",
     "list.inactiveSelectionBackground": "#0B173799",
     "list.inactiveSelectionForeground": "#7CBEFF",
-    "list.hoverBackground": "#060C24",
+    "list.hoverBackground": "#060C24A6",
     "list.hoverForeground": "#B8D9FF",
     "list.highlightForeground": "#5EAFFF",
     "list.errorForeground": "#FF4DE1",
@@ -109,7 +109,7 @@
     "quickInputList.focusBackground": "#052A59",
     "quickInputList.focusForeground": "#B8D9FF",
     "quickInputTitle.background": "#000E2F",
-    "input.background": "#000E2FB3",
+    "input.background": "#000E2F80",
     "input.foreground": "#5EAFFF",
     "input.border": "#153A75",
     "input.placeholderForeground": "#316CBD",
@@ -189,7 +189,10 @@
     "list.focusBackground": "#052A59B3",
     "list.inactiveFocusBackground": "#0B173799",
     "dropdown.background": "#000E2FBF",
-    "agentsChatInput.background": "#001E4AB3"
+    "agentsChatInput.background": "#001E4A80",
+    "modernTab.hoverBackground": "#060C24A6",
+    "editorSuggestWidget.background": "#001E4AA6",
+    "editorSuggestWidget.selectedBackground": "#052A59B3"
   },
   "tokenColors": [
     {
