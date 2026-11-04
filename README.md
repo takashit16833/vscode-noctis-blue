@@ -21,7 +21,7 @@ git clone https://github.com/takashit16833/vscode-noctis-blue.git
 cd vscode-noctis-blue
 npm test
 npx --yes @vscode/vsce package --no-dependencies
-code --install-extension noctis-blue-0.4.2.vsix
+code --install-extension noctis-blue-0.4.3.vsix
 ```
 
 VS Codeの **Preferences: Color Theme** で `Noctis Blue` または `Noctis Blue Transparent` を選択する。
@@ -63,6 +63,12 @@ MITライセンスの[Emacs版](https://github.com/takashit16833/emacs-retro-hac
 
 - [VS Code公式テーマ色一覧](https://code.visualstudio.com/api/references/theme-color)
 - [チャットTipの背景指定（VS Code本体）](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/contrib/chat/browser/widget/input/media/chatInputNotice.css)
+## Sticky Scrollのぼかしとホバー（0.4.3）
+
+- `vscode-wallpaper` で2026-11-03に実機確認済みの `.sticky-widget:not(.peek)` に対する `backdrop-filter: blur(12px)` を、`Noctis Blue: Show Combined Transparency Test` の `top` 側の一時CSSへ再利用する。固定コードの文字には `opacity` を指定しない。
+- 同じ実測で確定した `.sticky-widget-line-numbers` と `.sticky-widget-lines-scrollable` の重複下地を透明化する処理は従来どおり維持する。
+- VS Codeの `stickyScroll.css` がホバー時に `--vscode-editorStickyScrollHover-background` を適用するため、透過版テーマのみ `editorStickyScrollHover.background` を `#052A59A6`（Noctisの青、不透明度約65%）にする。ホバーの強調表示は残し、背景色だけを半透明にする。
+- これは `vscode-wallpaper` の以前の実機検証を根拠とした変更であり、Noctis Blue v0.4.3での実機表示はまだ未確認。
 ## ホバー・補完・入力欄の透過改善（0.4.2）
 
 以下は **Noctis Blue Transparentのみ** の変更である。元の青系の背景色は残したまま、透明度だけを調整した。通常版やdotfilesは変更しない。
