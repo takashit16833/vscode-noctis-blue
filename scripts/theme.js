@@ -8,7 +8,7 @@ function withAlpha(color, alpha) {
 function buildTheme(p,transparent){
   const colors={
     "foreground":p.dim,"descriptionForeground":p.foreground,"focusBorder":p.foreground,"errorForeground":p.cursor,
-    "widget.border":p.border,"selection.background":"#173366B2",
+    "widget.border":p.border,"selection.background":withAlpha(p.selectionUi,"B2"),
     "editor.foreground":p.foreground,"editorCursor.foreground":p.cursor,"editorCursor.background":p.background,
     "editor.lineHighlightBackground":p.line,"editor.lineHighlightBorder":p.border,"editor.selectionBackground":p.selection,
     "editor.inactiveSelectionBackground":withAlpha(p.selection,"88"),"editor.selectionHighlightBackground":withAlpha(p.focus,"50"),
@@ -41,9 +41,9 @@ function buildTheme(p,transparent){
     "auxiliaryBar.foreground":p.foreground,"auxiliaryBar.border":p.border,
     "terminal.foreground":p.foreground,"terminalCursor.foreground":p.cursor,
     "terminalCursor.background":p.background,
-    "terminal.ansiBlack":"#000000","terminal.ansiBrightBlack":p.inactiveForeground,
+    "terminal.ansiBlack":p.black,"terminal.ansiBrightBlack":p.inactiveForeground,
     "terminal.ansiBlue":p.dim,"terminal.ansiBrightBlue":p.foreground,
-    "terminal.ansiCyan":"#00CED1","terminal.ansiBrightCyan":p.cyan,
+    "terminal.ansiCyan":p.cyanDim,"terminal.ansiBrightCyan":p.cyan,
     "terminal.ansiGreen":p.green,"terminal.ansiBrightGreen":p.green,
     "terminal.ansiMagenta":p.type,"terminal.ansiBrightMagenta":p.typeBright,
     "terminal.ansiRed":p.cursor,"terminal.ansiBrightRed":p.errorBright,
