@@ -68,6 +68,9 @@ function generateCss(input = {}) {
     root + ' .part.panel .xterm-scrollable-element',
     root + ' .part.panel .xterm-viewport',
     root + ' .part.editor :is(.content, .editor-group-container, .editor-container, .editor-instance, .monaco-editor, .monaco-editor-background, .margin, .title, .tabs-container)',
+    // SCM has two layers using input.background; keep the outer .scm-editor
+    // translucent, and clear only its redundant inner Monaco renderer.
+    root + ' .scm-view .scm-editor-container :is(.monaco-editor, .monaco-editor-background, .margin)',
     root + ' :is(.part.sidebar, .part.auxiliarybar, .part.panel) > .content',
     root + ' .part.editor .tabs-and-actions-container',
     root + ' .part.panel .monaco-list-rows',
