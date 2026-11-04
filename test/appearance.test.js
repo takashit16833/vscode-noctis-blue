@@ -51,6 +51,13 @@ test('area CSS uses actual opaque Noctis colors, without any wallpaper image', (
   assert.ok(!css.includes('url('));
 });
 
+test('SCM input keeps its outer blue surface but clears duplicated inner Monaco background', () => {
+  const css = generateCss({ panel: 0.5 });
+  assert.match(css, /\.scm-view \.scm-editor-container :is\(\.monaco-editor, \.monaco-editor-background, \.margin\)/);
+  assert.doesNotMatch(css, /\.scm-view \.scm-editor\s*\{\s*background-color:\s*transparent/);
+  assert.ok(css.includes('color-mix(in srgb, ' + opaque.colors['panel.background'] + ' 50%, transparent)'));
+});
+
 test('floating gap uses its own painted strips and excludes regular layout', () => {
   const css = generateCss({ gap: 0.65 });
   assert.ok(css.includes('.floating-panels:not(.modern-ui-compact)'));
