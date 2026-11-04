@@ -7,12 +7,36 @@ const palette=require('../palette/colors.json');
 const {buildTheme}=require('../scripts/theme');
 const pkg=require('../package.json');
 const a=buildTheme(palette,false),b=buildTheme(palette,true);
-test('the transparent variant changes only surfaces',()=>{
-  const changed=Object.keys(a.colors).filter(k=>a.colors[k]!==b.colors[k]);
-  assert.equal(changed.length,20);
-  for(const key of changed){assert.equal(b.colors[key],a.colors[key]+'00');}
+test('transparent variant retains surfaces and adds only specified translucent details',()=>{
+  const detailColors={
+    'editor.lineHighlightBackground':'#06153680',
+    'editor.inactiveLineHighlightBackground':'#06153666',
+    'editor.selectionBackground':'#13264BA6',
+    'editor.inactiveSelectionBackground':'#13264B80',
+    'list.activeSelectionBackground':'#052A59B3',
+    'list.inactiveSelectionBackground':'#0B173799',
+    'list.focusBackground':'#052A59B3',
+    'list.inactiveFocusBackground':'#0B173799',
+    'input.background':'#000E2FB3',
+    'dropdown.background':'#000E2FBF',
+    'agentsChatInput.background':'#001E4AB3'
+  };
+  const allKeys=new Set([...Object.keys(a.colors),...Object.keys(b.colors)]);
+  const changed=[...allKeys].filter(k=>a.colors[k]!==b.colors[k]);
+  assert.equal(changed.length,31);
+  for(const key of changed){
+    if(Object.hasOwn(detailColors,key)) {
+      assert.equal(b.colors[key],detailColors[key],key);
+      continue;
+    }
+    assert.equal(b.colors[key],a.colors[key]+'00',key);
+  }
   assert.deepEqual(a.tokenColors,b.tokenColors);
   assert.deepEqual(a.semanticTokenColors,b.semanticTokenColors);
+  assert.equal(a.colors['editor.lineHighlightBackground'],palette.line);
+  assert.equal(a.colors['editor.selectionBackground'],palette.selection);
+  assert.equal(a.colors['input.background'],palette.backgroundDeep);
+  assert.equal(a.colors['agentsChatInput.background'],undefined);
 });
 test('colors are valid and cursor / errors use Emacs pink',()=>{
   assert.equal(a.colors['editorCursor.foreground'],'#FF4DE1');
