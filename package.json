@@ -2,7 +2,7 @@
   "name": "noctis-blue",
   "displayName": "Noctis Blue",
   "description": "A blue VS Code theme with customizable translucent surfaces.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "publisher": "takashit16833",
   "private": true,
   "engines": {
@@ -49,10 +49,6 @@
       {
         "command": "noctisBlue.showMarkdownActiveBlockTest",
         "title": "Noctis Blue: Show Markdown Active Block Test"
-      },
-      {
-        "command": "noctisBlue.openAppearancePreview",
-        "title": "Noctis Blue: Open Appearance Preview"
       }
     ],
     "configuration": {
@@ -125,7 +121,6 @@
   "main": "./src/extension.js",
   "activationEvents": [
     "onCommand:noctisBlue.showOpacityScript",
-    "onCommand:noctisBlue.showMarkdownActiveBlockTest",
-    "onCommand:noctisBlue.openAppearancePreview"
+    "onCommand:noctisBlue.showMarkdownActiveBlockTest"
   ]
 }
