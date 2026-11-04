@@ -72,6 +72,9 @@ MITライセンスの[Emacs版](https://github.com/takashit16833/emacs-retro-hac
 
 現在の `vscode-wallpaper` も独自の領域別不透明度CSSを出力するため、**両方を同時適用すると競合する**。壁紙との自動連携および起動時自動適用はまだ実装していない。CSSの適用方法を二重化せず、一つの表示経路を共有する設計が決まってから行う。
 
-内蔵Markdown EditorのWebview内の背景は、既存の透過テーマ色に従っている。今回のCSSが塗るのはWebviewの**外側**の編集領域。編集中ブロックの濃紺の背景は未調査であり、変更していない。各領域の実際の透過度は実機で確認する必要がある。
+内蔵Markdown EditorのWebview内の背景は、既存の透過テーマ色に従っている。今回のCSSが塗るのはWebviewの**外側**の編集領域。編集中ブロックの強調表示はCSSを追加する前に、公式設定 `"markdown.editor.highlightActiveBlock": false` を試す。この設定は公式のMarkdown拡張で定義され、既定値は `true`。編集動作は変更せず、編集中ブロックの強調表示のみ無効化する。実機での適用結果は未確認。各領域の実際の透過度も実機で確認する必要がある。
+
+- [公式設定定義](https://github.com/microsoft/vscode/blob/main/extensions/markdown-language-features/package.json)
+- [設定反映の実装](https://github.com/microsoft/vscode/blob/main/extensions/markdown-language-features/markdown-editor-src/editor.ts)
 
 背景色の下地が重なって不透明になるのを避けるため、既存 `vscode-wallpaper` で確認済みの内側の背景透明化処理を参考にしている。調査記録は [`docs/wallpaper-spec.md`](docs/wallpaper-spec.md) を参照する。
