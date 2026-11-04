@@ -2,7 +2,6 @@
 const vscode = require('vscode');
 const { generateTemporaryScript } = require('./appearance');
 const { generateTemporaryMarkdownScript } = require('./markdownAppearance');
-const { renderPreviewHtml } = require('./appearancePreview');
 
 function activate(context) {
   context.subscriptions.push(vscode.commands.registerCommand(
@@ -63,27 +62,6 @@ function activate(context) {
   ));
 
 
-  context.subscriptions.push(vscode.commands.registerCommand(
-    'noctisBlue.openAppearancePreview',
-    () => {
-      try {
-        const options = vscode.workspace.getConfiguration('noctisBlue');
-        const cssOpacity = options.get('opacity', {});
-        const blockOpacity = options.get('markdownActiveBlockOpacity', 0.65);
-        const panel = vscode.window.createWebviewPanel(
-          'noctisBlueAppearancePreview',
-          'Noctis Blue 外観プレビュー',
-          vscode.ViewColumn.Active,
-          { enableScripts: true, localResourceRoots: [] }
-        );
-        panel.webview.html = renderPreviewHtml(cssOpacity, blockOpacity);
-      } catch (error) {
-        void vscode.window.showErrorMessage(
-          'Noctis Blue 外観プレビューを開けません: ' + error.message
-        );
-      }
-    }
-  ));
 
 }
 function deactivate() {}
