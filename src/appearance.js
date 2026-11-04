@@ -91,6 +91,10 @@ function generateCss(input = {}) {
     root + ' .part.editor :is(.breadcrumbs-below-tabs, .breadcrumbs-control, .breadcrumbs-editor-type)',
     root + ' .part.editor .breadcrumbs-below-tabs :is(.breadcrumbs-control, .monaco-breadcrumbs)'
   ].join(',\n') + ' { background-image: none !important; }');
+  // Proven in vscode-wallpaper: blur only the sticky backdrop, not the pinned text.
+  // Its two opaque gutter/code layers are cleared by the `clear` selectors above.
+  lines.push(root + ' .part.editor .monaco-editor .sticky-widget:not(.peek)' +
+    ' { backdrop-filter: blur(12px) !important; }');
   lines.push(root + '.modern-ui-tabs .part.editor .tabs-container > .tab > .tab-fill' +
     ' { background-color: transparent !important; }');
   lines.push(root + ' { --vscode-scrollbar-background: transparent !important;' +
