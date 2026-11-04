@@ -69,7 +69,7 @@
 
 ## Noctis Blue の現在地（実機の観測）
 
-- `Noctis Blue Transparent` は、`scripts/theme.js` で背景色に末尾 `00` を付けた **完全透明色** を20個生成する。**領域別の0〜1設定は未実装**。
+- `Noctis Blue Transparent` は、`scripts/theme.js` で背景色に末尾 `00` を付けた **完全透明色** を20個生成する。その上に `noctisBlue.opacity` の６領域を個別に重ねる **一時CSS生成・手動適用機能** を追加した（0.2.0）。ただし設定の自動適用はまだ実装していない。
 - 通常のエディタで `--vscode-editor-background`、`.part.editor`、`.monaco-editor-background` が透明と観測された。
 - 内蔵 Markdown Editor のWebview内でも `html`、`body`、`#editor` が透明と観測された。
 - しかしテーマだけでは背後の縞模様が見えず、旧 wallpaper の透明化CSSに相当する一時CSSを追加したら、**通常のエディタと内蔵Markdown Editorの両方に縞模様が表示された**。
@@ -93,4 +93,4 @@
 - 配色が完成してから壁紙拡張を「画像・乗算・表示切替」に整理する。Noctisが使うCSS読み込み経路との責務分担も合わせて設計する。
 - **現時点では、実機検証で成功した一時CSSを最終的な本体変更方式と同一視しない。** Apc採用や本体改変は別途、理由・影響・復元方法を確認してから判断する。
 
-※この調査メモ自体は新しい透過率設定を実装したものではない。設定の実装と自動反映は未着手である。
+※ `noctisBlue.opacity` の設定項目と一時CSS生成は実装済み。`Noctis Blue: Show Temporary Opacity Script` で生成したコードを開発者ツールに貼り付けて試せる。設定の起動時自動反映、wallpaperとの同時適用、内蔵Markdown Editor編集中の要素の透明化は未実装である。
