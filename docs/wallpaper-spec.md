@@ -73,7 +73,7 @@
 - 通常のエディタで `--vscode-editor-background`、`.part.editor`、`.monaco-editor-background` が透明と観測された。
 - 内蔵 Markdown Editor のWebview内でも `html`、`body`、`#editor` が透明と観測された。
 - しかしテーマだけでは背後の縞模様が見えず、旧 wallpaper の透明化CSSに相当する一時CSSを追加したら、**通常のエディタと内蔵Markdown Editorの両方に縞模様が表示された**。
-- Markdown Editorで編集中のブロックに残る不透明な塗りは、実機のStylesから `.md-block-active` と `--md-block-active-background` に由来すると確認した。後述の手動テストはまだ未検証。
+- Markdown Editorの編集中ブロックの元の背景は `.md-block-active` と `--md-block-active-background` に由来することを実機のStylesで確認した。その後、元の色と強調表示を保ちながら背景と影を半透明にする一時CSSも実機で確認済み（常時適用は未実装）。
 
 ## 透過設計で避けるべき誤り
 
@@ -100,5 +100,5 @@
 - **背景色は消さない。強調表示を維持する。** `markdown.editor.highlightActiveBlock=false` は強調表示を無効化してしまうため、この目的には採用しない。
 - 付属のCSSは背景と周囲の影に `--md-block-active-background` を使っている。両者の色を残して透明度だけを変更するよう、`color-mix(in srgb, var(--md-block-active-background, #f8f8f8) 65%, transparent)` を適用する一時試験用のコードを用意した。
 - `noctisBlue.markdownActiveBlockOpacity`（0〜1、既定0.65）で一時CSSを生成。コマンド `Noctis Blue: Show Markdown Active Block Test` からコードを表示できる。実行対象は通常のワークベンチではなく **Markdown EditorのWebview**。
-- **次の実機確認:** 色と強調表示を残したまま背景と影が半透明になるか。実機で確認するまで常時適用やVS Code本体改変を導入しない。dotfilesも未変更。
-※ `noctisBlue.opacity` の設定項目と一時CSS生成は実装済み。`Noctis Blue: Show Temporary Opacity Script` で生成したコードを開発者ツールに貼り付けて試せる。設定の起動時自動反映、wallpaperとの同時適用、内蔵Markdown Editor編集中の要素の透明化は未実装である。
+- **確認済み:** 元の色と強調表示を残したまま、背景と影を半透明にできた。次の課題は、安全な常時適用方式の選定と、それを実機で検証することである。VS Code本体の改変やdotfiles変更は行っていない。
+※ `noctisBlue.opacity` の設定項目と一時CSS生成は実装済み。`Noctis Blue: Show Combined Transparency Test` でワークベンチの縞模様・領域別不透明度・Markdown編集中ブロックをまとめて一時検証できる。設定の起動時自動反映、wallpaperとの自動連携、Markdown Editorへの常時適用は未実装である。
