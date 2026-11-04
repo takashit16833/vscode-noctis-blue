@@ -2,8 +2,35 @@
 const vscode = require('vscode');
 const { generateTemporaryScript } = require('./appearance');
 const { generateTemporaryMarkdownScript } = require('./markdownAppearance');
+const { generateCombinedTestScript } = require('./combinedTest');
 
 function activate(context) {
+  context.subscriptions.push(vscode.commands.registerCommand(
+    'noctisBlue.showCombinedTransparencyTest',
+    async () => {
+      const name = vscode.workspace.getConfiguration('workbench').get('colorTheme');
+      if (name !== 'Noctis Blue Transparent') {
+        void vscode.window.showWarningMessage(
+          'Noctis Blue Transparent を選択してから透過を試してください。'
+        );
+        return;
+      }
+      try {
+        const document = await vscode.workspace.openTextDocument({
+          language: 'javascript',
+          content: generateCombinedTestScript()
+        });
+        await vscode.window.showTextDocument(document, { preview: false });
+        void vscode.window.showInformationMessage(
+          'この同じコードを開発者ツールの top と Markdown Editor で一回ずつ実行してください。' +
+          ' 背景の縞模様と半透明の領域を同時に確認できます。'
+        );
+      } catch (error) {
+        void vscode.window.showErrorMessage('統合検証スクリプトの生成に失敗: ' + error.message);
+      }
+    }
+  ));
+
   context.subscriptions.push(vscode.commands.registerCommand(
     'noctisBlue.showOpacityScript',
     async () => {
