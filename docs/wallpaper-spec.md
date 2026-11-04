@@ -93,4 +93,11 @@
 - 配色が完成してから壁紙拡張を「画像・乗算・表示切替」に整理する。Noctisが使うCSS読み込み経路との責務分担も合わせて設計する。
 - **現時点では、実機検証で成功した一時CSSを最終的な本体変更方式と同一視しない。** Apc採用や本体改変は別途、理由・影響・復元方法を確認してから判断する。
 
+## 内蔵Markdown Editorの編集中ブロック（2026-11-04 追加調査）
+
+- 実機の開発者ツールで `:where(.md-editor:not(.md-no-active-block-highlight)) .md-block-active` により背景が付くことを確認。`background` と `box-shadow` は両方とも `--md-block-active-background` を参照する。
+- 利用者が開発者ツールで該当２宣言を無効化すると、編集中ブロックの不透明な背景が消えることを確認。
+- VS Code付属Markdown拡張の公式設定に **`markdown.editor.highlightActiveBlock`（boolean、既定 `true`）** が存在する。この設定を `false` にすれば強調表示を無効化できる設計であり、説明上はソースマーカーや編集動作に影響しない。
+- 参照: https://github.com/microsoft/vscode/blob/main/extensions/markdown-language-features/package.json および https://github.com/microsoft/vscode/blob/main/extensions/markdown-language-features/markdown-editor-src/editor.ts
+- **次の実機確認:** `"markdown.editor.highlightActiveBlock": false` で背景と影が消えるか。確認するまでは dotfiles を変更せず、Noctis BlueへのWebview CSS注入も実装しない。
 ※ `noctisBlue.opacity` の設定項目と一時CSS生成は実装済み。`Noctis Blue: Show Temporary Opacity Script` で生成したコードを開発者ツールに貼り付けて試せる。設定の起動時自動反映、wallpaperとの同時適用、内蔵Markdown Editor編集中の要素の透明化は未実装である。
