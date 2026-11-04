@@ -61,8 +61,10 @@ Source Control のコミットメッセージ欄のように、
 
 Noctis Blue 自身は `workbench.html` を変更しない。
 
-自動適用では `vscode-wallpaper` API v2 の `setLayer(id, css)` を使い、
+自動適用では `vscode-wallpaper` API v3 の `setLayer(id, css, { ownerExtensionId })` を使い、
 本体への読み込み処理は wallpaper 側だけが所有する。
+
+Noctis Blue はレイヤーの提供元として自身の拡張 ID を登録し、無効化・削除時に wallpaper が孤児レイヤーを整理できるようにする。
 
 wallpaper 自身は表示面 CSS を生成しないため、
 Noctis Blue が所有権フラグを渡して wallpaper の描画を止める仕組みも不要である。
