@@ -11,3 +11,8 @@
 - 領域別の背景不透明度（0〜1）を Noctis Blue 側で設定できるようにする。色は `palette/colors.json` を用い、背景色の個別設定は増やさない。
 - **旧 `vscode-wallpaper` の仕様と実測結果は `docs/wallpaper-spec.md` を参照する。** 領域単位で一度だけ色を重ね、内側の下地を透明にする。テーマ色を単純に半透明へ変えるだけでは重複塗りの恐れがある。
 - 壁紙画像と `tint` の乗算と、領域の背景色の透明度は別の処理。旧wallpaperとNoctisの不透明度を重複適用しない。本体への読み込み処理も二重導入しない。
+- `noctisBlue.opacity` は背景色の不透明度（0〜1）で、`editor` / `sidebar` / `panel` / `auxiliaryBar` / `chrome` / `gap` を個別に設定する。背景色は通常版テーマから取得し、背景色設定を重複させない。
+- `src/appearance.js` は実測済みの重複背景を透明化し、各領域で一度だけ背景を混合する一時検証用CSSを生成する。文字や選択全体への `opacity` 指定をしない。
+- 現段階では `Noctis Blue: Show Temporary Opacity Script` コマンドによる明示的な一時適用のみ。本体への自動適用、設定変更の即時反映、Markdown Editor内部の編集ブロックの透明化は未実装であり、実装済みと説明しない。
+- 旧 `vscode-wallpaper` とNoctis Blueの領域別CSSを同時適用しない。背景画像・乗算は旧wallpaper側に残す。自動適用経路を二重に作らず、今後一つの表示経路へ整理する。
+- 透過設定や生成CSSを変更したら `npm test` を実行する。手動CSSの見え方は利用者の実機で検証する。
