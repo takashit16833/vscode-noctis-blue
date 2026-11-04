@@ -192,7 +192,8 @@
     "agentsChatInput.background": "#001E4A80",
     "modernTab.hoverBackground": "#060C24A6",
     "editorSuggestWidget.background": "#001E4AA6",
-    "editorSuggestWidget.selectedBackground": "#052A59B3"
+    "editorSuggestWidget.selectedBackground": "#052A59B3",
+    "editorStickyScrollHover.background": "#052A59A6"
   },
   "tokenColors": [
     {
