@@ -2,6 +2,7 @@
 
 const { generateCss } = require('./appearance');
 const { generateMarkdownCss } = require('./markdownAppearance');
+const opaqueTheme = require('../themes/noctis-blue.json');
 
 // A single script is pasted twice: once in top, once in Markdown Editor.
 // Both locations are actual VS Code contexts, not a simulated preview.
@@ -23,7 +24,7 @@ function generateCombinedTestScript() {
     '/* Diagnostic stripes in the actual VS Code workbench. */',
     '.monaco-workbench {',
     '  background-image: repeating-linear-gradient(45deg, #10244C 0 24px, #285A83 24px 48px) !important;',
-    '  background-color: #010111 !important;',
+    '  background-color: ' + opaqueTheme.colors['editor.background'] + ' !important;',
     '  background-blend-mode: normal !important;',
     '}',
     ''
