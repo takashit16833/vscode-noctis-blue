@@ -42,3 +42,36 @@ npm test
 ## 出典とライセンス
 
 MITライセンスの[Emacs版](https://github.com/takashit16833/emacs-retro-hacker-blue-theme)を配色設計の出発点とし、元になった [Retro Hacker Theme](https://github.com/elmersh/retro-hacker-theme) にも謝意を表する。著作権表示は `LICENSE` に残す。
+
+## 領域別の不透明度（試験機能）
+
+`Noctis Blue Transparent` で、Noctis Blueの背景色を保ったまま、６つの領域の背景色の不透明度を調整できるようにした。色の個別指定は増やしていない。以下の設定は `dotfiles/.config/vscode/settings.json` などに記述する。
+
+```jsonc
+"noctisBlue.opacity": {
+  "editor": 0.91,
+  "sidebar": 0.93,
+  "panel": 0.94,
+  "auxiliaryBar": 0.86,
+  "chrome": 0.93,
+  "gap": 0.91
+}
+```
+
+`0` は完全透明、`1` は不透明。背景色の透明度だけを変更し、文字や選択行全体の透明度は変更しない。`chrome` はタイトル・ステータス・アクティビティバーの３か所で、それぞれのテーマ色を保持する。`gap` は浮動パネルの余白のみを対象とする。
+
+**現時点の反映方法は安全な一時適用のみ。設定を書いただけでは画面へ自動反映されない。**
+
+1. `Noctis Blue Transparent` を選択する。
+2. コマンドパレットで `Noctis Blue: Show Temporary Opacity Script` を実行する。
+3. 開いたJavaScriptを全選択してコピーする。
+4. `Developer: Toggle Developer Tools` で開発者ツールを開き、Consoleの実行対象を `top` にして貼り付け、実行する。
+5. 同じコードをもう一度実行すると解除される。ウィンドウ再読み込みでも解除される。設定を変えたら、一度解除して新しいスクリプトを生成する。
+
+この検証では、VS Code本体の変更、外部通信、ユーザー設定の自動書き換えは行わない。壁紙画像の表示や乗算は従来どおり `vscode-wallpaper` が担当し、今回のコードは画像を扱わない。
+
+現在の `vscode-wallpaper` も独自の領域別不透明度CSSを出力するため、**両方を同時適用すると競合する**。壁紙との自動連携および起動時自動適用はまだ実装していない。CSSの適用方法を二重化せず、一つの表示経路を共有する設計が決まってから行う。
+
+内蔵Markdown EditorのWebview内の背景は、既存の透過テーマ色に従っている。今回のCSSが塗るのはWebviewの**外側**の編集領域。編集中ブロックの濃紺の背景は未調査であり、変更していない。各領域の実際の透過度は実機で確認する必要がある。
+
+背景色の下地が重なって不透明になるのを避けるため、既存 `vscode-wallpaper` で確認済みの内側の背景透明化処理を参考にしている。調査記録は [`docs/wallpaper-spec.md`](docs/wallpaper-spec.md) を参照する。
