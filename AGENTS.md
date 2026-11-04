@@ -29,3 +29,5 @@
 - v0.4.2の背景半透明化対象: `list.hoverBackground`、`modernTab.hoverBackground`、`tab.hoverBackground`、`editorSuggestWidget.background`、`editorSuggestWidget.selectedBackground`、`input.background`、`agentsChatInput.background`。通常版テーマは変更せず、`scripts/theme.js` で透過版の元色を保つ。
 - Source Controlメッセージ欄は VS Codeの `scm.css` が `.scm-editor` と `.scm-editor-container` 内の Monaco Editorを同じ `input.background` で重複描画している。`src/appearance.js` で内側だけ透明にし、外側の背景と枠線を残す。通常のMarkdown Editorや他の入力欄まで透明化するセレクタへ広げない。
 - Modern UIのホバー・Chat入力・SCM入力の実機確認は未完了。新しい状態に一致しない場合はCSSを推測で増やさず、Computed Styleでどの要素が背景を描くか確認する。
+- v0.4.3では既存 `vscode-wallpaper` で実機成功済みの `.sticky-widget:not(.peek)` への `backdrop-filter: blur(12px)` を一時CSSで再利用する。固定コードの文字に `opacity` を指定しない。
+- Sticky Scrollのホバー背景は公式 `editorStickyScrollHover.background` を透過版のみNoctis青 `#052A59A6` として指定する。実機の見え方は要確認。
