@@ -16,3 +16,6 @@
 - 現段階では `Noctis Blue: Show Temporary Opacity Script` コマンドによる明示的な一時適用のみ。本体への自動適用、設定変更の即時反映、Markdown Editor内部の編集ブロックの透明化は未実装であり、実装済みと説明しない。
 - 旧 `vscode-wallpaper` とNoctis Blueの領域別CSSを同時適用しない。背景画像・乗算は旧wallpaper側に残す。自動適用経路を二重に作らず、今後一つの表示経路へ整理する。
 - 透過設定や生成CSSを変更したら `npm test` を実行する。手動CSSの見え方は利用者の実機で検証する。
+- Markdown Editor の編集中ブロックは **強調表示と背景色を維持し、背景と影の不透明度だけを下げる**。`markdown.editor.highlightActiveBlock=false` で無効化するのは要件違反。
+- 内蔵Markdown EditorのWebviewにある `--md-block-active-background` は通常テーマの色とは別の変数である。`src/markdownAppearance.js` の試験用CSSはこれを参照し、固定色へ置き換えない。実機で確認できるまでは常時注入を導入しない。
+- Markdown Editorの一時試験スクリプトは `top` ではなく `Markdown Editor` フレームで実行する。設定 `noctisBlue.markdownActiveBlockOpacity` は試験用であり自動適用しない。
