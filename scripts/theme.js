@@ -119,10 +119,16 @@ function buildTheme(p,transparent){
       "list.inactiveSelectionBackground":[p.match,"99"],
       "list.focusBackground":[p.focus,"B3"],
       "list.inactiveFocusBackground":[p.match,"99"],
-      "input.background":[p.backgroundDeep,"B3"],
+      "input.background":[p.backgroundDeep,"80"],
       "dropdown.background":[p.backgroundDeep,"BF"],
       // Chat tip uses agentsChatInput.background (falls back to input.background).
-      "agentsChatInput.background":[p.panel,"B3"]
+      "agentsChatInput.background":[p.panel,"80"],
+      // Dedicated highlight and suggestion colors in the actual workbench.
+      "list.hoverBackground":[p.hover,"A6"],
+      "modernTab.hoverBackground":[p.hover,"A6"],
+      "tab.hoverBackground":[p.focus,"A6"],
+      "editorSuggestWidget.background":[p.panel,"A6"],
+      "editorSuggestWidget.selectedBackground":[p.focus,"B3"]
     };
     for (const [key,[base,alpha]] of Object.entries(translucentDetails)) colors[key]=base+alpha;
   }
