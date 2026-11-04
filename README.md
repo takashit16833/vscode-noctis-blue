@@ -10,7 +10,7 @@ Emacs版 [Retro Hacker Blue](https://github.com/takashit16833/emacs-retro-hacker
 - カーソル・エラーは `#FF4DE1`、コメントは `#465082`。Emacs版の色の役割を引き継ぐ。
 - Apc、外部のCSS注入拡張、VS Code本体改変は行わない。
 
-**実機検証済みの範囲:** Noctis Blue Transparentのテーマ色は通常エディタと内蔵Markdown EditorのWebview内まで透明として届いた。さらに、既存 `vscode-wallpaper` の下地透明化処理に相当する一時CSSを追加した結果、両エディタの背後に検証用の縞模様が表示された。ただし、Markdown Editorの編集中ブロックには不透明な背景が残る。**領域別の0〜1不透明度設定は現時点では未実装**。単純に色の末尾を `00` から変更すると複数層の重複塗りが起こり得るため、外側の領域の背景と内側の下地を分ける必要がある。詳しくは [`docs/wallpaper-spec.md`](docs/wallpaper-spec.md) を参照する。
+**実機検証済みの範囲:** Noctis Blue Transparentのテーマ色は通常エディタと内蔵Markdown EditorのWebview内まで透明として届いた。さらに、既存 `vscode-wallpaper` の下地透明化処理に相当する一時CSSを追加した結果、両エディタの背後に検証用の縞模様が表示された。ただし、Markdown Editorの編集中ブロックには不透明な背景が残る。**領域別の不透明度設定は、一時CSSによる手動検証方式として実装済み**。単純に色の末尾を `00` から変更すると複数層の重複塗りが起こり得るため、外側の領域の背景と内側の下地を分ける必要がある。詳しくは [`docs/wallpaper-spec.md`](docs/wallpaper-spec.md) を参照する。
 
 壁紙画像そのものの表示・画像切り替えは [vscode-wallpaper](https://github.com/takashit16833/vscode-wallpaper) の責務であり、このテーマでは管理しない。
 
@@ -21,7 +21,7 @@ git clone https://github.com/takashit16833/vscode-noctis-blue.git
 cd vscode-noctis-blue
 npm test
 npx --yes @vscode/vsce package --no-dependencies
-code --install-extension noctis-blue-0.2.0.vsix
+code --install-extension noctis-blue-0.2.1.vsix
 ```
 
 VS Codeの **Preferences: Color Theme** で `Noctis Blue` または `Noctis Blue Transparent` を選択する。
@@ -74,6 +74,22 @@ MITライセンスの[Emacs版](https://github.com/takashit16833/emacs-retro-hac
 
 内蔵Markdown EditorのWebview内の背景は、既存の透過テーマ色に従っている。今回のCSSが塗るのはWebviewの**外側**の編集領域。編集中ブロックは **強調表示を維持しつつ背景色と周囲の影を半透明化する**。VS Code標準の `markdown.editor.highlightActiveBlock` は `true` のままにする。`false` にすると強調表示そのものが消えるため、今回の要件を満たさない。
 
-実機で確認したCSSは `:where(.md-editor:not(.md-no-active-block-highlight)) .md-block-active` で、`background` と `box-shadow` の両方が `--md-block-active-background` を参照する。Webviewの開発者ツールで両者を `color-mix(in srgb, var(--md-block-active-background, #052A59) 65%, transparent)` とする試験を行い、視覚的な区別を保ちながら背景を透かせるか確認する。**これは実機未確認の試験案**であり、持続的なCSS注入は実装していない。
+実機で確認したCSSは `:where(.md-editor:not(.md-no-active-block-highlight)) .md-block-active` で、`background` と `box-shadow` の両方が `--md-block-active-background` を参照する。色を消したり別の色に置き換えるのではなく、**現在のCSS変数の色をそのまま使って不透明度だけを調整する**。
+
+### Markdown Editorの編集中ブロック（試験機能）
+
+```jsonc
+"noctisBlue.markdownActiveBlockOpacity": 0.65
+```
+
+背景と周囲の影の色を維持して、それぞれの不透明度を65%にする。編集中の強調表示は有効のままにする。この設定だけでWebviewのCSSが自動更新されるわけではない。
+
+1. `Noctis Blue Transparent` を選択する。
+2. コマンドパレットの `Noctis Blue: Show Markdown Active Block Test` を実行する。
+3. 表示されたJavaScriptをコピーし、`AGENTS.md` 等を **内蔵Markdown Editor** で開く。
+4. 開発者ツールのConsoleで実行対象を `Markdown Editor` のフレームに切り替え、コピーしたコードを実行する。
+5. Markdown内の箇条書きなどを編集状態にし、元の背景色を維持したまま壁紙が透けるか確認する。同じコードを再実行すると解除できる。
+
+このスクリプトはWebview内に試験用のスタイル要素を追加・解除するだけで、テーマ設定やVS Code本体ファイルを変更しない。**実機の反映結果は未確認**。公式テーマ設定のみで `--md-block-active-background` の透明度を指定できることも確認できていないため、常時適用の方法は別途検討する。
 
 背景色の下地が重なって不透明になるのを避けるため、既存 `vscode-wallpaper` で確認済みの内側の背景透明化処理を参考にしている。調査記録は [`docs/wallpaper-spec.md`](docs/wallpaper-spec.md) を参照する。
