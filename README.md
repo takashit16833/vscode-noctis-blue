@@ -21,7 +21,7 @@ git clone https://github.com/takashit16833/vscode-noctis-blue.git
 cd vscode-noctis-blue
 npm test
 npx --yes @vscode/vsce package --no-dependencies
-code --install-extension noctis-blue-0.3.1.vsix
+code --install-extension noctis-blue-0.4.0.vsix
 ```
 
 VS Codeの **Preferences: Color Theme** で `Noctis Blue` または `Noctis Blue Transparent` を選択する。
@@ -43,6 +43,23 @@ npm test
 
 MITライセンスの[Emacs版](https://github.com/takashit16833/emacs-retro-hacker-blue-theme)を配色設計の出発点とし、元になった [Retro Hacker Theme](https://github.com/elmersh/retro-hacker-theme) にも謝意を表する。著作権表示は `LICENSE` に残す。
 
+## 実際のVS Codeで一度に透過を検証する
+
+**`Noctis Blue: Show Combined Transparency Test`** は、別々の検証スクリプトを何回も取得しなくて済むようにしたコマンド。**プレビューではなく実際のVS Codeの画面**に対して、一時的なCSSを適用する。
+
+1. `Noctis Blue Transparent` を選び、**Developer: Reload Window** で古い検証用CSSを解除する。
+2. 内蔵 **Markdown Editor** でMarkdownファイルを開く。
+3. コマンドパレットから **Noctis Blue: Show Combined Transparency Test** を実行し、表示されたJavaScriptを一度だけコピーする。
+4. **Developer: Toggle Developer Tools** を開き、Consoleの実行対象を `top` にして貼り付け実行する。
+5. 実行対象を `Markdown Editor` に変更し、**まったく同じJavaScript** を貼り付け実行する。
+
+以上で、元の配色を残したまま、縞模様の背景・ワークベンチ各領域・内蔵Markdown Editorの編集中ブロックをまとめて確認できる。編集対象のブロックは角丸と強調表示を残したまま半透明にする。
+
+**見やすさを優先した固定の検証値**として、領域別背景色の不透明度は50%、編集中ブロックの背景と影は65%で生成する。これは `noctisBlue.opacity` の保存値を上書きしない。背景画像の代わりに一時的な縞模様を描く。通常の壁紙の画像切替・乗算を試験するものではない。
+
+**解除:** VS Codeを再読み込みすれば両方解除される。あるいは同じコードを同じ実行対象で再実行すると、対象側のCSSだけを解除できる。ユーザー設定・本体ファイルへの書き込みは行わない。
+
+この統合コマンドは旧来の個別テスト用コマンドと別に用意されている。**通常の透過確認は統合コマンドだけでよい。**
 ## 領域別の不透明度（試験機能）
 
 `Noctis Blue Transparent` で、Noctis Blueの背景色を保ったまま、６つの領域の背景色の不透明度を調整できるようにした。色の個別指定は増やしていない。以下の設定は `dotfiles/.config/vscode/settings.json` などに記述する。
