@@ -2,7 +2,7 @@
   "name": "noctis-blue",
   "displayName": "Noctis Blue",
   "description": "A blue VS Code theme with customizable translucent surfaces.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "takashit16833",
   "private": true,
   "engines": {
@@ -45,6 +45,10 @@
       {
         "command": "noctisBlue.showOpacityScript",
         "title": "Noctis Blue: Show Temporary Opacity Script"
+      },
+      {
+        "command": "noctisBlue.showMarkdownActiveBlockTest",
+        "title": "Noctis Blue: Show Markdown Active Block Test"
       }
     ],
     "configuration": {
@@ -102,12 +106,21 @@
             }
           },
           "markdownDescription": "Noctis Blue Transparent の領域別背景色の不透明度。0は透明、1は不透明。色はNoctis Blueの配色を使い、文字などの要素全体を薄くしません。現在は `Noctis Blue: Show Temporary Opacity Script` で手動適用する試験機能です。"
+        },
+        "noctisBlue.markdownActiveBlockOpacity": {
+          "type": "number",
+          "scope": "window",
+          "default": 0.65,
+          "minimum": 0,
+          "maximum": 1,
+          "markdownDescription": "内蔵Markdown Editorの編集中ブロックの**背景色**と周囲の影に適用する不透明度。元の背景色・角丸・強調表示を維持します。現在は `Noctis Blue: Show Markdown Active Block Test` から生成する一時CSSの検証専用です。"
         }
       }
     }
   },
   "main": "./src/extension.js",
   "activationEvents": [
-    "onCommand:noctisBlue.showOpacityScript"
+    "onCommand:noctisBlue.showOpacityScript",
+    "onCommand:noctisBlue.showMarkdownActiveBlockTest"
   ]
 }
