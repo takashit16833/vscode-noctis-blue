@@ -24,11 +24,12 @@ test('transparent variant retains surfaces and adds only specified translucent d
     'modernTab.hoverBackground':'#060C24A6',
     'tab.hoverBackground':'#052A59A6',
     'editorSuggestWidget.background':'#001E4AA6',
-    'editorSuggestWidget.selectedBackground':'#052A59B3'
+    'editorSuggestWidget.selectedBackground':'#052A59B3',
+    'editorStickyScrollHover.background':'#052A59A6'
   };
   const allKeys=new Set([...Object.keys(a.colors),...Object.keys(b.colors)]);
   const changed=[...allKeys].filter(k=>a.colors[k]!==b.colors[k]);
-  assert.equal(changed.length,36);
+  assert.equal(changed.length,37);
   for(const key of changed){
     if(Object.hasOwn(detailColors,key)) {
       assert.equal(b.colors[key],detailColors[key],key);
