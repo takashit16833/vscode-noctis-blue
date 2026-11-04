@@ -1,0 +1,45 @@
+{
+  "name": "noctis-blue",
+  "displayName": "Noctis Blue",
+  "description": "A blue VS Code theme, derived from the Emacs palette, with a transparent variant.",
+  "version": "0.1.0",
+  "publisher": "takashit16833",
+  "private": true,
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "keywords": [
+    "theme",
+    "dark",
+    "blue",
+    "transparent"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/takashit16833/vscode-noctis-blue.git"
+  },
+  "scripts": {
+    "build": "node scripts/build.js",
+    "check": "node scripts/build.js --check",
+    "test": "node --test test/*.test.js && npm run check",
+    "vscode:prepublish": "npm run build && npm test"
+  },
+  "contributes": {
+    "themes": [
+      {
+        "label": "Noctis Blue",
+        "uiTheme": "vs-dark",
+        "path": "./themes/noctis-blue.json"
+      },
+      {
+        "label": "Noctis Blue Transparent",
+        "uiTheme": "vs-dark",
+        "path": "./themes/noctis-blue-transparent.json"
+      }
+    ]
+  }
+}
