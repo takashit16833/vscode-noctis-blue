@@ -21,7 +21,7 @@ git clone https://github.com/takashit16833/vscode-noctis-blue.git
 cd vscode-noctis-blue
 npm test
 npx --yes @vscode/vsce package --no-dependencies
-code --install-extension noctis-blue-0.2.1.vsix
+code --install-extension noctis-blue-0.3.0.vsix
 ```
 
 VS Codeの **Preferences: Color Theme** で `Noctis Blue` または `Noctis Blue Transparent` を選択する。
@@ -43,6 +43,15 @@ npm test
 
 MITライセンスの[Emacs版](https://github.com/takashit16833/emacs-retro-hacker-blue-theme)を配色設計の出発点とし、元になった [Retro Hacker Theme](https://github.com/elmersh/retro-hacker-theme) にも謝意を表する。著作権表示は `LICENSE` に残す。
 
+## コードの貼り付けなしで見た目を比較する
+
+設定値を比較するだけなら、**Noctis Blue: Open Appearance Preview** コマンドを使う。
+
+- コマンドパレットから一度実行すると、縞模様の背景、編集領域、サイドバー、パネル、補助サイドバー、上部下部バー、余白、Markdown編集中ブロックの見本を表示する。
+- スライダーで各背景色の不透明度を調整できる。色はNoctis Blue通常版テーマから取得し、文字の透明度は変更しない。
+- **設定ファイル、VS Code本体、実際のエディタ、内蔵Markdown Editorは変更しない。** スライダーの値は画面内だけに反映され、[設定値に戻す]で元に戻せる。
+- **重要:** Markdownのブロックは見本であり、実際のWebviewの検証ではない。元の `--md-block-active-background` は内蔵Markdown Editor内部の変数なので、見本にはNoctis Blueの選択色を使う。
+- この見本で不透明度を絞り込めるが、最後の実画面の透過確認は別途必要になる。VS Code本体と内蔵Markdown EditorのWebviewは分離され、標準APIでは他の拡張が所有するWebviewへCSSを注入できない。
 ## 領域別の不透明度（試験機能）
 
 `Noctis Blue Transparent` で、Noctis Blueの背景色を保ったまま、６つの領域の背景色の不透明度を調整できるようにした。色の個別指定は増やしていない。以下の設定は `dotfiles/.config/vscode/settings.json` などに記述する。
