@@ -33,3 +33,8 @@
 - Sticky Scrollのホバー背景は公式 `editorStickyScrollHover.background` を透過版のみNoctis青 `#052A59A6` として指定する。実機の見え方は要確認。
 - v0.4.4の補完ポップアップは `src/appearance.js` の実画面用一時CSSで `backdrop-filter: blur(12px)` を適用する。VS Code本体 `suggest.css` と従来の `vscode-wallpaper/wallpaper.js` で確認済みの `.monaco-editor .suggest-widget` / `.suggest-details` を使用し、ワークベンチ補完にも対応する。補完一覧の `.monaco-list` / `.monaco-list-rows` の重複下地のみ透明化し、文字・ホバー・選択・枠線は変更しない。今回の適用結果は実機未検証。
 - Markdown Editor切り替えボタン `.md-readonly-toggle` の背景色は利用者の開発者ツールで `rgb(5, 42, 89)`（アルファ1）と実測されている。ボタン自体は不透明なので、原因未確認のまま上書きしない。
+
+- v0.5.0 以降のワークベンチ自動適用は `vscode-wallpaper` v0.8.0 以降が公開する CSS レイヤー API を使う。Noctis Blue は `workbench.html` を変更せず、読み込み処理を複製しない。
+- Noctis Blue の自動レイヤーは `ownsSurfaces: true` として登録し、領域別背景色・透過・ぼかしを担当する。その間 `vscode-wallpaper` は背景画像・乗算・画像切り替えだけを生成する。
+- 自動適用の有効状態は Noctis Blue 側の `globalState` に保存し、設定・テーマ変更時は次回再読み込み用 CSS だけを更新する。タイマー監視や勝手な再読み込みは行わない。
+- 内蔵 Markdown Editor は `vscode.markdown.editor` の別 Webview であり、現行 VS Code の公開 API にはその本体 CSS を追加する拡張点が確認できない。`markdownActiveBlockOpacity` の常時自動適用を `workbench.html` ローダーで実現したものとして扱わない。

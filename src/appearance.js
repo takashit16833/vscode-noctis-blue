@@ -1,7 +1,7 @@
 'use strict';
 
-// This is a temporary renderer-side test, not a replacement for the VS Code
-// theme engine. Use the opaque theme's colors and avoid repainting text.
+// Shared workbench appearance CSS for the automatic layer and temporary
+// renderer-side verification. Use the opaque theme's colors and avoid repainting text.
 const theme = require('../themes/noctis-blue.json');
 const manifest = require('../package.json');
 const keys = ['editor', 'sidebar', 'panel', 'auxiliaryBar', 'chrome', 'gap'];
@@ -41,7 +41,7 @@ function rule(selectors, value, opacity) {
 function generateCss(input = {}) {
   const op = normalizeOpacity(input);
   const root = '.monaco-workbench';
-  const lines = ['/* Temporary Noctis Blue opacity test: no wallpaper image or tint. */'];
+  const lines = ['/* Noctis Blue workbench appearance: no wallpaper image or tint. */'];
 
   lines.push(rule(root + ' .part.editor', color('editor.background'), op.editor));
   lines.push(rule(root + ' .part.sidebar, ' + root + '.floating-panels .part.sidebar',

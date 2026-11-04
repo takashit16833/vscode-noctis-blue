@@ -3,6 +3,18 @@ const vscode = require('vscode');
 const { generateTemporaryScript } = require('./appearance');
 const { generateTemporaryMarkdownScript } = require('./markdownAppearance');
 const { generateCombinedTestScript } = require('./combinedTest');
+const {
+  syncAutomaticAppearance,
+  enableAutomaticAppearance,
+  disableAutomaticAppearance
+} = require('./automaticAppearance');
+
+async function offerReload(message) {
+  const choice = await vscode.window.showInformationMessage(message, 'Reload Window');
+  if (choice === 'Reload Window') {
+    await vscode.commands.executeCommand('workbench.action.reloadWindow');
+  }
+}
 
 function activate(context) {
   context.subscriptions.push(vscode.commands.registerCommand(
@@ -88,7 +100,59 @@ function activate(context) {
     }
   ));
 
+  context.subscriptions.push(vscode.commands.registerCommand(
+    'noctisBlue.enableAutomaticAppearance',
+    async () => {
+      try {
+        const enabled = await enableAutomaticAppearance(vscode, context);
+        if (enabled) {
+          await offerReload(
+            'Noctis Blue の透過・ぼかしを自動適用する準備ができました。再読み込み後から有効になります。'
+          );
+        }
+      } catch (error) {
+        void vscode.window.showErrorMessage('Noctis Blue: ' + error.message);
+      }
+    }
+  ));
 
+  context.subscriptions.push(vscode.commands.registerCommand(
+    'noctisBlue.disableAutomaticAppearance',
+    async () => {
+      try {
+        const removed = await disableAutomaticAppearance(vscode, context);
+        if (removed) {
+          await offerReload(
+            'Noctis Blue の自動表示レイヤーを解除しました。再読み込み後から反映されます。'
+          );
+        } else {
+          void vscode.window.showInformationMessage(
+            'Noctis Blue の自動適用設定を解除しました。VS Code Wallpaper は見つかりませんでした。'
+          );
+        }
+      } catch (error) {
+        void vscode.window.showErrorMessage('Noctis Blue: ' + error.message);
+      }
+    }
+  ));
+
+  context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event => {
+    if (!event.affectsConfiguration('noctisBlue.opacity') &&
+        !event.affectsConfiguration('workbench.colorTheme')) return;
+    syncAutomaticAppearance(vscode, context).catch(error => {
+      void vscode.window.showWarningMessage(
+        'Noctis Blue の自動表示 CSS を更新できませんでした: ' + error.message
+      );
+    });
+  }));
+
+  // CSS ファイルは更新するだけで、タイマー監視や自動リロードは行わない。
+  // 実画面への反映は次回の Reload Window / 起動時に行われる。
+  syncAutomaticAppearance(vscode, context).catch(error => {
+    void vscode.window.showWarningMessage(
+      'Noctis Blue の自動表示 CSS を更新できませんでした: ' + error.message
+    );
+  });
 
 }
 function deactivate() {}

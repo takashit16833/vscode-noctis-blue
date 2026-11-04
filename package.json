@@ -2,7 +2,7 @@
   "name": "noctis-blue",
   "displayName": "Noctis Blue",
   "description": "A blue VS Code theme with customizable translucent surfaces.",
-  "version": "0.4.4",
+  "version": "0.5.0",
   "publisher": "takashit16833",
   "private": true,
   "engines": {
@@ -53,6 +53,14 @@
       {
         "command": "noctisBlue.showMarkdownActiveBlockTest",
         "title": "Noctis Blue: Show Markdown Active Block Test"
+      },
+      {
+        "command": "noctisBlue.enableAutomaticAppearance",
+        "title": "Noctis Blue: Enable Automatic Appearance"
+      },
+      {
+        "command": "noctisBlue.disableAutomaticAppearance",
+        "title": "Noctis Blue: Disable Automatic Appearance"
       }
     ],
     "configuration": {
@@ -109,7 +117,7 @@
               "description": "浮動パネルの間と外周の隙間に重ねる背景色の不透明度。"
             }
           },
-          "markdownDescription": "Noctis Blue Transparent の領域別背景色の不透明度。0は透明、1は不透明。色はNoctis Blueの配色を使い、文字などの要素全体を薄くしません。現在は `Noctis Blue: Show Temporary Opacity Script` で手動適用する試験機能です。"
+          "markdownDescription": "Noctis Blue Transparent の領域別背景色の不透明度。0は透明、1は不透明。色はNoctis Blueの配色を使い、文字などの要素全体を薄くしません。`Noctis Blue: Enable Automatic Appearance` を有効にすると、VS Code Wallpaper の共通ローダー経由で次回再読み込みから適用されます。"
         },
         "noctisBlue.markdownActiveBlockOpacity": {
           "type": "number",
@@ -124,8 +132,11 @@
   },
   "main": "./src/extension.js",
   "activationEvents": [
+    "onStartupFinished",
     "onCommand:noctisBlue.showOpacityScript",
     "onCommand:noctisBlue.showMarkdownActiveBlockTest",
-    "onCommand:noctisBlue.showCombinedTransparencyTest"
+    "onCommand:noctisBlue.showCombinedTransparencyTest",
+    "onCommand:noctisBlue.enableAutomaticAppearance",
+    "onCommand:noctisBlue.disableAutomaticAppearance"
   ]
 }

@@ -8,7 +8,7 @@ Emacs版 [Retro Hacker Blue](https://github.com/takashit16833/emacs-retro-hacker
 - **Noctis Blue Transparent**：VS Codeの公式配色機能だけを使用して、主要な背景色を透明にするテーマ。
 - 色の管理元は `palette/colors.json`。両テーマを `npm run build` で生成する。
 - カーソル・エラーは `#FF4DE1`、コメントは `#465082`。Emacs版の色の役割を引き継ぐ。
-- Apc、外部のCSS注入拡張、VS Code本体改変は行わない。
+- Noctis Blue 自身は Apc や独自の `workbench.html` 改変を行わない。自動適用を利用する場合だけ、`vscode-wallpaper` が一つの共通読み込み口を管理する。
 
 **実機検証済みの範囲:** Noctis Blue Transparentのテーマ色は通常エディタと内蔵Markdown EditorのWebview内まで透明として届いた。さらに、既存 `vscode-wallpaper` の下地透明化処理に相当する一時CSSを追加した結果、両エディタの背後に検証用の縞模様が表示された。Markdown Editorの編集中ブロックも、元の青系の背景色と強調表示を残した半透明化が一時CSSによる実機検証で確認されている。**領域別の不透明度設定は、一時CSSによる手動検証方式として実装済み**。単純に色の末尾を `00` から変更すると複数層の重複塗りが起こり得るため、外側の領域の背景と内側の下地を分ける必要がある。詳しくは [`docs/wallpaper-spec.md`](docs/wallpaper-spec.md) を参照する。
 
@@ -21,7 +21,7 @@ git clone https://github.com/takashit16833/vscode-noctis-blue.git
 cd vscode-noctis-blue
 npm test
 npx --yes @vscode/vsce package --no-dependencies
-code --install-extension noctis-blue-0.4.4.vsix
+code --install-extension noctis-blue-0.5.0.vsix
 ```
 
 VS Codeの **Preferences: Color Theme** で `Noctis Blue` または `Noctis Blue Transparent` を選択する。
@@ -135,7 +135,7 @@ Source ControlはVS Code本体の `scm.css` が外枠 `.scm-editor` と内部の
 
 `0` は完全透明、`1` は不透明。背景色の透明度だけを変更し、文字や選択行全体の透明度は変更しない。`chrome` はタイトル・ステータス・アクティビティバーの３か所で、それぞれのテーマ色を保持する。`gap` は浮動パネルの余白のみを対象とする。
 
-**現時点の反映方法は安全な一時適用のみ。設定を書いただけでは画面へ自動反映されない。**
+**v0.5.0 では `vscode-wallpaper` v0.8.0 以降の共通ローダーを使った自動適用を選べる。** 設定変更後はCSSファイルを更新するだけで、実画面への反映は次回の `Developer: Reload Window` またはVS Code起動時に行う。一時適用コマンドも検証用として残す。
 
 1. `Noctis Blue Transparent` を選択する。
 2. コマンドパレットで `Noctis Blue: Show Temporary Opacity Script` を実行する。
@@ -145,7 +145,7 @@ Source ControlはVS Code本体の `scm.css` が外枠 `.scm-editor` と内部の
 
 この検証では、VS Code本体の変更、外部通信、ユーザー設定の自動書き換えは行わない。壁紙画像の表示や乗算は従来どおり `vscode-wallpaper` が担当し、今回のコードは画像を扱わない。
 
-現在の `vscode-wallpaper` も独自の領域別不透明度CSSを出力するため、**両方を同時適用すると競合する**。壁紙との自動連携および起動時自動適用はまだ実装していない。CSSの適用方法を二重化せず、一つの表示経路を共有する設計が決まってから行う。
+自動適用時は `vscode-wallpaper` の外部レイヤーAPIへ `{ ownsSurfaces: true }` として登録する。この間、`vscode-wallpaper` は背景画像・乗算・画像切り替えだけを生成し、領域別の背景色・透過・ぼかしは Noctis Blue が担当する。`workbench.html` の読み込み処理は `vscode-wallpaper` だけが持ち、Noctis Blue 側では重複実装しない。
 
 内蔵Markdown EditorのWebview内の背景は、既存の透過テーマ色に従っている。今回のCSSが塗るのはWebviewの**外側**の編集領域。編集中ブロックは **強調表示を維持しつつ背景色と周囲の影を半透明化する**。VS Code標準の `markdown.editor.highlightActiveBlock` は `true` のままにする。`false` にすると強調表示そのものが消えるため、今回の要件を満たさない。
 
@@ -168,3 +168,20 @@ Source ControlはVS Code本体の `scm.css` が外枠 `.scm-editor` と内部の
 このスクリプトはWebview内に試験用のスタイル要素を追加・解除するだけで、テーマ設定やVS Code本体ファイルを変更しない。**編集中ブロックの半透明表示は実機で確認済み**。ただし、拡張による常時適用は未実装であり、公式テーマ設定だけで `--md-block-active-background` の不透明度を制御できることも確認できていない。
 
 背景色の下地が重なって不透明になるのを避けるため、既存 `vscode-wallpaper` で確認済みの内側の背景透明化処理を参考にしている。調査記録は [`docs/wallpaper-spec.md`](docs/wallpaper-spec.md) を参照する。
+
+
+## 自動適用（v0.5.0）
+
+ワークベンチ側の透過・ぼかしは、`vscode-wallpaper` v0.8.0 以降の共通CSSローダーを利用して起動時に適用できる。Noctis Blue は `workbench.html` を直接変更しない。
+
+1. `vscode-wallpaper` v0.8.0 以降と Noctis Blue v0.5.0 以降をインストールする。
+2. `Noctis Blue Transparent` を選択する。
+3. **Noctis Blue: Enable Automatic Appearance** を実行する。
+4. `vscode-wallpaper` が表示する本体変更の確認内容を読み、許可する。
+5. **Reload Window** で再読み込みする。
+
+以後、`noctisBlue.opacity` の変更と `Noctis Blue Transparent` / 通常版の切り替えに応じて、次回再読み込み用のCSSが更新される。タイマー監視や自動再読み込みは行わない。
+
+**Noctis Blue: Disable Automatic Appearance** は Noctis Blue の表示レイヤーだけを解除し、壁紙画像の自動適用そのものは無効にしない。
+
+内蔵 **Markdown Editor の編集中ブロック** は別の Webview 内で描画される。現行VS CodeにはこのリッチMarkdown Editorへ外部拡張からCSSを追加する公開の拡張点が確認できないため、`noctisBlue.markdownActiveBlockOpacity` は引き続き手動検証用である。通常のワークベンチ自動適用とは分けて扱う。
