@@ -19,12 +19,12 @@
 
 ## ワークベンチ自動適用
 
-- v0.6.0 以降は `vscode-wallpaper` v0.9.0 以降の CSS レイヤー API v2 を使う。
-- Noctis Blue のレイヤー ID は `takashit16833.noctis-blue`。
+- v0.7.0 以降は `vscode-wallpaper` v0.10.0 以降の CSS レイヤー API v3 を使う。
+- Noctis Blue のレイヤー ID は `takashit16833.noctis-blue`。API v3 では同じ ID を `ownerExtensionId` として登録し、拡張無効化・削除時の孤児レイヤー整理に使う。
 - `Noctis Blue Transparent` のときだけ Noctis の CSS レイヤーを登録する。
 - 通常版 `Noctis Blue` および他テーマでは Noctis のレイヤーを削除する。
 - wallpaper 側は常に背景画像・乗算・画像切り替えだけを生成するため、表示面所有権のフラグは使わない。
-- 自動適用の有効状態は Noctis Blue 側の `globalState` に保存する。
+- 自動適用の有効状態は Noctis Blue 側の `globalState` に保存する。解除時は Wallpaper のレイヤー削除が成功してから `false` を保存し、失敗時に状態を先行変更しない。
 - 設定・テーマ変更時は次回再読み込み用 CSS だけを更新する。
 - タイマー監視・勝手な再読み込み・Reload Window を促す通知を追加しない。
 - 実画面への反映時期は利用者が `Developer: Reload Window` を選ぶ。
@@ -35,7 +35,7 @@
 - 対象は `editor` / `sidebar` / `panel` / `auxiliaryBar` / `chrome` / `gap`。
 - 背景色は通常版テーマから取得し、別設定として重複管理しない。
 - 文字・アイコン・選択範囲へ要素全体の `opacity` を指定しない。
-- `src/appearance.js` を領域背景・重複下地透明化・ぼかしの CSS 生成元とする。
+- `src/appearance.js` を領域背景・重複下地透明化・ぼかしの CSS 生成元とする。DOM 依存セレクタは editor / panel / sidebar / SCM / Sticky / suggest / gap の機能単位で分け、処理内容ではなく必要理由をコメントする。
 - Source Control メッセージ欄は外側 `.scm-editor` の背景を残し、内部 Monaco の重複背景だけを透明化する。
 - Sticky Scroll は `.sticky-widget:not(.peek)` の背後だけを `blur(12px)` し、固定文字は薄くしない。
 - 補完候補はポップアップ背後だけをぼかし、文字・選択・ホバー・枠線を維持する。
