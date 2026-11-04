@@ -1,14 +1,12 @@
-# 内蔵 Markdown Editor の CSS 自動適用調査
-
-調査日: 2026-11-05
+# 内蔵 Markdown Editor の CSS 自動適用設計
 
 ## 結論
 
 現行 VS Code の公開 API だけを使って、別拡張から内蔵 Markdown Editor
-（`vscode.markdown.editor`）の親 Webview へ任意 CSS を追加する方法は確認できない。
+（`vscode.markdown.editor`）の親 Webview へ任意 CSS を追加する方法はない。
 
 Noctis Blue では、VS Code 本体や組み込み Markdown 拡張を改変せず、
-編集中ブロックの不透明度変更は開発・実機診断用の手動 CSS に留める。
+編集中ブロックの不透明度変更は開発・診断用の手動 CSS に留める。
 
 ## 対象の仕組み
 
@@ -74,15 +72,14 @@ Noctis Blue は `vscode.markdown.editor` の provider ではないため、
 ## テーマ色でできること
 
 VS Code のテーマ変数は Webview 側へ渡されるため、
-`Noctis Blue Transparent` の `editor.background` などによる
-Markdown Editor 全体の背景透過は実機で確認できている。
+テーマ側で公開 theme color を設定する範囲は Markdown Editor にも反映される。
 
 一方、編集中ブロックは Markdown Editor 内部の CSS 変数
 `--md-block-active-background` を使う。
 これは VS Code の公開 theme color ID ではないため、
 通常の color theme JSON から不透明度だけを差し替えることはできない。
 
-## 現在の診断方法
+## 診断方法
 
 `src/markdownAppearance.js` は元の
 `--md-block-active-background` を保持したまま、
@@ -93,13 +90,13 @@ Markdown Editor 全体の背景透過は実機で確認できている。
 Developer Tools の Markdown Editor フレームで実行すると、
 この CSS を一時的に追加できる。
 
-この表示は実機確認済みだが、正式な自動適用経路ではない。
+これは正式な自動適用経路ではなく、CSS の挙動確認と原因切り分けに使う。
 
 ## 採用しない方法
 
 ### VS Code 本体または組み込み Markdown 拡張の改変
 
-技術的には `MarkdownEditorProvider.#getHtml()` へ CSS を追加すれば実現できるが、
+`MarkdownEditorProvider.#getHtml()` へ CSS を追加する方法は、
 VS Code 更新ごとに差分管理が必要になり、本プロジェクトの方針に反する。
 
 ### 独自 Markdown Editor の再実装
@@ -132,5 +129,3 @@ VS Code に次のいずれかが追加された場合は再調査する。
   https://github.com/microsoft/vscode/blob/main/extensions/markdown-language-features/src/preview/markdownEditorProvider.ts
 - VS Code `markdownExtensions.ts`  
   https://github.com/microsoft/vscode/blob/main/extensions/markdown-language-features/src/markdownExtensions.ts
-- Markdown Editor の拡張点要望 #337448  
-  https://github.com/microsoft/vscode/issues/337448
