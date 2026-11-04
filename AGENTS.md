@@ -6,7 +6,7 @@
 - 公式テーマ設定だけで実現できる範囲を先に検証する。Apc、本体改変、CSS注入は実機検証で必要と判明するまで導入しない。
 - Markdown Live Previewは移植しない。内蔵Markdown Editorの透過を最優先で検証する。
 - 背景画像表示は別リポジトリ `vscode-wallpaper` が担当し、テーマは配色・透過を担当する。
-- 読みやすさが損なわれないよう、補完候補やメニューの背景は当面不透明にする。
+- 補完候補やメニューは読みやすさを保ちつつ色を残した半透明化を検証する。補完候補の背景は標準テーマ色 `editorSuggestWidget.background` を優先し、選択行や枠線は独立して調整する。
 - 元テーマのMITライセンスと著作権表記を保持する。
 - 領域別の背景不透明度（0〜1）を Noctis Blue 側で設定できるようにする。色は `palette/colors.json` を用い、背景色の個別設定は増やさない。
 - **旧 `vscode-wallpaper` の仕様と実測結果は `docs/wallpaper-spec.md` を参照する。** 領域単位で一度だけ色を重ね、内側の下地を透明にする。テーマ色を単純に半透明へ変えるだけでは重複塗りの恐れがある。
@@ -26,3 +26,6 @@
 - `agentsChatInput.background` はVS Code本体の `.chat-input-notice` が参照する（未設定時は `input.background`）。Tipは実機で重複背景と視認性を検証するまで完了扱いにしない。
 - `dropdown.background` の公式説明にはmacOSで利用されない可能性が明記されている。実機で効かなければ実際の選択要素とcomputed styleを確認し、推測のCSSを追加しない。
 - 現在行・選択範囲・Explorer選択は意味がわかる色と明瞭な文字を維持する。不透明度は固定の試験値であり、将来の最終値は実機で決める。
+- v0.4.2の背景半透明化対象: `list.hoverBackground`、`modernTab.hoverBackground`、`tab.hoverBackground`、`editorSuggestWidget.background`、`editorSuggestWidget.selectedBackground`、`input.background`、`agentsChatInput.background`。通常版テーマは変更せず、`scripts/theme.js` で透過版の元色を保つ。
+- Source Controlメッセージ欄は VS Codeの `scm.css` が `.scm-editor` と `.scm-editor-container` 内の Monaco Editorを同じ `input.background` で重複描画している。`src/appearance.js` で内側だけ透明にし、外側の背景と枠線を残す。通常のMarkdown Editorや他の入力欄まで透明化するセレクタへ広げない。
+- Modern UIのホバー・Chat入力・SCM入力の実機確認は未完了。新しい状態に一致しない場合はCSSを推測で増やさず、Computed Styleでどの要素が背景を描くか確認する。
