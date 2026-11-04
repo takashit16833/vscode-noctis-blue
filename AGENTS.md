@@ -1,40 +1,92 @@
 # Maintenance guidelines
 
-- Noctis Blueの外観の正本。既存の拡張機能を無条件に統合しない。
-- 配色はEmacs版Retro Hacker Blueを基準にし、`palette/colors.json` を唯一の色定義元とする。
-- `themes/*.json` は生成物。変更したら `npm run build && npm test` を実行する。
-- 公式テーマ設定だけで実現できる範囲を先に検証する。Apc、本体改変、CSS注入は実機検証で必要と判明するまで導入しない。
-- Markdown Live Previewは移植しない。内蔵Markdown Editorの透過を最優先で検証する。
-- 背景画像表示は別リポジトリ `vscode-wallpaper` が担当し、テーマは配色・透過を担当する。
-- 補完候補やメニューは読みやすさを保ちつつ色を残した半透明化を検証する。補完候補の背景は標準テーマ色 `editorSuggestWidget.background` を優先し、選択行や枠線は独立して調整する。
-- 元テーマのMITライセンスと著作権表記を保持する。
-- 領域別の背景不透明度（0〜1）を Noctis Blue 側で設定できるようにする。色は `palette/colors.json` を用い、背景色の個別設定は増やさない。
-- **旧 `vscode-wallpaper` の仕様と実測結果は `docs/wallpaper-spec.md` を参照する。** 領域単位で一度だけ色を重ね、内側の下地を透明にする。テーマ色を単純に半透明へ変えるだけでは重複塗りの恐れがある。
-- 壁紙画像と `tint` の乗算と、領域の背景色の透明度は別の処理。旧wallpaperとNoctisの不透明度を重複適用しない。本体への読み込み処理も二重導入しない。
-- `noctisBlue.opacity` は背景色の不透明度（0〜1）で、`editor` / `sidebar` / `panel` / `auxiliaryBar` / `chrome` / `gap` を個別に設定する。背景色は通常版テーマから取得し、背景色設定を重複させない。
-- `src/appearance.js` は実測済みの重複背景を透明化し、各領域で一度だけ背景を混合する一時検証用CSSを生成する。文字や選択全体への `opacity` 指定をしない。
-- 現段階で実画面への適用は一時CSSの明示的な手動実行のみ。通常の確認は `Noctis Blue: Show Combined Transparency Test` を優先する。**内蔵Markdown Editorの編集中ブロックの半透明化は実機で確認済み**だが、起動時自動適用と設定変更の即時反映は未実装である。
-- 旧 `vscode-wallpaper` とNoctis Blueの領域別CSSを同時適用しない。背景画像・乗算は旧wallpaper側に残す。自動適用経路を二重に作らず、今後一つの表示経路へ整理する。
-- 透過設定や生成CSSを変更したら `npm test` を実行する。手動CSSの見え方は利用者の実機で検証する。
-- Markdown Editor の編集中ブロックは **強調表示と背景色を維持し、背景と影の不透明度だけを下げる**。`markdown.editor.highlightActiveBlock=false` で無効化するのは要件違反。
-- 内蔵Markdown EditorのWebviewにある `--md-block-active-background` は通常テーマの色とは別の変数である。`src/markdownAppearance.js` の試験用CSSはこれを参照し、固定色へ置き換えない。一時CSSの実機表示は確認済みだが、常時適用する仕組みはまだ採用・実装していない。
-- Markdown Editorの一時試験スクリプトは `top` ではなく `Markdown Editor` フレームで実行する。設定 `noctisBlue.markdownActiveBlockOpacity` は試験用であり自動適用しない。
-- 実機透過の検証には `Noctis Blue: Show Combined Transparency Test` を優先する。`src/combinedTest.js` が同一JavaScriptに、top用の縞模様・50%領域CSSとMarkdown Editor用の65% active block CSSを同梱する。模擬プレビューは作らない。
-- 適用対象はVS Code本体の `top` とMarkdown Editor Webviewの２つ。手動操作は同じスクリプトの２回実行だけ。いずれも独立した一時 `<style>` 要素を管理し、同じ場所で再実行すると解除。Reload Windowですべて解除される。
-- 統合試験は `noctisBlue.opacity` の保存値を上書きしない。背景画像の実ファイル・乗算・切替は検証せず、画像代わりの縞模様を敷く。通常エディタと内蔵Markdown Editor（編集中ブロックを含む）の透過は実機で確認済み。各部品の細かな描画は引き続き個別確認が必要。
-- v0.4.1の選択背景・入力欄・セレクトボックス・Chat Tipは**公式テーマ色での半透明化を優先**し、`scripts/theme.js` の `translucentDetails` に透明版だけのアルファ値を指定する。元の配色は `palette/colors.json` の役割色から取得し、通常版のテーマ色は変更しない。
-- `agentsChatInput.background` はVS Code本体の `.chat-input-notice` が参照する（未設定時は `input.background`）。Tipは実機で重複背景と視認性を検証するまで完了扱いにしない。
-- `dropdown.background` の公式説明にはmacOSで利用されない可能性が明記されている。実機で効かなければ実際の選択要素とcomputed styleを確認し、推測のCSSを追加しない。
-- 現在行・選択範囲・Explorer選択は意味がわかる色と明瞭な文字を維持する。不透明度は固定の試験値であり、将来の最終値は実機で決める。
-- v0.4.2の背景半透明化対象: `list.hoverBackground`、`modernTab.hoverBackground`、`tab.hoverBackground`、`editorSuggestWidget.background`、`editorSuggestWidget.selectedBackground`、`input.background`、`agentsChatInput.background`。通常版テーマは変更せず、`scripts/theme.js` で透過版の元色を保つ。
-- Source Controlメッセージ欄は VS Codeの `scm.css` が `.scm-editor` と `.scm-editor-container` 内の Monaco Editorを同じ `input.background` で重複描画している。`src/appearance.js` で内側だけ透明にし、外側の背景と枠線を残す。通常のMarkdown Editorや他の入力欄まで透明化するセレクタへ広げない。
-- Modern UIのホバー・Chat入力・SCM入力の実機確認は未完了。新しい状態に一致しない場合はCSSを推測で増やさず、Computed Styleでどの要素が背景を描くか確認する。
-- v0.4.3では既存 `vscode-wallpaper` で実機成功済みの `.sticky-widget:not(.peek)` への `backdrop-filter: blur(12px)` を一時CSSで再利用する。固定コードの文字に `opacity` を指定しない。
-- Sticky Scrollのホバー背景は公式 `editorStickyScrollHover.background` を透過版のみNoctis青 `#052A59A6` として指定する。実機の見え方は要確認。
-- v0.4.4の補完ポップアップは `src/appearance.js` の実画面用一時CSSで `backdrop-filter: blur(12px)` を適用する。VS Code本体 `suggest.css` と従来の `vscode-wallpaper/wallpaper.js` で確認済みの `.monaco-editor .suggest-widget` / `.suggest-details` を使用し、ワークベンチ補完にも対応する。補完一覧の `.monaco-list` / `.monaco-list-rows` の重複下地のみ透明化し、文字・ホバー・選択・枠線は変更しない。今回の適用結果は実機未検証。
-- Markdown Editor切り替えボタン `.md-readonly-toggle` の背景色は利用者の開発者ツールで `rgb(5, 42, 89)`（アルファ1）と実測されている。ボタン自体は不透明なので、原因未確認のまま上書きしない。
+## 役割分担
 
-- v0.5.0 以降のワークベンチ自動適用は `vscode-wallpaper` v0.8.0 以降が公開する CSS レイヤー API を使う。Noctis Blue は `workbench.html` を変更せず、読み込み処理を複製しない。
-- Noctis Blue の自動レイヤーは `ownsSurfaces: true` として登録し、領域別背景色・透過・ぼかしを担当する。その間 `vscode-wallpaper` は背景画像・乗算・画像切り替えだけを生成する。
-- 自動適用の有効状態は Noctis Blue 側の `globalState` に保存し、設定・テーマ変更時は次回再読み込み用 CSS だけを更新する。タイマー監視や勝手な再読み込みは行わない。
-- 内蔵 Markdown Editor は `vscode.markdown.editor` の別 Webview であり、現行 VS Code の公開 API にはその本体 CSS を追加する拡張点が確認できない。`markdownActiveBlockOpacity` の常時自動適用を `workbench.html` ローダーで実現したものとして扱わない。
+- Noctis Blue は配色・背景透過・ぼかしの正本。既存拡張の単純統合はしない。
+- 背景画像、乗算、画像切り替えは `vscode-wallpaper` が担当する。
+- `palette/colors.json` を配色の唯一の管理元とする。
+- `themes/*.json` は生成物。変更後は `npm run build && npm test` を実行する。
+- VS Code 標準のテーマ機能・公開 API を最優先する。Apc への依存や Noctis Blue 独自の `workbench.html` 改変は行わない。
+- 本体改変が必要な表示は、既存の `vscode-wallpaper` 共通ローダーを一つだけ使用する。読み込み経路を二重化しない。
+
+## ワークベンチ自動適用
+
+- v0.5.0 以降は `vscode-wallpaper` v0.8.0 以降の CSS レイヤー API を使う。
+- Noctis Blue のレイヤー ID は `takashit16833.noctis-blue`。
+- 自動レイヤーは `ownsSurfaces: true` として登録し、領域別背景色・透過・ぼかしを Noctis Blue が担当する。
+- この間 `vscode-wallpaper` は背景画像・乗算・画像切り替えだけを生成する。
+- 通常版 `Noctis Blue` でも空の `ownsSurfaces: true` レイヤーを維持し、wallpaper 側の旧領域透過が復活しないようにする。
+- Noctis Blue 以外のテーマへ切り替えた場合は Noctis のレイヤーを削除し、領域の所有権を wallpaper 側へ戻す。
+- 自動適用の有効状態は Noctis Blue 側の `globalState` に保存する。
+- 設定・テーマ変更時は次回再読み込み用 CSS だけを更新する。タイマー監視・勝手な再読み込み・通知による再読み込み要求は追加しない。
+- テーマ切り替え直後は現在の画面に旧 CSS が残る。必要なときは利用者が `Developer: Reload Window` を実行する。2026-11-05 に Transparent → 通常版で旧 blur が残り、Reload 後に解消することを実機確認済み。
+
+## 領域別透過
+
+- `noctisBlue.opacity` は背景色の不透明度（0〜1）。対象は `editor` / `sidebar` / `panel` / `auxiliaryBar` / `chrome` / `gap`。
+- 背景色は通常版テーマから取得し、背景色設定を重複させない。
+- 文字・アイコン・選択範囲へ要素全体の `opacity` を指定しない。
+- `src/appearance.js` は自動適用と手動診断の両方で使う本番 CSS 生成元。領域の外側で一度だけ背景色を混合し、重複する内側の背景だけを透明化する。
+- Source Control メッセージ欄は外側 `.scm-editor` の背景を残し、内部 Monaco の重複背景だけを透明化する。通常エディタや他の入力欄まで広げない。
+- Sticky Scroll は `.sticky-widget:not(.peek)` に `backdrop-filter: blur(12px)` を適用し、固定コードの文字へ `opacity` を指定しない。
+- 補完候補は `.suggest-widget` / `.suggest-details` に `backdrop-filter: blur(12px)` を適用し、一覧の重複下地だけを透明化する。文字・選択・ホバー・枠線は維持する。
+
+### 2026-11-05 実機確認済み
+
+- editor: 0.91
+- sidebar: 0.93
+- auxiliaryBar: 0.86
+- panel: 0.94
+- titlebar/statusbar: 0.93
+- `vscode-wallpaper-layers-<workspace-id>.css` の読み込み
+- Sticky Scroll の blur
+- 補完候補の blur
+- 通常版への切り替え後、Reload Window で旧透過・blur が解除される
+
+Modern UI のホバー、Chat 入力、SCM 入力など細部は、問題が見つかった場合だけ Computed Style で実測して修正する。推測で CSS を増やさない。
+
+## 内蔵 Markdown Editor
+
+- 対象は `vscode.markdown.editor`。通常の Markdown Preview や外部 Live Preview と混同しない。
+- VS Code 本体では `MarkdownEditorProvider` が `CustomTextEditorProvider` として独立 Webview を生成する。
+- `MarkdownEditorProvider.#getHtml()` は本体同梱の `markdown-editor-out/editor.css` だけを親 Webview のスタイルとして読み込む。
+- `markdown.previewStyles` / `markdown.previewScripts` / `markdown.markdownItPlugins` は通常 Preview 用であり、`MarkdownEditorProvider` は参照しない。
+- 現在 Markdown Editor に公開されている拡張機構 `markdown.codeBlockEditorProviders` は fenced code block の iframe 置換用で、親 Webview の CSS を変更できない。
+- 別拡張から、組み込み Markdown Editor が所有する `WebviewPanel` を取得・書き換える公開 API はない。
+- したがって、現行 VS Code の公開 API だけでは編集中ブロックの CSS 常時自動適用はできない。詳細は `docs/markdown-editor.md`。
+- VS Code 本体または組み込み Markdown 拡張の改変、あるいは独自 Markdown Editor の再実装は行わない。公開 API が追加されたら再検討する。
+- `markdown.editor.highlightActiveBlock=false` で強調表示自体を消すのは要件違反。
+- 編集中ブロックの元色は Webview 内部の `--md-block-active-background` を使う。固定色へ置換せず、背景と影の不透明度だけを変更する。
+- `noctisBlue.markdownActiveBlockOpacity` と `src/markdownAppearance.js` は開発・実機診断用。正式な自動適用機能として扱わない。
+- `Noctis Blue: Show Markdown Active Block Test` は Markdown Editor フレーム内でだけ実行する。
+- 編集中ブロックの半透明化自体は実機確認済み。
+- Markdown Editor 切り替えボタン `.md-readonly-toggle` は実機で `rgb(5, 42, 89)`（不透明）と確認済み。問題がない限り上書きしない。
+
+## 開発用診断
+
+- `Noctis Blue: Show Combined Transparency Test`
+- `Noctis Blue: Show Temporary Opacity Script`
+- `Noctis Blue: Show Markdown Active Block Test`
+
+上記は正式な適用経路ではなく、DOM/CSS の実機確認用として残す。
+通常のワークベンチ表示は自動レイヤーを使って確認する。
+
+## 実測ルール
+
+- 環境依存の表示は推測で直さない。
+- 問題箇所を Developer Tools の要素・Computed Style で特定してから CSS を変更する。
+- 実測と予想が食い違った場合は実測を優先し、仮説を捨てる。
+- 一度に複数の未確認修正を入れない。
+- 既存の正常な表示を不要な CSS で壊さない。
+- 実機でしか確認できない項目は未検証と明記する。
+
+## 参考資料
+
+- `docs/wallpaper-spec.md`: wallpaper と領域背景の責務・過去の実測。
+- `docs/markdown-editor.md`: 内蔵 Markdown Editor の自動 CSS 適用可否の調査。
+- VS Code Markdown extension guide:
+  https://code.visualstudio.com/api/extension-guides/markdown-extension
+- VS Code Custom Editor API:
+  https://code.visualstudio.com/api/extension-guides/custom-editors
+- VS Code source `MarkdownEditorProvider`:
+  https://github.com/microsoft/vscode/blob/main/extensions/markdown-language-features/src/preview/markdownEditorProvider.ts
