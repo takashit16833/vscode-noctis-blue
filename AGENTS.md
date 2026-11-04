@@ -13,15 +13,15 @@
 - 壁紙画像と `tint` の乗算と、領域の背景色の透明度は別の処理。旧wallpaperとNoctisの不透明度を重複適用しない。本体への読み込み処理も二重導入しない。
 - `noctisBlue.opacity` は背景色の不透明度（0〜1）で、`editor` / `sidebar` / `panel` / `auxiliaryBar` / `chrome` / `gap` を個別に設定する。背景色は通常版テーマから取得し、背景色設定を重複させない。
 - `src/appearance.js` は実測済みの重複背景を透明化し、各領域で一度だけ背景を混合する一時検証用CSSを生成する。文字や選択全体への `opacity` 指定をしない。
-- 現段階では `Noctis Blue: Show Temporary Opacity Script` コマンドによる明示的な一時適用のみ。本体への自動適用、設定変更の即時反映、Markdown Editor内部の編集ブロックの透明化は未実装であり、実装済みと説明しない。
+- 現段階で実画面への適用は一時CSSの明示的な手動実行のみ。通常の確認は `Noctis Blue: Show Combined Transparency Test` を優先する。**内蔵Markdown Editorの編集中ブロックの半透明化は実機で確認済み**だが、起動時自動適用と設定変更の即時反映は未実装である。
 - 旧 `vscode-wallpaper` とNoctis Blueの領域別CSSを同時適用しない。背景画像・乗算は旧wallpaper側に残す。自動適用経路を二重に作らず、今後一つの表示経路へ整理する。
 - 透過設定や生成CSSを変更したら `npm test` を実行する。手動CSSの見え方は利用者の実機で検証する。
 - Markdown Editor の編集中ブロックは **強調表示と背景色を維持し、背景と影の不透明度だけを下げる**。`markdown.editor.highlightActiveBlock=false` で無効化するのは要件違反。
-- 内蔵Markdown EditorのWebviewにある `--md-block-active-background` は通常テーマの色とは別の変数である。`src/markdownAppearance.js` の試験用CSSはこれを参照し、固定色へ置き換えない。実機で確認できるまでは常時注入を導入しない。
+- 内蔵Markdown EditorのWebviewにある `--md-block-active-background` は通常テーマの色とは別の変数である。`src/markdownAppearance.js` の試験用CSSはこれを参照し、固定色へ置き換えない。一時CSSの実機表示は確認済みだが、常時適用する仕組みはまだ採用・実装していない。
 - Markdown Editorの一時試験スクリプトは `top` ではなく `Markdown Editor` フレームで実行する。設定 `noctisBlue.markdownActiveBlockOpacity` は試験用であり自動適用しない。
 - 実機透過の検証には `Noctis Blue: Show Combined Transparency Test` を優先する。`src/combinedTest.js` が同一JavaScriptに、top用の縞模様・50%領域CSSとMarkdown Editor用の65% active block CSSを同梱する。模擬プレビューは作らない。
 - 適用対象はVS Code本体の `top` とMarkdown Editor Webviewの２つ。手動操作は同じスクリプトの２回実行だけ。いずれも独立した一時 `<style>` 要素を管理し、同じ場所で再実行すると解除。Reload Windowですべて解除される。
-- 統合試験は `noctisBlue.opacity` の保存値を上書きしない。背景画像の実ファイル・乗算・切替は検証せず、画像代わりの縞模様を敷く。実機結果は利用者による検証まで未確認。
+- 統合試験は `noctisBlue.opacity` の保存値を上書きしない。背景画像の実ファイル・乗算・切替は検証せず、画像代わりの縞模様を敷く。通常エディタと内蔵Markdown Editor（編集中ブロックを含む）の透過は実機で確認済み。各部品の細かな描画は引き続き個別確認が必要。
 - v0.4.1の選択背景・入力欄・セレクトボックス・Chat Tipは**公式テーマ色での半透明化を優先**し、`scripts/theme.js` の `translucentDetails` に透明版だけのアルファ値を指定する。元の配色は `palette/colors.json` の役割色から取得し、通常版のテーマ色は変更しない。
 - `agentsChatInput.background` はVS Code本体の `.chat-input-notice` が参照する（未設定時は `input.background`）。Tipは実機で重複背景と視認性を検証するまで完了扱いにしない。
 - `dropdown.background` の公式説明にはmacOSで利用されない可能性が明記されている。実機で効かなければ実際の選択要素とcomputed styleを確認し、推測のCSSを追加しない。
