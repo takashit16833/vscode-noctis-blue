@@ -17,13 +17,18 @@ test('transparent variant retains surfaces and adds only specified translucent d
     'list.inactiveSelectionBackground':'#0B173799',
     'list.focusBackground':'#052A59B3',
     'list.inactiveFocusBackground':'#0B173799',
-    'input.background':'#000E2FB3',
+    'input.background':'#000E2F80',
     'dropdown.background':'#000E2FBF',
-    'agentsChatInput.background':'#001E4AB3'
+    'agentsChatInput.background':'#001E4A80',
+    'list.hoverBackground':'#060C24A6',
+    'modernTab.hoverBackground':'#060C24A6',
+    'tab.hoverBackground':'#052A59A6',
+    'editorSuggestWidget.background':'#001E4AA6',
+    'editorSuggestWidget.selectedBackground':'#052A59B3'
   };
   const allKeys=new Set([...Object.keys(a.colors),...Object.keys(b.colors)]);
   const changed=[...allKeys].filter(k=>a.colors[k]!==b.colors[k]);
-  assert.equal(changed.length,31);
+  assert.equal(changed.length,36);
   for(const key of changed){
     if(Object.hasOwn(detailColors,key)) {
       assert.equal(b.colors[key],detailColors[key],key);
