@@ -3,7 +3,7 @@
 const { generateCss } = require('./appearance');
 
 const WALLPAPER_EXTENSION_ID = 'takashit16833.vscode-wallpaper';
-const WALLPAPER_API_VERSION = 2;
+const WALLPAPER_API_VERSION = 3;
 const LAYER_ID = 'takashit16833.noctis-blue';
 const STATE_KEY = 'noctisBlue.automaticAppearanceEnabled';
 const TRANSPARENT_THEME = 'Noctis Blue Transparent';
@@ -25,7 +25,7 @@ async function wallpaperApi(vscode, optional = false) {
   const extension = vscode.extensions.getExtension(WALLPAPER_EXTENSION_ID);
   if (!extension) {
     if (optional) return null;
-    throw new Error('VS Code Wallpaper v0.9.0 以降をインストールしてください。');
+    throw new Error('VS Code Wallpaper v0.10.0 以降をインストールしてください。');
   }
 
   const api = extension.isActive ? extension.exports : await extension.activate();
@@ -33,7 +33,7 @@ async function wallpaperApi(vscode, optional = false) {
       typeof api.setLayer !== 'function' ||
       typeof api.removeLayer !== 'function' ||
       typeof api.enableAutomatic !== 'function') {
-    throw new Error('VS Code Wallpaper v0.9.0 以降が必要です。');
+    throw new Error('VS Code Wallpaper v0.10.0 以降が必要です。');
   }
   return api;
 }
@@ -43,7 +43,9 @@ async function syncAutomaticAppearance(vscode, context) {
 
   const api = await wallpaperApi(vscode);
   if (isTransparentTheme(vscode)) {
-    await api.setLayer(LAYER_ID, currentCss(vscode));
+    await api.setLayer(LAYER_ID, currentCss(vscode), {
+      ownerExtensionId: LAYER_ID
+    });
   } else {
     await api.removeLayer(LAYER_ID);
   }
@@ -56,21 +58,24 @@ async function enableAutomaticAppearance(vscode, context) {
   }
 
   const api = await wallpaperApi(vscode);
+  const wasEnabled = context.globalState.get(STATE_KEY, false);
   let registered = false;
   try {
-    await api.setLayer(LAYER_ID, currentCss(vscode));
+    await api.setLayer(LAYER_ID, currentCss(vscode), {
+      ownerExtensionId: LAYER_ID
+    });
     registered = true;
 
     const enabled = await api.enableAutomatic();
     if (!enabled) {
-      await api.removeLayer(LAYER_ID);
+      if (!wasEnabled) await api.removeLayer(LAYER_ID);
       return false;
     }
 
     await context.globalState.update(STATE_KEY, true);
     return true;
   } catch (error) {
-    if (registered) {
+    if (registered && !wasEnabled) {
       try {
         await api.removeLayer(LAYER_ID);
       } catch {}
@@ -80,10 +85,17 @@ async function enableAutomaticAppearance(vscode, context) {
 }
 
 async function disableAutomaticAppearance(vscode, context) {
-  await context.globalState.update(STATE_KEY, false);
   const api = await wallpaperApi(vscode, true);
-  if (api) await api.removeLayer(LAYER_ID);
-  return Boolean(api);
+  if (!api) {
+    throw new Error(
+      'VS Code Wallpaper が見つからないため CSS レイヤーを解除できません。' +
+      'Wallpaper を再インストールしてからもう一度解除してください。'
+    );
+  }
+
+  await api.removeLayer(LAYER_ID);
+  await context.globalState.update(STATE_KEY, false);
+  return true;
 }
 
 module.exports = {

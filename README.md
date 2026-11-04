@@ -32,7 +32,7 @@ Emacs版 [Retro Hacker Blue](https://github.com/takashit16833/emacs-retro-hacker
 
 ## インストール
 
-先に VS Code Wallpaper v0.9.0 以降をインストールする。
+先に VS Code Wallpaper v0.10.0 以降をインストールする。
 
 ```bash
 cd ~/vscode-wallpaper
@@ -77,7 +77,7 @@ Noctis Blue 自身は `workbench.html` を変更しない。
 
 ## 自動適用
 
-Noctis Blue v0.6.0 以降は VS Code Wallpaper v0.9.0 の CSS レイヤー API v2 を使う。
+Noctis Blue v0.7.0 以降は VS Code Wallpaper v0.10.0 の CSS レイヤー API v3 を使う。
 
 1. `Noctis Blue Transparent` を選ぶ。
 2. **Noctis Blue: Enable Automatic Appearance** を実行する。
@@ -90,8 +90,9 @@ Noctis Blue v0.6.0 以降は VS Code Wallpaper v0.9.0 の CSS レイヤー API v
 通常版 `Noctis Blue` や他テーマへ切り替えると Noctis Blue の CSS レイヤーは外れる。
 再び `Noctis Blue Transparent` へ戻した場合は、次回の Reload Window で透過表示へ戻る。
 
-**Noctis Blue: Disable Automatic Appearance** は Noctis Blue の CSS レイヤーだけを解除し、
-VS Code Wallpaper の背景画像設定や自動ローダー自体は無効化しない。
+**Noctis Blue: Disable Automatic Appearance** は Noctis Blue の CSS レイヤーだけを解除し、VS Code Wallpaper の背景画像設定や自動ローダー自体は無効化しない。レイヤー削除に失敗した場合は無効状態を保存せず、次回も同期・再試行できる状態を維持する。
+
+Noctis Blue が無効化・アンインストールされた場合は、Wallpaper API v3 に登録した提供元情報を使って孤児レイヤーを整理する。
 
 ## 内蔵 Markdown Editor
 

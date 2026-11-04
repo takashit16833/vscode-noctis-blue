@@ -1,23 +1,27 @@
 'use strict';
 
 // Noctis Blue theme generator. The palette is deliberately kept in one file.
+function withAlpha(color, alpha) {
+  return color + alpha;
+}
+
 function buildTheme(p,transparent){
   const colors={
     "foreground":p.dim,"descriptionForeground":p.foreground,"focusBorder":p.foreground,"errorForeground":p.cursor,
-    "widget.border":p.border,"selection.background":"#173366B2",
+    "widget.border":p.border,"selection.background":withAlpha(p.selectionUi,"B2"),
     "editor.foreground":p.foreground,"editorCursor.foreground":p.cursor,"editorCursor.background":p.background,
     "editor.lineHighlightBackground":p.line,"editor.lineHighlightBorder":p.border,"editor.selectionBackground":p.selection,
-    "editor.inactiveSelectionBackground":"#13264B88","editor.selectionHighlightBackground":"#052A5950",
-    "editor.wordHighlightBackground":p.match,"editor.wordHighlightStrongBackground":"#052A5980",
-    "editor.findMatchBackground":"#FFD70055","editor.findMatchHighlightBackground":p.hover,
+    "editor.inactiveSelectionBackground":withAlpha(p.selection,"88"),"editor.selectionHighlightBackground":withAlpha(p.focus,"50"),
+    "editor.wordHighlightBackground":p.match,"editor.wordHighlightStrongBackground":withAlpha(p.focus,"80"),
+    "editor.findMatchBackground":withAlpha(p.gold,"55"),"editor.findMatchHighlightBackground":p.hover,
     "editor.findRangeHighlightBackground":p.match,"editor.hoverHighlightBackground":p.hover,
     "editorLineNumber.foreground":p.muted,"editorLineNumber.activeForeground":p.foreground,
     "editorGutter.modifiedBackground":p.gold,"editorGutter.addedBackground":p.green,"editorGutter.deletedBackground":p.cursor,
-    "editorWhitespace.foreground":"#316CBD55","editorIndentGuide.background1":"#153A7570",
+    "editorWhitespace.foreground":withAlpha(p.muted,"55"),"editorIndentGuide.background1":withAlpha(p.border,"70"),
     "editorIndentGuide.activeBackground1":p.dim,"editorBracketMatch.background":p.match,
     "editorBracketMatch.border":p.border,"editorError.foreground":p.cursor,"editorWarning.foreground":p.gold,
     "editorInfo.foreground":p.foreground,"editorHint.foreground":p.muted,"editorCodeLens.foreground":p.muted,
-    "editorRuler.foreground":"#153A7566",
+    "editorRuler.foreground":withAlpha(p.border,"66"),
     "sideBar.foreground":p.foreground,"sideBar.border":p.border,"sideBarTitle.foreground":p.dim,
     "sideBarSectionHeader.foreground":p.light,"sideBarSectionHeader.border":p.border,
     "activityBar.foreground":p.foreground,"activityBar.inactiveForeground":p.muted,"activityBar.border":p.border,
@@ -37,9 +41,9 @@ function buildTheme(p,transparent){
     "auxiliaryBar.foreground":p.foreground,"auxiliaryBar.border":p.border,
     "terminal.foreground":p.foreground,"terminalCursor.foreground":p.cursor,
     "terminalCursor.background":p.background,
-    "terminal.ansiBlack":"#000000","terminal.ansiBrightBlack":p.inactiveForeground,
+    "terminal.ansiBlack":p.black,"terminal.ansiBrightBlack":p.inactiveForeground,
     "terminal.ansiBlue":p.dim,"terminal.ansiBrightBlue":p.foreground,
-    "terminal.ansiCyan":"#00CED1","terminal.ansiBrightCyan":p.cyan,
+    "terminal.ansiCyan":p.cyanDim,"terminal.ansiBrightCyan":p.cyan,
     "terminal.ansiGreen":p.green,"terminal.ansiBrightGreen":p.green,
     "terminal.ansiMagenta":p.type,"terminal.ansiBrightMagenta":p.typeBright,
     "terminal.ansiRed":p.cursor,"terminal.ansiBrightRed":p.errorBright,
@@ -64,10 +68,10 @@ function buildTheme(p,transparent){
     "menu.selectionBackground":p.focus,"menu.selectionForeground":p.white,"menu.border":p.border,
     "commandCenter.background":p.panel,"commandCenter.foreground":p.foreground,
     "commandCenter.border":p.border,"commandCenter.activeBackground":p.focus,
-    "scrollbarSlider.background":"#5EAFFF40","scrollbarSlider.hoverBackground":"#5EAFFF60",
-    "scrollbarSlider.activeBackground":"#5EAFFF80",
-    "minimapSlider.background":"#5EAFFF20","minimapSlider.hoverBackground":"#5EAFFF40",
-    "minimapSlider.activeBackground":"#5EAFFF60",
+    "scrollbarSlider.background":withAlpha(p.foreground,"40"),"scrollbarSlider.hoverBackground":withAlpha(p.foreground,"60"),
+    "scrollbarSlider.activeBackground":withAlpha(p.foreground,"80"),
+    "minimapSlider.background":withAlpha(p.foreground,"20"),"minimapSlider.hoverBackground":withAlpha(p.foreground,"40"),
+    "minimapSlider.activeBackground":withAlpha(p.foreground,"60"),
     "breadcrumb.foreground":p.muted,"breadcrumb.focusForeground":p.foreground,
     "breadcrumb.activeSelectionForeground":p.white,"breadcrumbPicker.background":p.panel,
     "gitDecoration.modifiedResourceForeground":p.gold,"gitDecoration.deletedResourceForeground":p.cursor,
@@ -165,4 +169,4 @@ function buildTheme(p,transparent){
   return {name:transparent?"Noctis Blue Transparent":"Noctis Blue",type:"dark",semanticHighlighting:true,colors,tokenColors,semanticTokenColors};
 }
 
-module.exports = { buildTheme };
+module.exports = { withAlpha, buildTheme };
