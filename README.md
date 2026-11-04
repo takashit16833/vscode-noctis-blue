@@ -10,7 +10,7 @@ Emacs版 [Retro Hacker Blue](https://github.com/takashit16833/emacs-retro-hacker
 - カーソル・エラーは `#FF4DE1`、コメントは `#465082`。Emacs版の色の役割を引き継ぐ。
 - Apc、外部のCSS注入拡張、VS Code本体改変は行わない。
 
-**内蔵Markdown Editorの透過は実機未確認**。このエディタはWebviewで描画されるため、テーマの `editor.background` を透明にしても、親の背景などが残る可能性がある。実測するまでは追加のCSS変更を行わない。
+**実機検証済みの範囲:** Noctis Blue Transparentのテーマ色は通常エディタと内蔵Markdown EditorのWebview内まで透明として届いた。さらに、既存 `vscode-wallpaper` の下地透明化処理に相当する一時CSSを追加した結果、両エディタの背後に検証用の縞模様が表示された。ただし、Markdown Editorの編集中ブロックには不透明な背景が残る。**領域別の0〜1不透明度設定は現時点では未実装**。単純に色の末尾を `00` から変更すると複数層の重複塗りが起こり得るため、外側の領域の背景と内側の下地を分ける必要がある。詳しくは [`docs/wallpaper-spec.md`](docs/wallpaper-spec.md) を参照する。
 
 壁紙画像そのものの表示・画像切り替えは [vscode-wallpaper](https://github.com/takashit16833/vscode-wallpaper) の責務であり、このテーマでは管理しない。
 
