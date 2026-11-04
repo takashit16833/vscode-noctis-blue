@@ -1,7 +1,7 @@
 {
   "name": "noctis-blue",
   "displayName": "Noctis Blue",
-  "description": "A blue VS Code theme, derived from the Emacs palette, with a transparent variant.",
+  "description": "A blue VS Code theme with customizable translucent surfaces.",
   "version": "0.1.0",
   "publisher": "takashit16833",
   "private": true,
@@ -40,6 +40,74 @@
         "uiTheme": "vs-dark",
         "path": "./themes/noctis-blue-transparent.json"
       }
-    ]
-  }
+    ],
+    "commands": [
+      {
+        "command": "noctisBlue.showOpacityScript",
+        "title": "Noctis Blue: Show Temporary Opacity Script"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Noctis Blue",
+      "properties": {
+        "noctisBlue.opacity": {
+          "type": "object",
+          "scope": "window",
+          "default": {
+            "editor": 0.91,
+            "sidebar": 0.93,
+            "panel": 0.94,
+            "auxiliaryBar": 0.86,
+            "chrome": 0.93,
+            "gap": 0.91
+          },
+          "additionalProperties": false,
+          "properties": {
+            "editor": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "中央のエディタ領域（内蔵Markdown Editorの外側を含む）の背景色の不透明度。"
+            },
+            "sidebar": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Explorer・検索などの主サイドバーの背景色の不透明度。"
+            },
+            "panel": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "ターミナルや問題一覧などのパネル背景色の不透明度。"
+            },
+            "auxiliaryBar": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "チャットなどの補助サイドバーの背景色の不透明度。"
+            },
+            "chrome": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "タイトルバー・ステータスバー・アクティビティバーの背景色の不透明度。"
+            },
+            "gap": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "浮動パネルの間と外周の隙間に重ねる背景色の不透明度。"
+            }
+          },
+          "markdownDescription": "Noctis Blue Transparent の領域別背景色の不透明度。0は透明、1は不透明。色はNoctis Blueの配色を使い、文字などの要素全体を薄くしません。現在は `Noctis Blue: Show Temporary Opacity Script` で手動適用する試験機能です。"
+        }
+      }
+    }
+  },
+  "main": "./src/extension.js",
+  "activationEvents": [
+    "onCommand:noctisBlue.showOpacityScript"
+  ]
 }
