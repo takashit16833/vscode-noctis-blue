@@ -77,12 +77,20 @@ test('通常版テーマでは自動適用の有効化を拒否する', async ()
   assert.equal(f.calls.some(call => call[0] === 'setLayer'), false);
 });
 
-test('起動時同期は透過版なら登録し、通常版へ切り替えたらレイヤーを外す', async () => {
+test('起動時同期は透過版でCSSを登録し、通常版では空レイヤーで不透明面を守る', async () => {
   const f = fixture({ stateEnabled: true });
   assert.equal(await syncAutomaticAppearance(f.vscode, f.context), true);
-  assert.ok(f.calls.some(call => call[0] === 'setLayer'));
+  assert.ok(f.calls.some(call => call[0] === 'setLayer' && call[2].includes('.part.editor')));
 
   f.setTheme('Noctis Blue');
+  await syncAutomaticAppearance(f.vscode, f.context);
+  assert.ok(f.calls.some(call =>
+    call[0] === 'setLayer' && call[1] === LAYER_ID && call[2] === '' &&
+    call[3].ownsSurfaces === true));
+});
+
+test('Noctis Blue 以外のテーマでは表示面の所有権を wallpaper へ戻す', async () => {
+  const f = fixture({ stateEnabled: true, theme: 'Dark Modern' });
   await syncAutomaticAppearance(f.vscode, f.context);
   assert.ok(f.calls.some(call => call[0] === 'removeLayer' && call[1] === LAYER_ID));
 });
