@@ -10,7 +10,7 @@ Emacs版 [Retro Hacker Blue](https://github.com/takashit16833/emacs-retro-hacker
 - カーソル・エラーは `#FF4DE1`、コメントは `#465082`。Emacs版の色の役割を引き継ぐ。
 - Apc、外部のCSS注入拡張、VS Code本体改変は行わない。
 
-**実機検証済みの範囲:** Noctis Blue Transparentのテーマ色は通常エディタと内蔵Markdown EditorのWebview内まで透明として届いた。さらに、既存 `vscode-wallpaper` の下地透明化処理に相当する一時CSSを追加した結果、両エディタの背後に検証用の縞模様が表示された。ただし、Markdown Editorの編集中ブロックには不透明な背景が残る。**領域別の不透明度設定は、一時CSSによる手動検証方式として実装済み**。単純に色の末尾を `00` から変更すると複数層の重複塗りが起こり得るため、外側の領域の背景と内側の下地を分ける必要がある。詳しくは [`docs/wallpaper-spec.md`](docs/wallpaper-spec.md) を参照する。
+**実機検証済みの範囲:** Noctis Blue Transparentのテーマ色は通常エディタと内蔵Markdown EditorのWebview内まで透明として届いた。さらに、既存 `vscode-wallpaper` の下地透明化処理に相当する一時CSSを追加した結果、両エディタの背後に検証用の縞模様が表示された。Markdown Editorの編集中ブロックも、元の青系の背景色と強調表示を残した半透明化が一時CSSによる実機検証で確認されている。**領域別の不透明度設定は、一時CSSによる手動検証方式として実装済み**。単純に色の末尾を `00` から変更すると複数層の重複塗りが起こり得るため、外側の領域の背景と内側の下地を分ける必要がある。詳しくは [`docs/wallpaper-spec.md`](docs/wallpaper-spec.md) を参照する。
 
 壁紙画像そのものの表示・画像切り替えは [vscode-wallpaper](https://github.com/takashit16833/vscode-wallpaper) の責務であり、このテーマでは管理しない。
 
@@ -57,18 +57,14 @@ MITライセンスの[Emacs版](https://github.com/takashit16833/emacs-retro-hac
 | セレクトボックスの背景 | 不透明度約75% |
 | チャットのTip／チャット入力系背景 | 不透明度約70% |
 
+上記は**v0.4.1時点の記録**。入力欄・チャット入力欄の不透明度はv0.4.2で50%に変更した。現在の確認対象は次の節の内容を参照。
+
 配色は `palette/colors.json` の元の色を使用する。文字色や選択自体の表示は維持し、背景色にだけ不透明度を指定する。
 
 **注意:** `dropdown.background` はVS Code公式の説明でmacOSでは使われない場合がある。チャットのTipは実装上 `agentsChatInput.background`（なければ `input.background`）を使用するが、ほかの下地との重複描画もあり得る。この２点を含め、実機の表示はまだ未検証。透明化に成功したと断定しない。実測後に必要な部分だけ追加のCSS対応を検討する。
 
 - [VS Code公式テーマ色一覧](https://code.visualstudio.com/api/references/theme-color)
 - [チャットTipの背景指定（VS Code本体）](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/contrib/chat/browser/widget/input/media/chatInputNotice.css)
-## Sticky Scrollのぼかしとホバー（0.4.3）
-
-- `vscode-wallpaper` で2026-11-03に実機確認済みの `.sticky-widget:not(.peek)` に対する `backdrop-filter: blur(12px)` を、`Noctis Blue: Show Combined Transparency Test` の `top` 側の一時CSSへ再利用する。固定コードの文字には `opacity` を指定しない。
-- 同じ実測で確定した `.sticky-widget-line-numbers` と `.sticky-widget-lines-scrollable` の重複下地を透明化する処理は従来どおり維持する。
-- VS Codeの `stickyScroll.css` がホバー時に `--vscode-editorStickyScrollHover-background` を適用するため、透過版テーマのみ `editorStickyScrollHover.background` を `#052A59A6`（Noctisの青、不透明度約65%）にする。ホバーの強調表示は残し、背景色だけを半透明にする。
-- これは `vscode-wallpaper` の以前の実機検証を根拠とした変更であり、Noctis Blue v0.4.3での実機表示はまだ未確認。
 ## ホバー・補完・入力欄の透過改善（0.4.2）
 
 以下は **Noctis Blue Transparentのみ** の変更である。元の青系の背景色は残したまま、透明度だけを調整した。通常版やdotfilesは変更しない。
@@ -91,6 +87,12 @@ Source ControlはVS Code本体の `scm.css` が外枠 `.scm-editor` と内部の
 - [VS Codeの補完候補の色定義](https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/browser/suggestWidget.ts)
 - [VS CodeのSCM入力欄CSS](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/contrib/scm/browser/media/scm.css)
 - [VS CodeのModern Tab色定義](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/common/theme.ts)
+## Sticky Scrollのぼかしとホバー（0.4.3）
+
+- `vscode-wallpaper` で2026-11-03に実機確認済みの `.sticky-widget:not(.peek)` に対する `backdrop-filter: blur(12px)` を、`Noctis Blue: Show Combined Transparency Test` の `top` 側の一時CSSへ再利用する。固定コードの文字には `opacity` を指定しない。
+- 同じ実測で確定した `.sticky-widget-line-numbers` と `.sticky-widget-lines-scrollable` の重複下地を透明化する処理は従来どおり維持する。
+- VS Codeの `stickyScroll.css` がホバー時に `--vscode-editorStickyScrollHover-background` を適用するため、透過版テーマのみ `editorStickyScrollHover.background` を `#052A59A6`（Noctisの青、不透明度約65%）にする。ホバーの強調表示は残し、背景色だけを半透明にする。
+- これは `vscode-wallpaper` の以前の実機検証を根拠とした変更であり、Noctis Blue v0.4.3での実機表示はまだ未確認。
 ## 実際のVS Codeで一度に透過を検証する
 
 **`Noctis Blue: Show Combined Transparency Test`** は、別々の検証スクリプトを何回も取得しなくて済むようにしたコマンド。**プレビューではなく実際のVS Codeの画面**に対して、一時的なCSSを適用する。
@@ -107,7 +109,7 @@ Source ControlはVS Code本体の `scm.css` が外枠 `.scm-editor` と内部の
 
 **解除:** VS Codeを再読み込みすれば両方解除される。あるいは同じコードを同じ実行対象で再実行すると、対象側のCSSだけを解除できる。ユーザー設定・本体ファイルへの書き込みは行わない。
 
-この統合コマンドは旧来の個別テスト用コマンドと別に用意されている。**通常の透過確認は統合コマンドだけでよい。**
+統合コマンドは従来の個別テスト用コマンドと併存している。**通常の透過確認は統合コマンドだけでよい。** 個別コマンドは、設定した不透明度を対象領域だけで検証したい場合に使う。
 ## 領域別の不透明度（試験機能）
 
 `Noctis Blue Transparent` で、Noctis Blueの背景色を保ったまま、６つの領域の背景色の不透明度を調整できるようにした。色の個別指定は増やしていない。以下の設定は `dotfiles/.config/vscode/settings.json` などに記述する。
@@ -155,6 +157,6 @@ Source ControlはVS Code本体の `scm.css` が外枠 `.scm-editor` と内部の
 4. 開発者ツールのConsoleで実行対象を `Markdown Editor` のフレームに切り替え、コピーしたコードを実行する。
 5. Markdown内の箇条書きなどを編集状態にし、元の背景色を維持したまま壁紙が透けるか確認する。同じコードを再実行すると解除できる。
 
-このスクリプトはWebview内に試験用のスタイル要素を追加・解除するだけで、テーマ設定やVS Code本体ファイルを変更しない。**実機の反映結果は未確認**。公式テーマ設定のみで `--md-block-active-background` の透明度を指定できることも確認できていないため、常時適用の方法は別途検討する。
+このスクリプトはWebview内に試験用のスタイル要素を追加・解除するだけで、テーマ設定やVS Code本体ファイルを変更しない。**編集中ブロックの半透明表示は実機で確認済み**。ただし、拡張による常時適用は未実装であり、公式テーマ設定だけで `--md-block-active-background` の不透明度を制御できることも確認できていない。
 
 背景色の下地が重なって不透明になるのを避けるため、既存 `vscode-wallpaper` で確認済みの内側の背景透明化処理を参考にしている。調査記録は [`docs/wallpaper-spec.md`](docs/wallpaper-spec.md) を参照する。
