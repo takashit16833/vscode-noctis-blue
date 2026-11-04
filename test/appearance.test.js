@@ -58,6 +58,14 @@ test('SCM input keeps its outer blue surface but clears duplicated inner Monaco 
   assert.ok(css.includes('color-mix(in srgb, ' + opaque.colors['panel.background'] + ' 50%, transparent)'));
 });
 
+test('Sticky Scroll uses wallpaper-proven backdrop blur without dimming pinned text', () => {
+  const css = generateCss({ editor: 0.5 });
+  assert.match(css, /\.sticky-widget:not\(\.peek\) \{ backdrop-filter: blur\(12px\) !important; \}/);
+  assert.match(css, /\.sticky-widget:not\(\.peek\) \.sticky-widget-line-numbers/);
+  assert.match(css, /\.sticky-widget:not\(\.peek\) \.sticky-widget-lines-scrollable/);
+  assert.doesNotMatch(css, /\.sticky-widget:not\(\.peek\).*opacity:/);
+});
+
 test('floating gap uses its own painted strips and excludes regular layout', () => {
   const css = generateCss({ gap: 0.65 });
   assert.ok(css.includes('.floating-panels:not(.modern-ui-compact)'));
