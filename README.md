@@ -21,7 +21,7 @@ git clone https://github.com/takashit16833/vscode-noctis-blue.git
 cd vscode-noctis-blue
 npm test
 npx --yes @vscode/vsce package --no-dependencies
-code --install-extension noctis-blue-0.4.1.vsix
+code --install-extension noctis-blue-0.4.2.vsix
 ```
 
 VS Codeの **Preferences: Color Theme** で `Noctis Blue` または `Noctis Blue Transparent` を選択する。
@@ -63,6 +63,28 @@ MITライセンスの[Emacs版](https://github.com/takashit16833/emacs-retro-hac
 
 - [VS Code公式テーマ色一覧](https://code.visualstudio.com/api/references/theme-color)
 - [チャットTipの背景指定（VS Code本体）](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/contrib/chat/browser/widget/input/media/chatInputNotice.css)
+## ホバー・補完・入力欄の透過改善（0.4.2）
+
+以下は **Noctis Blue Transparentのみ** の変更である。元の青系の背景色は残したまま、透明度だけを調整した。通常版やdotfilesは変更しない。
+
+| 対象 | 実装方式 | 試験値 |
+| --- | --- | --- |
+| Explorerのホバー行 | `list.hoverBackground` | 元色の不透明度約65% |
+| Problemsなどのタブのホバー | `modernTab.hoverBackground`、`tab.hoverBackground` | 元色の不透明度約65% |
+| 補完候補の一覧 | `editorSuggestWidget.background` | 元色の不透明度約65% |
+| 補完候補の選択行 | `editorSuggestWidget.selectedBackground` | 元色の不透明度約70% |
+| Chat入力欄（Describe what to build） | `input.background`、`agentsChatInput.background` | 元色の不透明度50% |
+| Source Controlのコミットメッセージ欄 | `input.background` と一時CSSで内部の重複背景だけを透明化 | 元色の不透明度50% |
+
+Source ControlはVS Code本体の `scm.css` が外枠 `.scm-editor` と内部のMonaco Editorの両方を `input.background` で描いている。テーマの色だけを半透明にすると背景が重なって濃くなるため、**テスト用CSS内では外枠の色を維持し、内部の重複背景だけを透明にしている**。これは通常の編集領域の下地透明化と同じ方針である。
+
+修正の確認には `Noctis Blue: Show Combined Transparency Test` を使う。最新版のスクリプトを取得し、`top` と `Markdown Editor` の両方で実行する。今回の５か所だけを見る場合は `top` での実行で足りる。
+
+**実機未検証:** 特にChatの入力欄とModern UIタブは、使用しているVS Codeの版や背景の重複状態によって差が出る可能性がある。確認できない場合は開発者ツールで実際の要素と背景色を診断し、推測で追加のCSSを増やさない。
+
+- [VS Codeの補完候補の色定義](https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/browser/suggestWidget.ts)
+- [VS CodeのSCM入力欄CSS](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/contrib/scm/browser/media/scm.css)
+- [VS CodeのModern Tab色定義](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/common/theme.ts)
 ## 実際のVS Codeで一度に透過を検証する
 
 **`Noctis Blue: Show Combined Transparency Test`** は、別々の検証スクリプトを何回も取得しなくて済むようにしたコマンド。**プレビューではなく実際のVS Codeの画面**に対して、一時的なCSSを適用する。
