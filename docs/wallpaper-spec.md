@@ -1,26 +1,21 @@
 # 背景画像と領域背景の設計
 
-## この文書の位置付け
-
-この文書は進捗管理ではなく、Noctis Blue と `vscode-wallpaper` の責務分担、
-背景の重複塗りを避けるための設計原則を記録する。
-
-現在の確認状況、未確認項目、次の作業はここでは管理しない。
-
 ## 役割分担
 
 ### vscode-wallpaper
 
 - 画面全体の背景画像を描画する。
 - 代替画像と画面条件による切り替えを担当する。
-- tint と画像の乗算を担当する。
+- tint と背景画像の乗算を担当する。
 - Noctis Blue を含む外部 CSS レイヤーの共通読み込み口を管理する。
+- editor / sidebar / panel 等の領域背景やぼかしは管理しない。
 
 ### Noctis Blue
 
 - 通常版と透過版の配色を管理する。
 - editor / sidebar / panel / auxiliaryBar / chrome / gap の背景色と不透明度を管理する。
-- Sticky Scroll や補完候補など、前面の文字を薄くせず背後だけをぼかす処理を管理する。
+- 同じ領域の重複下地を透明化する。
+- Sticky Scroll や補完候補など、前面の文字を薄くせず背後だけをぼかす。
 - 背景画像のパス、乗算、画像切り替えは管理しない。
 
 ## 領域の不透明度
@@ -36,14 +31,14 @@
 - `chrome`
 - `gap`
 
-背景色は Noctis Blue の通常版テーマから取得し、利用者に同じ色を別設定として重複管理させない。
+背景色は Noctis Blue の通常版テーマから取得し、同じ色を利用者設定へ重複させない。
 
 ## 背景色は一度だけ描く
 
 VS Code では、同じ見た目の領域でも外側と内側の複数要素が背景色を描くことがある。
 
-半透明色を複数層に同時適用すると、指定した不透明度より濃く見える。
-そのため Noctis Blue では次の原則を使う。
+半透明色を複数層へ同時適用すると、指定値より濃く見える。
+そのため Noctis Blue は次の原則を使う。
 
 1. 領域の外側で背景色を一度だけ描く。
 2. 同じ領域内で重複する下地だけを透明にする。
@@ -66,11 +61,11 @@ Source Control のコミットメッセージ欄のように、
 
 Noctis Blue 自身は `workbench.html` を変更しない。
 
-自動適用では `vscode-wallpaper` の CSS レイヤー API を使い、
+自動適用では `vscode-wallpaper` API v2 の `setLayer(id, css)` を使い、
 本体への読み込み処理は wallpaper 側だけが所有する。
 
-Noctis Blue のレイヤーが `ownsSurfaces: true` の間は、
-wallpaper 側が同じ editor / sidebar / panel などの不透明度を重ねて適用しない。
+wallpaper 自身は表示面 CSS を生成しないため、
+Noctis Blue が所有権フラグを渡して wallpaper の描画を止める仕組みも不要である。
 
 ## テーマJSONだけでは完結しない理由
 
@@ -82,7 +77,7 @@ wallpaper 側が同じ editor / sidebar / panel などの不透明度を重ね�
 そのため、
 
 - 配色そのものはテーマ JSON
-- 領域の一度塗りと内部下地の透明化、ぼかしは Noctis Blue の CSS
+- 領域の一度塗り、内部下地の透明化、ぼかしは Noctis Blue の CSS
 - 背景画像と乗算は vscode-wallpaper
 
 という分担にする。
@@ -96,7 +91,7 @@ wallpaper 側が同じ editor / sidebar / panel などの不透明度を重ね�
 
 ## 実測の扱い
 
-環境依存の表示問題は、Developer Tools の要素と Computed Style を使って確認する。
+環境依存の表示問題は Developer Tools の要素と Computed Style を使って確認する。
 
-その結果から恒久的な設計ルールが得られた場合だけ、この文書へ設計判断として反映する。
-単発の確認結果や作業途中の状態は、設計資料へ蓄積しない。
+恒久的な設計ルールが得られた場合だけこの文書へ反映し、
+単発の確認結果や作業途中の状態は蓄積しない。
