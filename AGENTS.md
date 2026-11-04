@@ -31,3 +31,5 @@
 - Modern UIのホバー・Chat入力・SCM入力の実機確認は未完了。新しい状態に一致しない場合はCSSを推測で増やさず、Computed Styleでどの要素が背景を描くか確認する。
 - v0.4.3では既存 `vscode-wallpaper` で実機成功済みの `.sticky-widget:not(.peek)` への `backdrop-filter: blur(12px)` を一時CSSで再利用する。固定コードの文字に `opacity` を指定しない。
 - Sticky Scrollのホバー背景は公式 `editorStickyScrollHover.background` を透過版のみNoctis青 `#052A59A6` として指定する。実機の見え方は要確認。
+- v0.4.4の補完ポップアップは `src/appearance.js` の実画面用一時CSSで `backdrop-filter: blur(12px)` を適用する。VS Code本体 `suggest.css` と従来の `vscode-wallpaper/wallpaper.js` で確認済みの `.monaco-editor .suggest-widget` / `.suggest-details` を使用し、ワークベンチ補完にも対応する。補完一覧の `.monaco-list` / `.monaco-list-rows` の重複下地のみ透明化し、文字・ホバー・選択・枠線は変更しない。今回の適用結果は実機未検証。
+- Markdown Editor切り替えボタン `.md-readonly-toggle` の背景色は利用者の開発者ツールで `rgb(5, 42, 89)`（アルファ1）と実測されている。ボタン自体は不透明なので、原因未確認のまま上書きしない。
