@@ -30,7 +30,7 @@ test('markdown opacity setting rejects invalid numbers', () => {
 
 test('webview test script only toggles a temporary stylesheet', () => {
   const script = generateTemporaryMarkdownScript(0.65);
-  assert.match(script, /document\.querySelector\("\\.md-editor"\)/);
+  assert.ok(script.includes('document.querySelector(".md-editor")'));
   assert.match(script, /noctis-blue-markdown-active-test/);
   assert.match(script, /existing\.remove\(\)/);
   assert.match(script, /document\.head\.appendChild\(style\)/);
