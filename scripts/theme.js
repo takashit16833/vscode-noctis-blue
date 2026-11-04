@@ -106,6 +106,27 @@ function buildTheme(p,transparent){
     "auxiliaryBarSectionHeader.background":"panel"
   };
   for(const [key,role] of Object.entries(surfaces)) colors[key]=p[role]+(transparent?"00":"");
+  // These are content highlights and controls, not full workbench surfaces.
+  // In the transparent variant retain their original blue and reduce only
+  // the background alpha. Borders, text, icons and opaque variant stay intact.
+  if (transparent) {
+    const translucentDetails = {
+      "editor.lineHighlightBackground":[p.line,"80"],
+      "editor.inactiveLineHighlightBackground":[p.line,"66"],
+      "editor.selectionBackground":[p.selection,"A6"],
+      "editor.inactiveSelectionBackground":[p.selection,"80"],
+      "list.activeSelectionBackground":[p.focus,"B3"],
+      "list.inactiveSelectionBackground":[p.match,"99"],
+      "list.focusBackground":[p.focus,"B3"],
+      "list.inactiveFocusBackground":[p.match,"99"],
+      "input.background":[p.backgroundDeep,"B3"],
+      "dropdown.background":[p.backgroundDeep,"BF"],
+      // Chat tip uses agentsChatInput.background (falls back to input.background).
+      "agentsChatInput.background":[p.panel,"B3"]
+    };
+    for (const [key,[base,alpha]] of Object.entries(translucentDetails)) colors[key]=base+alpha;
+  }
+
   const rule=(name,scope,foreground,fontStyle)=>({name,scope,settings:{...(foreground?{foreground}:{}),...(fontStyle!==undefined?{fontStyle}:{})}});
   const tokenColors=[
     rule("Comments",["comment","punctuation.definition.comment","string.comment"],p.comment,""),
