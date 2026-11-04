@@ -6,9 +6,14 @@ const WALLPAPER_EXTENSION_ID = 'takashit16833.vscode-wallpaper';
 const LAYER_ID = 'takashit16833.noctis-blue';
 const STATE_KEY = 'noctisBlue.automaticAppearanceEnabled';
 const TRANSPARENT_THEME = 'Noctis Blue Transparent';
+const OPAQUE_THEME = 'Noctis Blue';
+
+function currentTheme(vscode) {
+  return vscode.workspace.getConfiguration('workbench').get('colorTheme');
+}
 
 function isTransparentTheme(vscode) {
-  return vscode.workspace.getConfiguration('workbench').get('colorTheme') === TRANSPARENT_THEME;
+  return currentTheme(vscode) === TRANSPARENT_THEME;
 }
 
 function currentCss(vscode) {
@@ -35,8 +40,14 @@ async function wallpaperApi(vscode, optional = false) {
 async function syncAutomaticAppearance(vscode, context) {
   if (!context.globalState.get(STATE_KEY, false)) return false;
   const api = await wallpaperApi(vscode);
-  if (isTransparentTheme(vscode)) {
+  const theme = currentTheme(vscode);
+  if (theme === TRANSPARENT_THEME) {
     await api.setLayer(LAYER_ID, currentCss(vscode), { ownsSurfaces: true });
+  } else if (theme === OPAQUE_THEME) {
+    // Keep surface ownership while contributing no transparency CSS.
+    // This prevents wallpaper's legacy surface opacity from making the
+    // intentionally opaque Noctis Blue theme translucent.
+    await api.setLayer(LAYER_ID, '', { ownsSurfaces: true });
   } else {
     await api.removeLayer(LAYER_ID);
   }
@@ -75,7 +86,7 @@ async function disableAutomaticAppearance(vscode, context) {
 }
 
 module.exports = {
-  WALLPAPER_EXTENSION_ID, LAYER_ID, STATE_KEY, TRANSPARENT_THEME,
-  isTransparentTheme, currentCss, wallpaperApi,
+  WALLPAPER_EXTENSION_ID, LAYER_ID, STATE_KEY, TRANSPARENT_THEME, OPAQUE_THEME,
+  currentTheme, isTransparentTheme, currentCss, wallpaperApi,
   syncAutomaticAppearance, enableAutomaticAppearance, disableAutomaticAppearance
 };
