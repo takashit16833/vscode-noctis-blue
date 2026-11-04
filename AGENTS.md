@@ -19,3 +19,6 @@
 - Markdown Editor の編集中ブロックは **強調表示と背景色を維持し、背景と影の不透明度だけを下げる**。`markdown.editor.highlightActiveBlock=false` で無効化するのは要件違反。
 - 内蔵Markdown EditorのWebviewにある `--md-block-active-background` は通常テーマの色とは別の変数である。`src/markdownAppearance.js` の試験用CSSはこれを参照し、固定色へ置き換えない。実機で確認できるまでは常時注入を導入しない。
 - Markdown Editorの一時試験スクリプトは `top` ではなく `Markdown Editor` フレームで実行する。設定 `noctisBlue.markdownActiveBlockOpacity` は試験用であり自動適用しない。
+- 実機透過の検証には `Noctis Blue: Show Combined Transparency Test` を優先する。`src/combinedTest.js` が同一JavaScriptに、top用の縞模様・50%領域CSSとMarkdown Editor用の65% active block CSSを同梱する。模擬プレビューは作らない。
+- 適用対象はVS Code本体の `top` とMarkdown Editor Webviewの２つ。手動操作は同じスクリプトの２回実行だけ。いずれも独立した一時 `<style>` 要素を管理し、同じ場所で再実行すると解除。Reload Windowですべて解除される。
+- 統合試験は `noctisBlue.opacity` の保存値を上書きしない。背景画像の実ファイル・乗算・切替は検証せず、画像代わりの縞模様を敷く。実機結果は利用者による検証まで未確認。
