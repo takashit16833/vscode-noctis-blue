@@ -66,6 +66,19 @@ test('Sticky Scroll uses wallpaper-proven backdrop blur without dimming pinned t
   assert.doesNotMatch(css, /\.sticky-widget:not\(\.peek\).*opacity:/);
 });
 
+test('suggest popup blurs the background and clears list layers without fading rows', () => {
+  const css = generateCss({ editor: 0.5 });
+  assert.match(css, /\.monaco-editor \.suggest-widget/);
+  assert.match(css, /\.monaco-editor \.suggest-details/);
+  assert.match(css, /\.workbench-suggest-widget \.suggest-details/);
+  assert.match(css, /backdrop-filter: blur\(12px\) !important/);
+  assert.match(css, /\.suggest-widget \.monaco-list-rows/);
+  assert.match(css, /\.workbench-suggest-widget \.monaco-list-rows/);
+  const widgetRule = css.match(/\.monaco-editor \.suggest-widget,[\s\S]*?\{ backdrop-filter: blur\(12px\) !important; \}/);
+  assert.ok(widgetRule);
+  assert.doesNotMatch(widgetRule[0], /opacity:|background-color:/);
+  assert.doesNotMatch(css, /\.suggest-widget \.monaco-list-row\s*\{\s*opacity:/);
+});
 test('floating gap uses its own painted strips and excludes regular layout', () => {
   const css = generateCss({ gap: 0.65 });
   assert.ok(css.includes('.floating-panels:not(.modern-ui-compact)'));
