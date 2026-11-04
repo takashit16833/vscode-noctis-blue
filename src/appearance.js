@@ -102,6 +102,22 @@ function generateCss(input = {}) {
   lines.push(root + ' :is(.part.editor, .part.panel) .monaco-scrollable-element > .scrollbar' +
     ' { background: transparent !important; }');
 
+  // Suggest popup: blur the editor behind the translucent Noctis surface.
+  // VS Code's suggest.css paints the popup and the details panel; list layers
+  // may cover the blur. Keep the popup's theme color, selection, text and borders.
+  // These selectors and the child-background fix were already used by vscode-wallpaper.
+  lines.push([
+    root + ' .monaco-editor .suggest-widget',
+    root + ' .monaco-editor .suggest-details',
+    root + ' .workbench-suggest-widget',
+    root + ' .workbench-suggest-widget .suggest-details'
+  ].join(',\n') + ' { backdrop-filter: blur(12px) !important; }');
+  lines.push([
+    root + ' .monaco-editor .suggest-widget .monaco-list',
+    root + ' .monaco-editor .suggest-widget .monaco-list-rows',
+    root + ' .workbench-suggest-widget .monaco-list',
+    root + ' .workbench-suggest-widget .monaco-list-rows'
+  ].join(',\n') + ' { background-color: transparent !important; }');
   // The floating-panel gap is a margin: don't fill the panels themselves.
   if (op.gap > 0) {
     const floating = root + '.floating-panels:not(.modern-ui-compact) ';
