@@ -1,6 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const vm = require('node:vm');
 const manifest = require('../package.json');
 const { validateOpacity, generateMarkdownCss, generateTemporaryMarkdownScript } =
   require('../src/markdownAppearance');
@@ -35,4 +36,41 @@ test('webview test script only toggles a temporary stylesheet', () => {
   assert.match(script, /existing\.remove\(\)/);
   assert.match(script, /document\.head\.appendChild\(style\)/);
   assert.doesNotMatch(script, /workbench\.html|require\(|localStorage|fetch\(|vscode\.workspace/);
+});
+
+test('generated JavaScript applies and then removes only its own style node', () => {
+  const script = generateTemporaryMarkdownScript(0.65);
+  const nodes = new Map();
+  const root = { querySelector: () => null };
+  const document = {
+    querySelector: selector => selector === '.md-editor' ? root : null,
+    getElementById: id => nodes.get(id) || null,
+    createElement: () => ({
+      id: '', textContent: '',
+      remove() { nodes.delete(this.id); }
+    }),
+    head: { appendChild(node) { nodes.set(node.id, node); } }
+  };
+  const context = {
+    document,
+    getComputedStyle: () => ({ getPropertyValue: () => '#052A59' }),
+    console: { info() {} }
+  };
+  assert.match(vm.runInNewContext(script, context), /適用/);
+  const style = nodes.get('noctis-blue-markdown-active-test');
+  assert.ok(style);
+  assert.match(style.textContent, /var\(--md-block-active-background/);
+  assert.match(style.textContent, /65%, transparent/);
+  assert.match(style.textContent, /box-shadow:/);
+  assert.match(vm.runInNewContext(script, context), /解除/);
+  assert.equal(nodes.size, 0);
+});
+
+test('generated JavaScript refuses non-Markdown context without mutation', () => {
+  const script = generateTemporaryMarkdownScript(0.65);
+  const context = {
+    document: { querySelector: () => null },
+    console: { info() {} }
+  };
+  assert.throws(() => vm.runInNewContext(script, context), /Markdown Editor/);
 });
