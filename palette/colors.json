@@ -28,5 +28,8 @@
   "match": "#0B1737",
   "hover": "#060C24",
   "inactiveBackground": "#00091F",
-  "inactiveForeground": "#20467B"
+  "inactiveForeground": "#20467B",
+  "black": "#000000",
+  "cyanDim": "#00CED1",
+  "selectionUi": "#173366"
 }
