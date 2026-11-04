@@ -53,23 +53,15 @@ Noctis Blue 自身は `workbench.html` を変更しない。
 文字や選択範囲全体へ `opacity` を指定せず、背景色だけを混合する。
 内側で重複して背景を描く要素は透明化し、同じ領域の背景色を複数回重ねない。
 
-2026-11-05 の実機確認では、次を確認済みである。
-
-- editor / sidebar / auxiliaryBar / panel / titlebar / statusbar の不透明度が設定値どおり適用される。
-- `vscode-wallpaper-layers-<workspace-id>.css` が読み込まれる。
-- Sticky Scroll の `backdrop-filter: blur(12px)` が適用される。
-- 補完候補の背景ぼかしが適用される。
-- 通常版 `Noctis Blue` へ切り替え、Reload Window 後に透過・ぼかしが解除される。
-
 ## 内蔵 Markdown Editor
 
 VS Code 内蔵のリッチ Markdown Editor（`vscode.markdown.editor`）は独立した Webview である。
 
-テーマ色は Webview まで届くため、`Noctis Blue Transparent` の背景透過自体は利用できる。
-一方、編集中ブロックの背景は Webview 内部の `--md-block-active-background` で描画されており、
+テーマ色による背景透過は利用できるが、編集中ブロックの背景は Webview 内部の
+`--md-block-active-background` で描画される。
 現行 VS Code の公開 API には、別拡張からこの Webview 本体へ CSS を追加する拡張点がない。
 
-そのため、次の設定は現在も開発・実機検証用である。
+そのため、次の設定は開発・診断用である。
 
 ```jsonc
 "noctisBlue.markdownActiveBlockOpacity": 0.65
@@ -79,11 +71,11 @@ VS Code 内蔵のリッチ Markdown Editor（`vscode.markdown.editor`）は独�
 Markdown Editor の開発者ツール上で実行すると、元の背景色・角丸・強調表示を維持したまま、
 背景と影の不透明度だけを変更できる。
 
-この制約と調査根拠は [docs/markdown-editor.md](docs/markdown-editor.md) を参照する。
+この制約と設計根拠は [docs/markdown-editor.md](docs/markdown-editor.md) を参照する。
 
 ## 開発用診断コマンド
 
-通常利用では自動適用を使用する。次のコマンドは原因切り分けや実機確認用として残している。
+通常利用では自動適用を使用する。次のコマンドは原因切り分け用として残している。
 
 - **Noctis Blue: Show Combined Transparency Test**
 - **Noctis Blue: Show Temporary Opacity Script**
