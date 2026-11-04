@@ -128,7 +128,9 @@ function buildTheme(p,transparent){
       "modernTab.hoverBackground":[p.hover,"A6"],
       "tab.hoverBackground":[p.focus,"A6"],
       "editorSuggestWidget.background":[p.panel,"A6"],
-      "editorSuggestWidget.selectedBackground":[p.focus,"B3"]
+      "editorSuggestWidget.selectedBackground":[p.focus,"B3"],
+      // stickyScroll.css paints the hovered row separately from the blurred region.
+      "editorStickyScrollHover.background":[p.focus,"A6"]
     };
     for (const [key,[base,alpha]] of Object.entries(translucentDetails)) colors[key]=base+alpha;
   }
