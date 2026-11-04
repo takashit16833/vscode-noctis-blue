@@ -22,3 +22,7 @@
 - 実機透過の検証には `Noctis Blue: Show Combined Transparency Test` を優先する。`src/combinedTest.js` が同一JavaScriptに、top用の縞模様・50%領域CSSとMarkdown Editor用の65% active block CSSを同梱する。模擬プレビューは作らない。
 - 適用対象はVS Code本体の `top` とMarkdown Editor Webviewの２つ。手動操作は同じスクリプトの２回実行だけ。いずれも独立した一時 `<style>` 要素を管理し、同じ場所で再実行すると解除。Reload Windowですべて解除される。
 - 統合試験は `noctisBlue.opacity` の保存値を上書きしない。背景画像の実ファイル・乗算・切替は検証せず、画像代わりの縞模様を敷く。実機結果は利用者による検証まで未確認。
+- v0.4.1の選択背景・入力欄・セレクトボックス・Chat Tipは**公式テーマ色での半透明化を優先**し、`scripts/theme.js` の `translucentDetails` に透明版だけのアルファ値を指定する。元の配色は `palette/colors.json` の役割色から取得し、通常版のテーマ色は変更しない。
+- `agentsChatInput.background` はVS Code本体の `.chat-input-notice` が参照する（未設定時は `input.background`）。Tipは実機で重複背景と視認性を検証するまで完了扱いにしない。
+- `dropdown.background` の公式説明にはmacOSで利用されない可能性が明記されている。実機で効かなければ実際の選択要素とcomputed styleを確認し、推測のCSSを追加しない。
+- 現在行・選択範囲・Explorer選択は意味がわかる色と明瞭な文字を維持する。不透明度は固定の試験値であり、将来の最終値は実機で決める。
