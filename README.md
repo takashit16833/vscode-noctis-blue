@@ -21,7 +21,7 @@ git clone https://github.com/takashit16833/vscode-noctis-blue.git
 cd vscode-noctis-blue
 npm test
 npx --yes @vscode/vsce package --no-dependencies
-code --install-extension noctis-blue-0.4.3.vsix
+code --install-extension noctis-blue-0.4.4.vsix
 ```
 
 VS Codeの **Preferences: Color Theme** で `Noctis Blue` または `Noctis Blue Transparent` を選択する。
@@ -87,6 +87,14 @@ Source ControlはVS Code本体の `scm.css` が外枠 `.scm-editor` と内部の
 - [VS Codeの補完候補の色定義](https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/browser/suggestWidget.ts)
 - [VS CodeのSCM入力欄CSS](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/contrib/scm/browser/media/scm.css)
 - [VS CodeのModern Tab色定義](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/common/theme.ts)
+## 補完候補の背景ぼかし（0.4.4）
+
+`Noctis Blue Transparent` の一時CSS（`Noctis Blue: Show Combined Transparency Test` の `top` 側）に **補完ポップアップの背景ぼかし12px** を追加した。通常版のテーマ色や壁紙の画像処理は変更しない。
+
+- VS Codeの `suggest.css` と、既存 `vscode-wallpaper` の `wallpaper.js` を確認したうえで、`.monaco-editor .suggest-widget` と `.suggest-details`、補完のワークベンチ表示にも `backdrop-filter: blur(12px)` を適用する。
+- 補完一覧の `.monaco-list` と `.monaco-list-rows` が背景を重ねて描く場合に備え、これらの**下地だけ**を透明にする。候補の文字・選択行・ホバー色・枠線・スクロールバーのつまみには手を加えない。
+- 背景色は透過テーマの `editorSuggestWidget.background` をそのまま使う。暗い青を残したまま後ろをぼかす。補完候補はDevToolsへのフォーカス移動で閉じるため、既存拡張の確認済みのCSS構造を再利用する。**この版での実機描画は未確認。**
+- Markdown Editorの切り替えスイッチのボタン `.md-readonly-toggle` は、実機の `getComputedStyle` で背景が不透明な `rgb(5, 42, 89)` と確認済み。ボタン自体の色は変更しない。周囲の背景の確認が必要なら別途実測する。
 ## Sticky Scrollのぼかしとホバー（0.4.3）
 
 - `vscode-wallpaper` で2026-11-03に実機確認済みの `.sticky-widget:not(.peek)` に対する `backdrop-filter: blur(12px)` を、`Noctis Blue: Show Combined Transparency Test` の `top` 側の一時CSSへ再利用する。固定コードの文字には `opacity` を指定しない。
