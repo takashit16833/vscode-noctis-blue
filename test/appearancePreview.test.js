@@ -28,7 +28,8 @@ test('strict CSP, no external resources, no workspace mutation', () => {
   assert.match(html, /default-src &#39;none&#39;/);
   assert.match(html, /script-src &#39;nonce-previewNonce123&#39;/);
   assert.match(html, /connect-src &#39;none&#39;/);
-  assert.match(html, /localResourceRoots/);
+  const extensionSource = require('node:fs').readFileSync(require('node:path').join(__dirname, '../src/extension.js'), 'utf8');
+  assert.match(extensionSource, /localResourceRoots: \[\]/);
   assert.doesNotMatch(html, /<img|<iframe|https?:\/\/|fetch\(|postMessage\(|acquireVsCodeApi/);
 });
 
