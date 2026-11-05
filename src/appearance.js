@@ -5,7 +5,7 @@
 const theme = require('../themes/noctis-blue.json');
 const manifest = require('../package.json');
 
-const OPACITY_KEYS = ['editor', 'sidebar', 'panel', 'auxiliaryBar', 'chrome', 'gap'];
+const OPACITY_KEYS = ['editor', 'minimap', 'sidebar', 'panel', 'auxiliaryBar', 'chrome', 'gap'];
 const ROOT = '.monaco-workbench';
 
 function normalizeOpacity(value = {}) {
@@ -45,6 +45,9 @@ function rule(selectors, value, opacity) {
 function buildSurfaceRules(op) {
   const lines = [
     rule(ROOT + ' .part.editor', color('editor.background'), op.editor),
+    // The minimap canvas uses a transparent theme background. Paint its own
+    // adjustable surface behind the canvas, without dimming content or sliders.
+    rule(ROOT + ' .part.editor .monaco-editor .minimap', color('minimap.background'), op.minimap),
     rule(ROOT + ' .part.sidebar, ' + ROOT + '.floating-panels .part.sidebar',
       color('sideBar.background'), op.sidebar),
     rule(ROOT + ' .part.auxiliarybar, ' + ROOT + '.floating-panels .part.auxiliarybar',
