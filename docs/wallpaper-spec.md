@@ -13,7 +13,7 @@
 ### `src/appearance.js` と配色テーマ
 
 - 通常版と透過版の配色を管理する。
-- editor / minimap / tabs / breadcrumbs / sidebar / panel / auxiliaryBar / chrome / gap の背景色と不透明度を管理する。
+- editor / gutter / minimap / tabs / breadcrumbs / sidebar / panel / auxiliaryBar / chrome / gap の背景色と不透明度を管理する。
 - 同じ領域の重複下地を透明化する。
 - Sticky Scroll や補完候補など、前面の文字を薄くせず背後だけをぼかす。
 - 背景画像のパス、乗算、画像切り替えは `src/workbench/wallpaper.js` に任せる。
@@ -22,9 +22,10 @@
 
 `noctisBlue.opacity` は背景色の不透明度であり、文字や要素全体の不透明度ではない。
 
-対象は次の9領域である。
+対象は次の10領域である。
 
 - `editor`
+- `gutter`
 - `minimap`
 - `tabs`
 - `breadcrumbs`
@@ -35,6 +36,8 @@
 - `gap`
 
 背景色は Noctis Blue の通常版テーマから取得し、同じ色を利用者設定へ重複させない。
+
+`gutter` は行番号・折りたたみ記号が並ぶ Monaco Editor の `.margin` に、通常版 `editorGutter.background` の色を一度だけ追加描画する。元の `.margin` は内部背景を透明化する対象なので、明確にそれより詳細度の高い規則で復元する。現在行の強調は VS Code 本体が `editor.lineHighlightBackground` を使い `.margin-view-overlays .current-line-margin` に描画するため、これを CSS で上書きしない。VS Code 標準 `editor.renderLineHighlight: "all"` によって行番号領域にも強調を表示する。エディタ背景上の追加描画のため、`gutter` の不透明度を上げると最終表示は濃くなり、エディタより透過させる指定ではない。
 
 `minimap` はエディタ内部の独立した表示面であり、通常版の `minimap.background` を一度だけ背景として追加する。VS Code がミニマップの Canvas に使う透過版テーマ色は透明のままにして、Canvas 側と CSS 側で背景色を二重に描かない。ただしエディタ領域の背景の上に重なるため、最終的な不透明度は `minimap` の設定値より高くなる。
 
