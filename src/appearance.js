@@ -5,7 +5,7 @@
 const theme = require('../themes/noctis-blue.json');
 const manifest = require('../package.json');
 
-const OPACITY_KEYS = ['editor', 'minimap', 'sidebar', 'panel', 'auxiliaryBar', 'chrome', 'gap'];
+const OPACITY_KEYS = ['editor', 'minimap', 'tabs', 'sidebar', 'panel', 'auxiliaryBar', 'chrome', 'gap'];
 const ROOT = '.monaco-workbench';
 
 function normalizeOpacity(value = {}) {
@@ -125,6 +125,16 @@ function buildClearBackgroundRules() {
   ];
 }
 
+function buildTabRules(op) {
+  // Paint the entire tab strip on its outer title only. Its nested
+  // tabs-and-actions-container is cleared above to avoid a second layer.
+  // Keep the individual active/inactive tab fills independently colored.
+  return [
+    rule(ROOT + ' .part.editor .editor-group-container > .title.tabs',
+      color('editorGroupHeader.tabsBackground'), op.tabs)
+  ];
+}
+
 function buildConnectedTabRules() {
   // Connected tabs use custom background variables even when the legacy
   // theme colors are defined. Reuse those colors without repainting .tab-fill.
@@ -208,6 +218,7 @@ function generateCss(input = {}) {
   const lines = ['/* Noctis Blue workbench appearance: no wallpaper image or tint. */'];
   lines.push(...buildSurfaceRules(op));
   lines.push(...buildClearBackgroundRules());
+  lines.push(...buildTabRules(op));
   lines.push(...buildConnectedTabRules());
   lines.push(...buildStickyRules());
   lines.push(...buildSuggestRules());
@@ -241,6 +252,7 @@ module.exports = {
   normalizeOpacity,
   buildSurfaceRules,
   buildClearBackgroundRules,
+  buildTabRules,
   buildConnectedTabRules,
   buildStickyRules,
   buildSuggestRules,
