@@ -47,6 +47,8 @@
 - ミニマップは通常版 `minimap.background` を基準にし、透過版の Canvas 背景は透明のまま保持する。ミニマップ自身の半透明背景だけを CSS で描き、文字・スクロール位置の表示を薄くしない。エディタ背景の上に重なる追加背景なので、最終的な不透明度と `minimap` の設定値を混同しない。
 - タブ領域の背景は、通常版の `editorGroupHeader.tabsBackground` を使い、`.part.editor .editor-group-container > .title.tabs` の一層だけに `tabs` の不透明度を設定する。内部のタブ一覧・操作領域を二重に塗らない。エディタ背景上での追加背景なので、単独のアルファ値と最終表示の不透明度を区別する。
 - Transparent 版のタブでは、通常版の `tab.activeBackground` / `tab.inactiveBackground` の色を半透明で維持する。Modern UI でも VS Code 標準の色指定を使い、`.tab-fill` を一律に透明化する独自 CSS を追加しない。Connected タブは通常テーマ色を独自背景変数に反映しないため、`src/appearance.js` で `--vscode-tab-activeBackground` / `--vscode-tab-inactiveBackground` を `--modern-ui-editor-tab-custom-*-background` へ橋渡しする。利用者が明示指定した色を優先できるよう、VS Code の色カスタマイズ規則より詳細度を上げない。タブはエディタ背景の上に追加描画されるので、設定したアルファ値と最終的な不透明度を混同しない。
+- ウィンドウが非アクティブのとき、VS Code は `.part.titlebar.inactive` を付与する。CSS では `titleBar.inactiveBackground` と `chrome` の不透明度を使い、アクティブ時の色で上書きしない。状態監視のタイマーは追加しない。
+- ステータスバーの状態別背景は VS Code がインラインの色として選ぶので、未確認の状態クラスを推測して CSS に追加しない。
 - 文字・アイコン・選択範囲へ要素全体の `opacity` を指定しない。
 - `src/appearance.js` を領域背景・重複下地透明化・ぼかしの CSS 生成元とする。DOM 依存セレクタは editor / panel / sidebar / SCM / Sticky / suggest / gap の機能単位で分け、処理内容ではなく必要理由をコメントする。
 - Source Control メッセージ欄は外側 `.scm-editor` の背景を残し、内部 Monaco の重複背景だけを透明化する。
