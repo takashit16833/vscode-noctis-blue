@@ -52,34 +52,22 @@ function run(f, vars) {
   });
 }
 
-test('拡張一覧取得が失敗した場合は旧 Wallpaper を削除しない', async t => {
+test('拡張一覧を取得できなければ失敗する', async t => {
   const f = await fixture(t);
-  const result = run(f, {LIST_FAIL:'1'});
+  const result = run(f, { LIST_FAIL: '1' });
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /could not list installed extensions/);
-  const calls = await fs.readFile(f.logger, 'utf8');
-  assert.doesNotMatch(calls, /--uninstall-extension/);
-  assert.equal(calls.match(/^npx$/gm)?.length, 1);
 });
 
-test('Noctis が一覧で確認できた場合だけ旧 Wallpaper を削除する', async t => {
+test('Noctis Blue がインストールされていれば成功する', async t => {
   const f = await fixture(t);
-  const result = run(f, {
-    LIST_FAIL: '0',
-    EXTENSION_LIST: ['takashit16833.noctis-blue', 'takashit16833.vscode-wallpaper'].join(String.fromCharCode(10))
-  });
+  const result = run(f, { LIST_FAIL: '0', EXTENSION_LIST: 'takashit16833.noctis-blue' });
   assert.equal(result.status, 0, result.stderr);
-  const calls = await fs.readFile(f.logger, 'utf8');
-  assert.match(calls, /--uninstall-extension/);
 });
 
-test('Noctis の導入結果を一覧で確認できなければ旧拡張を残す', async t => {
+test('Noctis Blue がインストールされていなければ失敗する', async t => {
   const f = await fixture(t);
-  const result = run(f, {
-    LIST_FAIL: '0',
-    EXTENSION_LIST: 'takashit16833.vscode-wallpaper'
-  });
+  const result = run(f, { LIST_FAIL: '0', EXTENSION_LIST: '' });
   assert.notEqual(result.status, 0);
-  const calls = await fs.readFile(f.logger, 'utf8');
-  assert.doesNotMatch(calls, /--uninstall-extension/);
+  assert.match(result.stderr, /Noctis Blue is not listed/);
 });
