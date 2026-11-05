@@ -165,7 +165,7 @@ function activate(context) {
         event.affectsConfiguration('noctisBlue.wallpaper') || themeChanged) {
       syncAutomaticAppearance(vscode, context).catch(reportSyncError);
     }
-    if (event.affectsConfiguration('noctisBlue.markdownActiveBlockOpacity') || themeChanged) {
+    if (event.affectsConfiguration('noctisBlue.markdownActiveBlockOpacity')) {
       syncMarkdownEditorAppearance(vscode, context).catch(reportMarkdownSyncError);
     }
   }));
