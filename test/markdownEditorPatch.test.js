@@ -57,21 +57,38 @@ test('設定変更は元CSSを維持したまま管理ブロックだけ更新�
   assert.equal(await fs.readFile(f.filename + BACKUP_SUFFIX, 'utf8'), f.content);
 });
 
-test('VS Code 更新で元 editor.css が入れ替わったら古いバックアップを置換して再適用する', async t => {
+test('VS Code 更新で元 CSS が変わったとき古いバックアップを消さず停止する', async t => {
   const f = await fixture(t, '/* vscode old */\n');
-  await applyMarkdownEditorCss(f.filename, '.md-heading { color: red; }');
+  await applyMarkdownEditorCss(f.filename, '.old{}');
+  await fs.writeFile(f.filename, '/* vscode new */\n');
+  await assert.rejects(applyMarkdownEditorCss(f.filename, '.new{}'), /由来が分かりません/);
+  assert.equal(await fs.readFile(f.filename + BACKUP_SUFFIX, 'utf8'), '/* vscode old */\n');
+  assert.equal(await fs.readFile(f.filename, 'utf8'), '/* vscode new */\n');
+});
 
-  const updated = '/* vscode new */\n';
-  await fs.writeFile(f.filename, updated);
+test('元 CSS と同一でも由来不明のバックアップは採用も削除もしない', async t => {
+  const f = await fixture(t);
+  await fs.writeFile(f.filename + BACKUP_SUFFIX, f.content);
+  await assert.rejects(applyMarkdownEditorCss(f.filename, '.safe{}'), /由来が分かりません/);
+  assert.equal(await fs.readFile(f.filename + BACKUP_SUFFIX, 'utf8'), f.content);
+});
 
-  await applyMarkdownEditorCss(f.filename, '.md-heading { color: blue; }');
-  assert.equal(await fs.readFile(f.filename + BACKUP_SUFFIX, 'utf8'), updated);
-  const current = await fs.readFile(f.filename, 'utf8');
-  assert.ok(current.startsWith(updated));
-  assert.match(current, /color: blue/);
+test('既存のバックアップは上書きせず、内容が異なれば停止する', async t => {
+  const f = await fixture(t);
+  await fs.writeFile(f.filename + BACKUP_SUFFIX, 'unrelated file');
+  await assert.rejects(applyMarkdownEditorCss(f.filename, '.safe{}'), /由来が分かりません/);
+  assert.equal(await fs.readFile(f.filename + BACKUP_SUFFIX, 'utf8'), 'unrelated file');
+});
 
-  await removeMarkdownEditorCss(f.filename);
-  assert.equal(await fs.readFile(f.filename, 'utf8'), updated);
+test('旧方式の固定名にシンボリックリンクがあってもリンク先を変更しない', async t => {
+  const f = await fixture(t);
+  const victim = path.join(f.directory, 'victim.css');
+  const legacyTemp = path.join(f.directory, '.editor.css.noctis-blue-' + process.pid + '.tmp');
+  await fs.writeFile(victim, 'sensitive');
+  await fs.symlink(victim, legacyTemp);
+  await applyMarkdownEditorCss(f.filename, '.safe{}');
+  assert.equal(await fs.readFile(victim, 'utf8'), 'sensitive');
+  assert.equal((await fs.lstat(legacyTemp)).isSymbolicLink(), true);
 });
 
 test('管理ブロック適用後に元CSS部分が変更されていたら上書きしない', async t => {
@@ -101,12 +118,12 @@ test('壊れた管理マーカーは拒否する', async t => {
   );
 });
 
-test('管理ブロックがない状態の解除は古いバックアップだけ掃除する', async t => {
+test('管理ブロックのない解除は既存バックアップに触れない', async t => {
   const f = await fixture(t);
   await fs.writeFile(f.filename + BACKUP_SUFFIX, 'old backup');
   assert.deepEqual(await removeMarkdownEditorCss(f.filename), {
     changed: false,
     patched: false
   });
-  await assert.rejects(fs.stat(f.filename + BACKUP_SUFFIX), { code: 'ENOENT' });
+  assert.equal(await fs.readFile(f.filename + BACKUP_SUFFIX, 'utf8'), 'old backup');
 });

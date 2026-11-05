@@ -127,7 +127,7 @@ very-long-token-without-natural-breakpoints-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ
 
 `/Users/example/project/src/index.ts`
 
-`takashit16833.noctis-blue@0.9.1`
+`takashit16833.noctis-blue`
 
 文章中の `background-color: #0A1A36` と `color: #A6CAFF` の表示を確認する。
 
@@ -148,7 +148,7 @@ bash ./install.sh
 ```json
 {
   "workbench.colorTheme": "Noctis Blue Transparent",
-  "vscodeWallpaper.enabled": true,
+  "noctisBlue.wallpaper.enabled": true,
   "noctisBlue.markdownActiveBlockOpacity": 0.65
 }
 ```

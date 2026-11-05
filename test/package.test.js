@@ -52,12 +52,12 @@ test('開発用の診断コマンドはコマンドパレットに表示しな�
 
 test('背景管理を内包するため UI host を優先する', () => {
   const manifest = require('../package.json');
-  assert.deepEqual(manifest.extensionKind, ['ui', 'workspace']);
+  assert.deepEqual(manifest.extensionKind, ['ui']);
 });
 
 test('統合した壁紙の実装と設定を同じ VSIX に含む', () => {
   const manifest = require('../package.json');
-  assert.equal(manifest.version, '0.12.0');
+  assert.equal(manifest.version, '0.12.1');
   assert.equal(manifest.extensionDependencies, undefined);
   for (const name of ['auto-apply', 'renderer-loader', 'wallpaper', 'workspace-id']) {
     assert.ok(fs.existsSync(path.join(root, 'src', 'workbench', name + '.js')));

@@ -5,6 +5,7 @@ const test = require('node:test');
 const {
   MARKDOWN_EXTENSION_ID,
   STATE_KEY,
+  targetScope,
   markdownEditorCssPath,
   syncMarkdownEditorAppearance,
   enableMarkdownEditorAppearance,
@@ -13,10 +14,11 @@ const {
 
 function fixture(options = {}) {
   const calls = [];
-  const state = { [STATE_KEY]: options.enabled ?? false };
+  const state = { [STATE_KEY]: options.enabled ? { 'local:/app': true } : (options.targets ?? {}) };
   let theme = options.theme ?? 'Noctis Blue Transparent';
 
   const vscode = {
+    env: { appRoot: '/app' },
     workspace: {
       getConfiguration(section) {
         if (section === 'workbench') {
@@ -79,5 +81,21 @@ test('Noctis 以外のテーマでは有効化を拒否する', async () => {
     enableMarkdownEditorAppearance(f.vscode, f.context),
     /Noctis Blue/
   );
-  assert.equal(f.state[STATE_KEY], false);
+  assert.deepEqual(f.state[STATE_KEY], {});
+});
+
+test('接続先が異なる環境では以前の有効化記録を流用しない', async () => {
+  const f = fixture({targets: {'remote:vscode-remote://dev-container+first': true}});
+  f.vscode.workspace.workspaceFolders = [{
+    uri: { scheme: 'vscode-remote', authority: 'dev-container+second' }
+  }];
+  assert.equal(targetScope(f.vscode), 'remote:vscode-remote://dev-container+second');
+  assert.equal(await syncMarkdownEditorAppearance(f.vscode, f.context), false);
+});
+
+test('従来の単一真偽値は新しい接続先を許可しない', async () => {
+  const f = fixture();
+  f.context.globalState.get = (key, fallback) =>
+    key === 'noctisBlue.markdownEditorAppearanceEnabled' ? true : fallback;
+  assert.equal(await syncMarkdownEditorAppearance(f.vscode, f.context), false);
 });

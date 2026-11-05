@@ -11,6 +11,9 @@ test('Markdown Editor CSS follows the Emacs document palette', () => {
   const css = generateMarkdownCss(0.65);
 
   assert.match(css, /\.md-heading \{/);
+  assert.match(css, /data-vscode-theme-id="Noctis Blue"/);
+  assert.match(css, /data-vscode-theme-id="Noctis Blue Transparent"/);
+  for (const theme of manifest.contributes.themes) assert.equal(theme.id, theme.label);
   assert.match(css, new RegExp('color: ' + palette.pale.replace('#', '\\#') + ' !important;', 'i'));
 
   assert.match(css, /pre\.md-code-block \{/);
@@ -53,6 +56,7 @@ test('markdown opacity setting rejects invalid numbers', () => {
   assert.equal(validateOpacity(1), 1);
   const cfg = manifest.contributes.configuration.properties['noctisBlue.markdownActiveBlockOpacity'];
   assert.equal(cfg.type, 'number');
+  assert.equal(cfg.scope, 'application');
   assert.equal(cfg.default, 0.65);
   assert.equal(cfg.minimum, 0);
   assert.equal(cfg.maximum, 1);
