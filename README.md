@@ -1,41 +1,47 @@
 # Noctis Blue
 
-Emacs版 [Retro Hacker Blue](https://github.com/takashit16833/emacs-retro-hacker-blue-theme) の配色を基準にした VS Code 用テーマである。
+Emacs 版 [Retro Hacker Blue](https://github.com/takashit16833/emacs-retro-hacker-blue-theme) をもとにした VS Code 用の青系テーマです。
 
-通常版と透過版で配色を共有し、背景画像・透過・ぼかしも同じ拡張に含める。
-
-## テーマ
-
-- **Noctis Blue**: 通常の不透明テーマ。
-- **Noctis Blue Transparent**: 背景画像を見せるための透過テーマ。
-- 配色の唯一の管理元は `palette/colors.json`。
-- JSON / JSONC / JSON Lines のプロパティ名は基本文字色 `#5EAFFF` に揃える。
-- `themes/*.json` は `npm run build` で生成する。
-
-## 構成
-
-利用者が導入する拡張機能は **Noctis Blue ひとつ**。
-内部では配色、壁紙、透過・ぼかし、Markdown Editor の処理を分けて保守する。
+- **Noctis Blue**：通常版
+- **Noctis Blue Transparent**：背景画像と透過表示に対応する版
 
 ## インストール
 
-Mac 側で実行する。
+macOS のターミナルで実行します。VS Code と Node.js（npm）が必要です。
+
+初めて導入する場合：
+
+```bash
+git clone git@github.com:takashit16833/vscode-noctis-blue.git ~/vscode-noctis-blue
+cd ~/vscode-noctis-blue
+bash ./install.sh
+```
+
+既に導入している場合：
 
 ```bash
 cd ~/vscode-noctis-blue
-git switch main
 git pull --ff-only
 bash ./install.sh
 ```
 
-`install.sh` はテスト・VSIX 作成・ローカル VS Code への導入を行う。ほかの拡張のインストール状態は変更しない。
+インストール後は VS Code で **Developer: Reload Window** を実行してください。
 
-**VS Code 本体の読み込み方式が変わる版へ更新するときは、更新前の Noctis Blue で `Disable Automatic Appearance` を実行し、`Developer: Reload Window` で復元を確認してからインストールする。** 更新後は `Enable Automatic Appearance` で再度有効化する。すでに更新して解除できない場合、管理していた版を一時的に再導入して解除する。管理ファイルを手動削除しない。
-workbench の管理ファイルは、バックアップと読み込みスクリプトを検証できた場合だけ変更する。検証できない場合は停止し、無断で修正・削除しない。
+## 有効化
+
+1. VS Code のテーマを **Noctis Blue** または **Noctis Blue Transparent** に変更します。
+2. 背景画像・透過・ぼかしを使う場合は、コマンドパレットから **Noctis Blue: Enable Automatic Appearance** を実行し、確認画面を承認します。
+3. **Developer: Reload Window** で表示を更新します。
+
+背景画像・透過機能は VS Code 本体のファイルを変更するため、初回の明示的な許可が必要です。テーマを選ぶだけでは自動的に有効になりません。
+
+内蔵 Markdown Editor の装飾を使う場合は、別途 **Noctis Blue: Enable Markdown Editor Appearance** を実行して確認画面を承認してください。Dev Container などの接続先では、その接続先ごとに有効化が必要です。
 
 ## 基本設定
 
-```jsonc
+VS Code の `settings.json` で設定します。
+
+```json
 {
   "workbench.colorTheme": "Noctis Blue Transparent",
   "noctisBlue.wallpaper.enabled": true,
@@ -54,117 +60,76 @@ workbench の管理ファイルは、バックアップと読み込みスクリ�
     "auxiliaryBar": 0.86,
     "chrome": 0.93,
     "gap": 0.91
-  }
+  },
+  "noctisBlue.markdownActiveBlockOpacity": 0.65,
+  "editor.renderLineHighlight": "all"
 }
 ```
 
-背景画像の設定は `noctisBlue.wallpaper.*` を使用する。
+### 背景画像
 
-`gutter` は行番号・折りたたみ記号のある左側の領域に、通常版の `editorGutter.background` の色を重ねる不透明度。現在行の数字は `editorLineNumber.activeForeground` で色分けされ、行全体の背景は `editor.lineHighlightBackground` によって強調される。行番号領域にも現在行の背景を表示するには、VS Code 標準の `"editor.renderLineHighlight": "all"` を設定する。現在行専用の不透明度項目は増やさない。
+- `noctisBlue.wallpaper.enabled`：背景画像の有効・無効
+- `image`：使用する画像
+- `alternateImage`：条件に応じて切り替える画像。不要なら空文字
+- `switchMode`：切り替え条件。縦長画面なら `orientation`、縦横比なら `aspect-ratio`、画面幅なら `width`
+- `maxAspectRatio`：`aspect-ratio` 使用時の境界値（例：`"16/10"`）
+- `maxWidth`：`width` 使用時の境界値（例：`1400`）
+- `tint`：背景画像に乗算する色。`#FFFFFF` なら元の色を維持
 
-エディタ全体の背景の上に描画するため、`gutter` を高くすると行番号の背景は濃くなる。行番号をエディタ本体より透かすための設定ではない。
-`minimap` はミニマップ自身の背景色（通常版の `minimap.background`）に追加する不透明度であり、文字やスクロール位置の表示は薄くしない。エディタ全体の背景色の上に重なるため、`minimap: 0.5` が画面上で50%の不透明度になるわけではない。0にすると従来と同様にミニマップ固有の背景は透明になる。
+### 不透明度
 
-`tabs` はタブ一覧と操作ボタンの領域、`breadcrumbs` はパンくずリストの背景色の不透明度を、それぞれ独立して設定する。どちらも通常版の `editorGroupHeader.tabsBackground`（現在 `#000E2F`）を使用するが、共通の親要素 `.title.tabs` は塗らない。エディタ背景の上に重なるため、設定値は画面上の最終不透明度とは異なる。
+`noctisBlue.opacity` は 0（透明）から 1（不透明）まで指定できます。
 
-Transparent 版の個々のタブは、通常版の選択中・非選択の背景色をそれぞれ50%不透明で残す。エディタ領域の半透明背景の上に重なるため、最終表示が50%不透明になるわけではない。追加の設定項目を増やさず、VS Code 標準のテーマ色を利用する。Connected タブでは VS Code が通常のテーマ色をそのまま描画しないため、Noctis Blue の既存の透過 CSS で、そのテーマ色を Connected タブの背景変数へ渡す。
+| 項目 | 対象 |
+| --- | --- |
+| `editor` | エディタ全体 |
+| `gutter` | 行番号・折りたたみ記号のある左側 |
+| `minimap` | ミニマップ |
+| `tabs` | ファイルのタブが並ぶ領域 |
+| `breadcrumbs` | パンくずリスト |
+| `sidebar` | サイドバー |
+| `panel` | ターミナルなどのパネル |
+| `auxiliaryBar` | チャットなどの補助サイドバー |
+| `chrome` | タイトルバー・ステータスバーなど |
+| `gap` | パネル間と外周の隙間 |
 
-タイトルバーは、ウィンドウが非アクティブになると `titleBar.inactiveBackground` に切り替える。`chrome` の値はアクティブ時・非アクティブ時の両方に適用する。
+`gutter` や `minimap` などはエディタ背景の上に色を重ねるため、指定値が画面全体の最終的な不透明度になるわけではありません。`gutter` の値を上げると行番号の背景が濃くなります。
 
-## 自動適用
+現在行を行番号の背景も含めて強調する場合は、`"editor.renderLineHighlight": "all"` を使用します。
 
-初回は **Noctis Blue: Enable Automatic Appearance** を実行して本体変更への同意を確認する。明示的に有効化していない場合、ファイルが存在するだけでは自動適用を開始しない。
-その後は `Developer: Reload Window` で反映する。
+### Markdown Editor
 
-設定変更は生成 CSS だけを更新し、勝手にウィンドウを再読み込みしない。
-通常の Noctis Blue に切り替えると透過 CSS がなくなり、背景画像の有効設定は維持する。
+編集中のブロックの背景は、次の設定で調整できます。
 
-**Noctis Blue: Disable Automatic Appearance** は背景画像と透過の自動適用をまとめて解除する。
-**Noctis Blue: Repair Background Loader** は VS Code 更新後の修復用。
-
-## 内蔵 Markdown Editor
-
-VS Code 内蔵のリッチ Markdown Editor（`vscode.markdown.editor`）は独立した Webview である。
-
-Noctis Blue の通常本文色は従来どおり `#5EAFFF` を使う。パレット上の `white` は Emacs 版 Retro Hacker Blue の `fg-pale` と同じ `#A6CAFF` に揃える。コードブロック背景は Emacs 版の `org-block-bg` と同じ `#0A1A36` を基準にし、Transparent 版では 75% 不透明（`#0A1A36BF`）で描画する。
-
-公開 API だけでは Webview 本体へ任意 CSS を追加できないため、Noctis Blue は明示的に有効化した場合だけ、VS Code 組み込み Markdown 拡張の `markdown-editor-out/editor.css` 末尾へ管理ブロックを追記する。
-
-**Noctis Blue: Enable Markdown Editor Appearance** を一度実行して確認ダイアログを承認すると、次を自動適用する。
-Dev Container ではリモートサーバー上の CSS を VS Code のファイル操作 API で探し、対象を確認してから変更する。書き込み権限がない場合はエラーになり、権限は自動変更しない。実機での再検証が必要。
-
-- 見出し `.md-heading`: Emacs `fg-pale` と同じ `#A6CAFF`
-- H1/H2: 左外側 `-14px` に `::before` の青い縦線を表示し、文字行の中心に揃える
-- H2: 標準の下線を非表示
-- `pre.md-code-block`: 枠線なし
-- 引用: Obsidian と同じ青系の背景 `#001947`、文字 `#4C9EEB`、枠 `#5EAFFF`、左罫線 `2px`
-- インラインコード: 文字 `#7CBEFF`、背景 `#052A59`、上下左右の余白を調整
-- 引用・インラインコードの背景は Transparent 版で45%不透明（Obsidian の背景画像表示に合わせる）
-- `text` / `plaintext` コードブロック: 通常本文と同じ `#5EAFFF`
-- 通常リンク: Emacs版と同じ `fg-muted = #316CBD`、太字、下線
-- 表ヘッダー: 先頭行のセルを `#316CBD` + 太字
-- 表罫線: 既存の太さ・線種を維持し、`widget.border`（現在 `#153A75`）
-- 編集中ブロック: 元の `--md-block-active-background` を維持したまま指定不透明度へ調整
-
-```jsonc
+```json
 "noctisBlue.markdownActiveBlockOpacity": 0.65
 ```
 
-元の `editor.css` は隣にバックアップし、**Noctis Blue: Disable Markdown Editor Appearance** で内容を検証して復元する。VS Code 更新後に未加工の CSS と古いバックアップが残った場合、由来を確認できないため自動削除・再適用せず停止する。Markdown の有効化は接続先ごとの許可で管理し、更新後の新しい接続先では再有効化が必要となる。
+この設定は VS Code 全体で共通です。内蔵 Markdown Editor の装飾を有効にしてから使用してください。変更後に表示が更新されない場合は、Markdown Editor を開き直すか **Developer: Reload Window** を実行します。
 
-Markdown の CSS は Noctis Blue のテーマでだけ効き、不透明度はアプリ全体で共通設定とする。拡張機能の更新後は **Developer: Reload Window** を実行して新しいコードを読み込む。CSS 変更後は Markdown Editor を開き直すかウィンドウを再読み込みして表示を反映する。
+接続先のファイルに書き込み権限がない場合は、装飾を有効化できません。権限は自動変更されません。
 
-旧バージョンで有効にしたローカルの Markdown Editor CSS は、旧形式の有効化記録に加え、既存の Noctis Blue 管理ブロックと検証可能なバックアップがある場合だけ接続先別の記録へ引き継ぐ。旧形式の記録だけでは新規の CSS や Dev Container へ適用しない。引き継げない接続先では **Enable Markdown Editor Appearance** で個別に有効化する。
+## コマンド
 
-**Noctis Blue をアンインストールする前には、次の両方を解除する。**
+コマンドパレットから利用できます。
+
+| コマンド | 用途 |
+| --- | --- |
+| **Noctis Blue: Enable Automatic Appearance** | 背景画像・透過・ぼかしの有効化 |
+| **Noctis Blue: Disable Automatic Appearance** | 背景画像・透過・ぼかしの解除 |
+| **Noctis Blue: Enable Markdown Editor Appearance** | 内蔵 Markdown Editor の装飾を有効化 |
+| **Noctis Blue: Disable Markdown Editor Appearance** | 内蔵 Markdown Editor の装飾を解除 |
+| **Noctis Blue: Repair Background Loader** | VS Code 更新後、背景が適用されなくなった場合の修復 |
+
+## 更新・アンインストール
+
+VS Code 本体の更新によって背景や Markdown Editor の装飾が反映されなくなる場合があります。問題があるときは、上記の有効化・修復コマンドを使用してください。
+
+**VS Code 本体の読み込み方式が変わる更新を行う場合**は、更新前に **Noctis Blue: Disable Automatic Appearance** を実行し、**Developer: Reload Window** で元に戻ったことを確認してください。更新後に必要に応じて再度有効化します。
+
+**Noctis Blue をアンインストールする前**には、以下の両方を実行し、それぞれ復元が成功したことを確認してください。
 
 1. **Noctis Blue: Disable Markdown Editor Appearance**
 2. **Noctis Blue: Disable Automatic Appearance**
 
-それぞれ対象ファイルの復元が成功したことを確認する。
-
-詳細は [docs/markdown-editor.md](docs/markdown-editor.md)。
-
-## コマンドの使い分け
-
-コマンドパレットには、利用者向けの次の5つを表示する。
-
-- **Noctis Blue: Enable Automatic Appearance** — 壁紙・透過・ぼかしをまとめて有効にする。
-- **Noctis Blue: Disable Automatic Appearance** — 壁紙・透過・ぼかしの自動適用を解除する。
-- **Noctis Blue: Enable Markdown Editor Appearance** — 組み込み Markdown Editor の装飾を有効にする。組み込み CSS を変更するため、権限が必要。
-- **Noctis Blue: Disable Markdown Editor Appearance** — 組み込み Markdown Editor の装飾を解除する。
-- **Noctis Blue: Repair Background Loader** — VS Code 更新後の修復用（通常操作では不要）。
-
-開発・原因切り分け用の以下3つは、コマンドパレットに表示しない。
-コマンド自体は廃止せず、拡張 API 等から呼び出せる。
-
-- `noctisBlue.showCombinedTransparencyTest`
-- `noctisBlue.showOpacityScript`
-- `noctisBlue.showMarkdownActiveBlockTest`
-
-日常操作で診断コマンドを実行する必要はない。
-
-## 開発
-
-```bash
-npm run build
-npm test
-```
-
-`themes/*.json` は直接編集せず、
-`palette/colors.json` または `scripts/theme.js` を変更する。
-
-## 関連資料
-
-- [docs/wallpaper-spec.md](docs/wallpaper-spec.md)
-- [docs/markdown-editor.md](docs/markdown-editor.md)
-- [docs/markdown-showcase.md](docs/markdown-showcase.md): Markdown Editor / Preview の見た目確認用ショーケース。
-- [VS Code Theme Color](https://code.visualstudio.com/api/references/theme-color)
-- [VS Code Markdown Extension API](https://code.visualstudio.com/api/extension-guides/markdown-extension)
-
-## 出典とライセンス
-
-MIT ライセンスの [Emacs版 Retro Hacker Blue](https://github.com/takashit16833/emacs-retro-hacker-blue-theme)
-を配色設計の出発点とし、元になった
-[Retro Hacker Theme](https://github.com/elmersh/retro-hacker-theme) にも謝意を表する。
-著作権表示は `LICENSE` に残す。
+復元に失敗した場合は、VS Code 本体のファイルやバックアップを手動で削除せず、エラー内容を確認してください。
