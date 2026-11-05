@@ -16,6 +16,18 @@ test('Markdown Editor CSS follows the Emacs document palette', () => {
   assert.match(css, /pre\.md-code-block \{/);
   assert.match(css, /border: none !important;/);
 
+  assert.match(css, /blockquote\.md-blockquote \{/);
+  assert.match(css, /--vscode-textBlockQuote-background, #222222\) 65%, transparent/);
+
+  assert.match(css, /\.md-document code:not\(pre code\) \{/);
+  assert.match(css, /--vscode-editor-foreground, #5EAFFF\)/i);
+  assert.match(css, /--vscode-textCodeBlock-background, #0A1A36\)/i);
+
+  assert.match(css, /\.md-document a \{/);
+  assert.match(css, /color: #316CBD !important;/i);
+  assert.match(css, /font-weight: 700 !important;/);
+  assert.match(css, /text-decoration: underline !important;/);
+
   assert.match(css, /--md-block-active-background/);
   assert.match(css, /65%, transparent/);
   assert.match(css, /box-shadow: 0 0 0 8px color-mix/);
@@ -67,6 +79,9 @@ test('generated JavaScript applies and then removes only its own style node', ()
   const style = nodes.get('noctis-blue-markdown-active-test');
   assert.ok(style);
   assert.match(style.textContent, /\.md-heading/);
+  assert.match(style.textContent, /blockquote\.md-blockquote/);
+  assert.match(style.textContent, /code:not\(pre code\)/);
+  assert.match(style.textContent, /\.md-document a/);
   assert.match(style.textContent, /var\(--md-block-active-background/);
   assert.match(vm.runInNewContext(script, context), /解除/);
   assert.equal(nodes.size, 0);
