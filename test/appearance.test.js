@@ -8,7 +8,7 @@ const { normalizeOpacity, generateCss, generateTemporaryScript } = require('../s
 
 test('configuration includes separately adjustable minimap and tab-strip surfaces', () => {
   const properties = manifest.contributes.configuration.properties['noctisBlue.opacity'];
-  const keys = ['editor', 'minimap', 'tabs', 'sidebar', 'panel', 'auxiliaryBar', 'chrome', 'gap'];
+  const keys = ['editor', 'minimap', 'tabs', 'breadcrumbs', 'sidebar', 'panel', 'auxiliaryBar', 'chrome', 'gap'];
   assert.deepEqual(Object.keys(properties.properties), keys);
   assert.deepEqual(Object.keys(normalizeOpacity()), keys);
   assert.deepEqual(normalizeOpacity({ editor: 0 }).editor, 0);
@@ -19,6 +19,9 @@ test('configuration includes separately adjustable minimap and tab-strip surface
   assert.equal(normalizeOpacity().tabs, 0.75);
   assert.equal(normalizeOpacity({ tabs: 0 }).tabs, 0);
   assert.equal(normalizeOpacity({ tabs: 1 }).tabs, 1);
+  assert.equal(normalizeOpacity().breadcrumbs, 0.75);
+  assert.equal(normalizeOpacity({ breadcrumbs: 0 }).breadcrumbs, 0);
+  assert.equal(normalizeOpacity({ breadcrumbs: 1 }).breadcrumbs, 1);
   for (const item of Object.values(properties.properties)) {
     assert.equal(item.minimum, 0);
     assert.equal(item.maximum, 1);
@@ -29,19 +32,21 @@ test('bad settings fail without emitting CSS', () => {
   for (const invalid of [null, [], 5, { editor: '0.9' }, { editor: NaN },
     { editor: Infinity }, { panel: -0.1 }, { panel: 1.1 },
     { minimap: '0.5' }, { minimap: -0.1 }, { minimap: 1.1 },
-    { tabs: '0.75' }, { tabs: -0.1 }, { tabs: 1.1 }, { unknown: 0.5 }]) {
+    { tabs: '0.75' }, { tabs: -0.1 }, { tabs: 1.1 },
+    { breadcrumbs: '0.75' }, { breadcrumbs: -0.1 }, { breadcrumbs: 1.1 }, { unknown: 0.5 }]) {
     assert.throws(() => generateCss(invalid), Error);
   }
 });
 
 test('area CSS uses actual opaque Noctis colors, without any wallpaper image', () => {
   const css = generateCss({
-    editor: 0.5, minimap: 0.25, tabs: 0.75, sidebar: 0.8, panel: 1, auxiliaryBar: 0.4, chrome: 0.9, gap: 0
+    editor: 0.5, minimap: 0.25, tabs: 0.75, breadcrumbs: 0.25, sidebar: 0.8, panel: 1, auxiliaryBar: 0.4, chrome: 0.9, gap: 0
   });
   for (const [key, percent] of [
     ['editor.background', '50%'],
     ['minimap.background', '25%'],
     ['editorGroupHeader.tabsBackground', '75%'],
+    ['editorGroupHeader.tabsBackground', '25%'],
     ['sideBar.background', '80%'],
     ['panel.background', '100%'],
     ['auxiliaryBar.background', '40%'],
@@ -93,17 +98,21 @@ test('minimap paints only its own background, without changing canvas or slider'
   }
 });
 
-test('tab strip paints once on outer title without changing individual tab fills', () => {
-  const selector = '.monaco-workbench .part.editor .editor-group-container > .title.tabs';
+test('tabs and breadcrumbs have independent, single-layer backgrounds', () => {
+  const tabsSelector = '.monaco-workbench .part.editor .editor-group-container > .title.tabs > .tabs-and-actions-container';
+  const breadcrumbsSelector = '.monaco-workbench .part.editor .editor-group-container > .title .breadcrumbs-below-tabs';
   const color = opaque.colors['editorGroupHeader.tabsBackground'];
-  for (const [opacity, percent] of [[0, '0%'], [0.75, '75%'], [1, '100%']]) {
-    const css = generateCss({ editor: 0.88, tabs: opacity });
-    const expected = selector + ' { background-color: color-mix(in srgb, ' +
-      color + ' ' + percent + ', transparent) !important; }';
-    assert.ok(css.includes(expected));
-    assert.ok(css.indexOf('background-color: transparent !important;') < css.indexOf(expected));
-    assert.equal(css.split(expected).length - 1, 1);
+  for (const [tabs, breadcrumbs] of [[0, 1], [0.75, 0.25], [1, 0]]) {
+    const css = generateCss({ editor: 0.88, tabs, breadcrumbs });
+    for (const [selector, opacity] of [[tabsSelector, tabs], [breadcrumbsSelector, breadcrumbs]]) {
+      const percent = (opacity * 100) + '%';
+      const expected = selector + ' { background-color: color-mix(in srgb, ' +
+        color + ' ' + percent + ', transparent) !important; }';
+      assert.equal(css.split(expected).length - 1, 1);
+    }
+    assert.ok(!css.includes('.title.tabs { background-color: color-mix('));
     assert.ok(!css.includes('.tabs-container > .tab > .tab-fill { background-color:'));
+    assert.ok(css.includes('.part.editor :is(.breadcrumbs-below-tabs, .breadcrumbs-control, .breadcrumbs-editor-type)'));
   }
   assert.equal(
     transparent.colors['editorGroupHeader.tabsBackground'],
