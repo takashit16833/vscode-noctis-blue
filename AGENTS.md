@@ -28,7 +28,7 @@
 - `src/workbench/auto-apply.js`: workbench.html の導入・検証・同期・解除・修復だけを担当。管理外のローダー・バックアップを上書きしない。
 - `src/workbench/renderer-loader.js`: CSS を起動時に読み込む。タイマーやポーリングを増やさない。
 - `src/workbench/workspace-id.js`: VS Code renderer 側と同一の作業領域 ID を生成する。
-- 現在の管理対象 CSS は `vscode-wallpaper-*.css` と `vscode-wallpaper-layers-*.css`、読み込みスクリプトは `vscode-wallpaper-loader.js` という実際のファイル名を使用している。これは現行の読み込み経路であり、名称だけを変えると既存インストールの表示が壊れる。名称を変更する場合は HTML・バックアップ・読み込み側を含めた安全な切り替えが必要。
+- 現在の管理対象 CSS は `noctis-blue-*.css` と `noctis-blue-layers-*.css`、読み込みスクリプトは `noctis-blue-loader.js` という実際のファイル名を使用している。これらのファイルは Noctis Blue が所有する。管理ファイル名の変更は読み込み・検証・解除・復元とテストを含めて整合性を保つ。
 - 背景画像設定は `noctisBlue.wallpaper.*` のみ読み取る。存在しない設定や別拡張の設定から値を推測しない。
 - `Noctis Blue Transparent` のときだけ領域透過 CSS を追加する。背景画像自体は `noctisBlue.wallpaper.enabled` で制御する。
 - 自動適用の保存状態は `noctisBlue.automaticAppearanceEnabled` (`globalState`) だけで判定する。管理ファイルが存在するという理由で、利用者の同意や無効化状態を上書きしない。

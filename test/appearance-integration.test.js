@@ -63,9 +63,9 @@ test('単一拡張だけで壁紙・透過を導入し、テーマ変更を反�
   assert.equal(f.state[STATE_KEY], true);
   assert.equal((await automatic.inspect(f.vscode.env.appRoot)).installed, true);
 
-  const generated = (await fs.readdir(f.files.dir)).find(x => /^vscode-wallpaper-[\da-f]{32}\.css$/.test(x));
+  const generated = (await fs.readdir(f.files.dir)).find(x => /^noctis-blue-[\da-f]{32}\.css$/.test(x));
   assert.ok(generated, 'workspace CSS was not written');
-  const layersName = generated.replace('vscode-wallpaper-', 'vscode-wallpaper-layers-');
+  const layersName = generated.replace('noctis-blue-', 'noctis-blue-layers-');
   const imageCss = await fs.readFile(path.join(f.files.dir, generated), 'utf8');
   assert.match(imageCss, /example\.org\/image\.png/);
   assert.match(await fs.readFile(path.join(f.files.dir, layersName), 'utf8'), /monaco-grid-view/);
