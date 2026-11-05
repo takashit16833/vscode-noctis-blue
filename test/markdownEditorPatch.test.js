@@ -52,8 +52,8 @@ test('設定変更は元CSSを維持したまま管理ブロックだけ更新�
 
   const current = await fs.readFile(f.filename, 'utf8');
   assert.ok(current.startsWith(f.content));
-  assert.doesNotMatch(current, /color: red/);
-  assert.match(current, /color: blue/);
+  assert.doesNotMatch(current, /\.md-heading \{ color: red; \}/);
+  assert.match(current, /\.md-heading \{ color: blue; \}/);
   assert.equal(await fs.readFile(f.filename + BACKUP_SUFFIX, 'utf8'), f.content);
 });
 
