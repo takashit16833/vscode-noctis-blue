@@ -50,11 +50,7 @@ pre.md-code-block {
 }
 
 blockquote.md-blockquote {
-  background: color-mix(
-    in srgb,
-    var(--vscode-textBlockQuote-background, #222222) 65%,
-    transparent
-  ) !important;
+  background: var(--vscode-textCodeBlock-background, #0A1A36) !important;
 }
 
 .md-document code:not(pre code) {
@@ -74,8 +70,13 @@ blockquote.md-blockquote {
   font-weight: 700 !important;
 }
 
+pre.md-code-block > code.language-text,
+pre.md-code-block > code.language-plaintext {
+  color: var(--vscode-editor-foreground, #5EAFFF) !important;
+}
+
 .md-table td {
-  border-color: #316CBD !important;
+  border-color: var(--vscode-widget-border, #153A75) !important;
 }
 ```
 
@@ -84,16 +85,16 @@ blockquote.md-blockquote {
 コードブロック背景は公開テーマ色 `textCodeBlock.background` で管理し、
 Emacs 版の `org-block-bg` と同じ `#0A1A36` を使う。
 インラインコードも同じテーマ色を参照するため、Transparent 版ではコードブロックと同じ半透明背景になる。
+`text` / `plaintext` の fenced code は構文色を使わず、通常本文と同じ `editor.foreground` を使う。
 
-引用は実機で `BLOCKQUOTE.md-block.md-blockquote` と
-`--vscode-textBlockQuote-background: #222222` を確認済みである。
-色そのものを消さず、`color-mix()` で65%だけ残して半透明化する。
+引用は実機で `BLOCKQUOTE.md-block.md-blockquote` と確認済みである。
+背景はコードブロックと同じ `textCodeBlock.background` に統一する。
 
 通常リンクは実機でクラスなしの `A` 要素として確認済みであり、
 Emacs版の `fg-muted = #316CBD`、太字、下線に揃える。
 
 表は実機で先頭行の `TD` が見出し、通常セルも `TD` と確認済みである。
-見出しは `#316CBD` + 太字、罫線は既存の太さ・線種を維持して色だけ `#316CBD` にする。
+見出しは `#316CBD` + 太字、罫線は既存の太さ・線種を維持して `widget.border`（現在 `#153A75`）を使う。
 
 編集中ブロックは `--md-block-active-background` の元色を保持し、
 `noctisBlue.markdownActiveBlockOpacity` で背景と影のアルファ値だけを調整する。
