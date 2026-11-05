@@ -2,6 +2,8 @@
 
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const crypto = require('node:crypto');
+const { constants } = require('node:fs');
 
 const START_MARKER = '/* >>> Noctis Blue Markdown Editor CSS >>> */';
 const END_MARKER = '/* <<< Noctis Blue Markdown Editor CSS <<< */';
@@ -50,18 +52,33 @@ function markerState(content) {
   return { patched: true, start, end: end + END_MARKER.length };
 }
 
+// Each write owns an unpredictable, exclusively created temporary file.
+// Never remove a path that this call did not successfully create.
 async function atomicWrite(filename, content, mode, io = fs) {
-  const directory = path.dirname(filename);
-  const temporary = path.join(
-    directory,
-    '.' + path.basename(filename) + '.noctis-blue-' + process.pid + '.tmp'
-  );
+  const temporary = path.join(path.dirname(filename),
+    '.' + path.basename(filename) + '.noctis-blue-' + crypto.randomUUID() + '.tmp');
+  let created = false;
   try {
-    await io.writeFile(temporary, content, { mode });
+    await io.writeFile(temporary, content, { flag: 'wx', mode });
+    created = true;
     await io.chmod(temporary, mode);
     await io.rename(temporary, filename);
   } finally {
-    await io.rm(temporary, { force: true }).catch(() => {});
+    if (created) await io.rm(temporary, { force: true }).catch(() => {});
+  }
+}
+
+async function createBackupExclusive(filename, backupFilename, original, io = fs) {
+  // Native copyFile with COPYFILE_EXCL and workspace.fs.copy(overwrite:false)
+  // both reject an existing backup without touching its content.
+  if (io === fs) {
+    await io.copyFile(filename, backupFilename, constants.COPYFILE_EXCL);
+  } else {
+    await io.copyFileExclusive(filename, backupFilename);
+  }
+  const saved = await io.readFile(backupFilename, 'utf8');
+  if (saved !== original) {
+    throw new Error('バックアップ中に元の Markdown Editor CSS が変化しました。確認が必要です。');
   }
 }
 
@@ -99,14 +116,17 @@ async function applyMarkdownEditorCss(filename, css, io = fs) {
     original = backup.content;
     validatePatchedContent(current, original);
   } else {
-    // A VS Code update replaces editor.css but can leave our sidecar backup.
-    // Once the current file has no managed marker, it is the new clean source.
+    // A stale backup may belong to an unrelated operation. Do not overwrite or
+    // delete it. Reuse only when byte-for-byte identical to the clean CSS.
     original = current;
-    const staleBackup = await readBackup(filename, io);
-    if (staleBackup) await io.unlink(staleBackup.filename);
-    const backupFilename = filename + BACKUP_SUFFIX;
-    await io.writeFile(backupFilename, original, { mode: stat.mode });
-    await io.chmod(backupFilename, stat.mode);
+    const existing = await readBackup(filename, io);
+    if (existing) {
+      if (existing.content !== current) {
+        throw new Error('Markdown Editor CSS の既存バックアップが現在の元ファイルと一致しません。削除せず停止します。');
+      }
+    } else {
+      await createBackupExclusive(filename, filename + BACKUP_SUFFIX, original, io);
+    }
   }
 
   const next = original + separatorFor(original) + managedBlock(css);
@@ -123,7 +143,8 @@ async function removeMarkdownEditorCss(filename, io = fs) {
   const backup = await readBackup(filename, io);
 
   if (!state.patched) {
-    if (backup) await io.unlink(backup.filename);
+    // A matching filename alone never proves that a backup belongs to us.
+    // Leave it untouched if a prior restore stopped halfway through.
     return { changed: false, patched: false };
   }
   if (!backup) {
