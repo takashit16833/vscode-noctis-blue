@@ -53,6 +53,9 @@
 - コードブロック枠線は Markdown Editor 側が汎用 `widget.border` を使うため、テーマ色 `widget.border` は変更せず `pre.md-code-block` だけ CSS で枠線を消す。
 - Markdown 見出しの下線は Markdown Editor 標準の色・太さを維持し、Noctis Blue から上書きしない。
 - 引用・インラインコード・リンク・表など Markdown Editor 固有要素は、実DOMと Computed Style を確認してから個別に上書きする。推測したクラス名や `background: transparent` のような色を消す指定を入れない。
+- 引用は実機で `BLOCKQUOTE.md-block.md-blockquote`、背景 `--vscode-textBlockQuote-background` を確認済み。色を維持したまま背景だけを半透明化する。
+- インラインコードは実機で `CODE`、fenced code は `PRE.md-code-block > CODE` と確認済み。非 `PRE` 配下の `CODE` だけを `editor.foreground` + `textCodeBlock.background` へ揃える。
+- 通常リンクは実機でクラスなしの `A` 要素と確認済み。Markdown Editor 文書内だけ `fg-muted = #316CBD`、太字、下線へ揃える。
 - 公開 API で届かない Markdown Editor 固有の CSS は、利用者が明示的に有効化した場合だけ `markdown-editor-out/editor.css` に追記する。
 - 元 `editor.css` は `.noctis-blue.backup` として完全保存し、解除時は内容一致を確認して復元する。
 - 管理ブロック以外の変更、壊れたマーカー、バックアップ欠落を検出した場合は上書き・解除せず停止する。
