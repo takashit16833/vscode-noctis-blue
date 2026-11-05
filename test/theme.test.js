@@ -73,9 +73,10 @@ test('transparent variant changes only workbench surfaces and declared transluce
   assert.equal(opaque.colors['agentsChatInput.background'], undefined);
 });
 
-test('Markdown editor uses fg-pale for document text and Emacs-style block background', () => {
-  assert.equal(opaque.colors['editor.foreground'], palette.pale);
-  assert.equal(transparent.colors['editor.foreground'], palette.pale);
+test('palette white aliases fg-pale while editor text keeps the base blue', () => {
+  assert.equal(palette.white, palette.pale);
+  assert.equal(opaque.colors['editor.foreground'], palette.foreground);
+  assert.equal(transparent.colors['editor.foreground'], palette.foreground);
   assert.equal(opaque.colors['textCodeBlock.background'], palette.markdownCodeBlockBackground);
   assert.equal(transparent.colors['textCodeBlock.background'],
     withAlpha(palette.markdownCodeBlockBackground, 'BF'));
