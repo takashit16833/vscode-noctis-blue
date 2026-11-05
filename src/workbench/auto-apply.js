@@ -304,8 +304,9 @@ async function repairStaleUnlocked(appRoot) {
     throw new Error('管理ローダーがなく、バックアップの所有を確認できません。自動削除しません。');
   }
 
+  let backup;
   if (backupStat) {
-    const backup = await fs.readFile(files.backup, 'utf8');
+    backup = await fs.readFile(files.backup, 'utf8');
     if (hasUnrecognizedLoader(backup) ||
         backup.indexOf(WORKBENCH_CSS) < 0 ||
         backup.indexOf(WORKBENCH_CSS, backup.indexOf(WORKBENCH_CSS) + 1) >= 0) {
