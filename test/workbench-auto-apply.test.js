@@ -11,7 +11,7 @@ const cssAnchor = '<link rel="stylesheet" href="../../../workbench/workbench.des
 const original = '<!doctype html>\n<html><head>\n\t' + cssAnchor + '\n</head><body></body></html>\n';
 
 async function fixture(t) {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'wallpaper-auto-test-'));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'noctis-workbench-test-'));
   t.after(() => fs.rm(root, { recursive: true, force: true }));
   const files = pathsFor(root);
   await fs.mkdir(path.dirname(files.html), { recursive: true });
@@ -171,7 +171,7 @@ test('解除中の削除失敗後は HTML が復元され、次の解除で安�
   const originalUnlink = fs.unlink;
   let failedOnce = false;
   t.mock.method(fs, 'unlink', async filename => {
-    if (!failedOnce && String(filename).endsWith('vscode-wallpaper-project.css')) {
+    if (!failedOnce && String(filename).endsWith('noctis-blue-project.css')) {
       failedOnce = true;
       throw new Error('simulated I/O failure');
     }
