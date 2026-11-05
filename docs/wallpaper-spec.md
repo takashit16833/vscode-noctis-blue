@@ -47,7 +47,7 @@ VS Code では、同じ見た目の領域でも外側と内側の複数要素が
 2. 同じ領域内で重複する下地だけを透明にする。
 3. 文字、アイコン、選択行、ホバー、罫線など意味を持つ前景表現は維持する。
 
-選択中・非選択のタブは独立した表示面として、通常版の `tab.activeBackground` / `tab.inactiveBackground` の色をそれぞれ50%不透明で維持する。塗りは VS Code の公式テーマ色に任せ、独自 CSS で `.tab-fill` を一律に透明化しない。エディタ領域の背景の上に追加描画されるので、最終的な不透明度はタブ背景色単独の値とは異なる。
+選択中・非選択のタブは独立した表示面として、通常版の `tab.activeBackground` / `tab.inactiveBackground` の色をそれぞれ50%不透明で維持する。塗りの色は VS Code の公式テーマ色を使用する。Connected タブでは通常のテーマ色だけでは内部の背景変数が設定されず、透明な下地へ戻るため、透過 CSS で `--vscode-tab-activeBackground` / `--vscode-tab-inactiveBackground` を `--modern-ui-editor-tab-custom-*-background` へ渡す。`.tab-fill` 自体の背景は上書きせず、VS Code の描画規則を維持する。エディタ領域の背景の上に追加描画されるので、最終的な不透明度はタブ背景色単独の値とは異なる。
 
 Source Control のコミットメッセージ欄のように、
 外側と内部 Monaco Editor が同じ `input.background` を描く場所では、
