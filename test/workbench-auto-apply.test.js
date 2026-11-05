@@ -230,6 +230,42 @@ test('初回導入中に別の loader が現れても巻き戻しで消さない
   assert.equal(await fs.readFile(files.html, 'utf8'), original);
 });
 
+test('一時ファイルの排他的作成が失敗しても、他者のファイルを削除しない', async t => {
+  const { root } = await fixture(t);
+  const originalWrite = fs.writeFile;
+  let foreign;
+  t.mock.method(fs, 'writeFile', async (filename, content, options) => {
+    if (String(filename).includes('.tmp-')) {
+      foreign = filename;
+      await originalWrite(filename, 'unrelated', { flag: 'wx' });
+      const error = new Error('already exists');
+      error.code = 'EEXIST';
+      throw error;
+    }
+    return originalWrite(filename, content, options);
+  });
+  await assert.rejects(enable(root, 'body{}', 'project'), { code: 'EEXIST' });
+  assert.equal(await fs.readFile(foreign, 'utf8'), 'unrelated');
+});
+
+test('検証後に VS Code の HTML が交換された場合は復元しない', async t => {
+  const { root, files } = await fixture(t);
+  await enable(root, 'body{}', 'project');
+  const originalReaddir = fs.readdir;
+  let changed = false;
+  t.mock.method(fs, 'readdir', async (...args) => {
+    const result = await originalReaddir(...args);
+    if (!changed) {
+      changed = true;
+      await fs.appendFile(files.html, '<!-- updated externally -->');
+    }
+    return result;
+  });
+  await assert.rejects(disable(root), /検証後に/);
+  assert.match(await fs.readFile(files.html, 'utf8'), /updated externally/);
+  assert.equal(await fs.readFile(files.backup, 'utf8'), original);
+});
+
 test('元 HTML と同一の無関係なバックアップ単体は削除しない', async t => {
   const { root, files } = await fixture(t);
   await fs.writeFile(files.backup, original);
