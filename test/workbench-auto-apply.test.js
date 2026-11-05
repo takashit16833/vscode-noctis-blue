@@ -164,7 +164,7 @@ test('VS Code 更新後に残った管理ファイルだけを安全に修復で
 test('修復は管理外 loader や CSS を削除しない', async t => {
   const { root, files } = await fixture(t);
   await fs.writeFile(files.loader, 'unrelated loader');
-  await assert.rejects(repairStale(root), /所有を確認できません/);
+  await assert.rejects(repairStale(root), /読み込みスクリプト|所有を確認できません/);
   assert.equal(await fs.readFile(files.loader, 'utf8'), 'unrelated loader');
 
   await fs.unlink(files.loader);
@@ -234,6 +234,22 @@ test('HTML 復元後のバックアップ削除失敗は次の解除で再試行
     await fs.readFile(path.join(__dirname, '..', 'src', 'workbench', 'renderer-loader.js'), 'utf8'));
   assert.deepEqual(await disable(root), { installed: false, changed: true });
   await assert.rejects(fs.stat(files.backup), { code: 'ENOENT' });
+  await assert.rejects(fs.stat(files.loader), { code: 'ENOENT' });
+});
+
+test('最後の管理ローダー削除失敗は、確認後に安全に再試行できる', async t => {
+  const { root, files } = await fixture(t);
+  await enable(root, 'body{}', 'project');
+  const originalUnlink = fs.unlink;
+  t.mock.method(fs, 'unlink', async filename => {
+    if (filename === files.loader) throw new Error('simulated loader unlink failure');
+    return originalUnlink(filename);
+  });
+  await assert.rejects(disable(root), /simulated loader unlink failure/);
+  t.mock.restoreAll();
+  assert.equal(await fs.readFile(files.html, 'utf8'), original);
+  await assert.rejects(fs.stat(files.backup), { code: 'ENOENT' });
+  assert.deepEqual(await disable(root), { installed: false, changed: true });
   await assert.rejects(fs.stat(files.loader), { code: 'ENOENT' });
 });
 
