@@ -6,13 +6,16 @@ const opaque = require('../themes/noctis-blue.json');
 const transparent = require('../themes/noctis-blue-transparent.json');
 const { normalizeOpacity, generateCss, generateTemporaryScript } = require('../src/appearance');
 
-test('configuration matches the six original wallpaper areas', () => {
+test('configuration includes a separately adjustable minimap surface', () => {
   const properties = manifest.contributes.configuration.properties['noctisBlue.opacity'];
-  const keys = ['editor', 'sidebar', 'panel', 'auxiliaryBar', 'chrome', 'gap'];
+  const keys = ['editor', 'minimap', 'sidebar', 'panel', 'auxiliaryBar', 'chrome', 'gap'];
   assert.deepEqual(Object.keys(properties.properties), keys);
   assert.deepEqual(Object.keys(normalizeOpacity()), keys);
   assert.deepEqual(normalizeOpacity({ editor: 0 }).editor, 0);
   assert.deepEqual(normalizeOpacity({ editor: 1 }).editor, 1);
+  assert.equal(normalizeOpacity().minimap, 0.5);
+  assert.equal(normalizeOpacity({ minimap: 0 }).minimap, 0);
+  assert.equal(normalizeOpacity({ minimap: 1 }).minimap, 1);
   for (const item of Object.values(properties.properties)) {
     assert.equal(item.minimum, 0);
     assert.equal(item.maximum, 1);
@@ -21,17 +24,19 @@ test('configuration matches the six original wallpaper areas', () => {
 
 test('bad settings fail without emitting CSS', () => {
   for (const invalid of [null, [], 5, { editor: '0.9' }, { editor: NaN },
-    { editor: Infinity }, { panel: -0.1 }, { panel: 1.1 }, { unknown: 0.5 }]) {
+    { editor: Infinity }, { panel: -0.1 }, { panel: 1.1 },
+    { minimap: '0.5' }, { minimap: -0.1 }, { minimap: 1.1 }, { unknown: 0.5 }]) {
     assert.throws(() => generateCss(invalid), Error);
   }
 });
 
 test('area CSS uses actual opaque Noctis colors, without any wallpaper image', () => {
   const css = generateCss({
-    editor: 0.5, sidebar: 0.8, panel: 1, auxiliaryBar: 0.4, chrome: 0.9, gap: 0
+    editor: 0.5, minimap: 0.25, sidebar: 0.8, panel: 1, auxiliaryBar: 0.4, chrome: 0.9, gap: 0
   });
   for (const [key, percent] of [
     ['editor.background', '50%'],
+    ['minimap.background', '25%'],
     ['sideBar.background', '80%'],
     ['panel.background', '100%'],
     ['auxiliaryBar.background', '40%'],
@@ -42,6 +47,7 @@ test('area CSS uses actual opaque Noctis colors, without any wallpaper image', (
     assert.ok(css.includes('color-mix(in srgb, ' + opaque.colors[key] + ' ' + percent + ', transparent)'), key);
   }
   assert.equal(transparent.colors['editor.background'], opaque.colors['editor.background'] + '00');
+  assert.equal(transparent.colors['minimap.background'], opaque.colors['minimap.background'] + '00');
   assert.ok(css.includes('.monaco-grid-view'));
   assert.ok(css.includes('.part.editor .tabs-and-actions-container'));
   assert.ok(css.includes('background-color: transparent !important'));
@@ -49,6 +55,18 @@ test('area CSS uses actual opaque Noctis colors, without any wallpaper image', (
   assert.ok(!css.includes('background-blend-mode'));
   assert.ok(!css.includes('vscodeWallpaper'));
   assert.ok(!css.includes('url('));
+});
+
+test('minimap paints only its own background, without changing canvas or slider', () => {
+  for (const [opacity, percent] of [[0, '0%'], [0.5, '50%'], [1, '100%']]) {
+    const css = generateCss({ editor: 0.88, minimap: opacity });
+    assert.ok(css.includes(
+      '.part.editor .monaco-editor .minimap { background-color: color-mix(in srgb, ' +
+      opaque.colors['minimap.background'] + ' ' + percent + ', transparent) !important; }'
+    ));
+    assert.ok(!css.includes('.minimap canvas {'));
+    assert.ok(!css.includes('.minimap-slider {'));
+  }
 });
 
 test('SCM input keeps its outer blue surface but clears duplicated inner Monaco background', () => {
