@@ -93,7 +93,7 @@ function buildTheme(p,transparent){
     "editorOverviewRuler.background":"background",
     "terminal.background":"background",
     "minimap.background":"background",
-    "sideBar.background":"background",
+    "sideBar.background":"sidebar",
     "panel.background":"panel",
     "auxiliaryBar.background":"background",
     "activityBar.background":"panel",

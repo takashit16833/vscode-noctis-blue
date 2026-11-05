@@ -26,6 +26,14 @@ test('alpha variants are derived from palette colors', () => {
     withAlpha(palette.foreground, '20'));
 });
 
+test('sidebar uses the Obsidian background without changing other surfaces', () => {
+  assert.equal(palette.sidebar, '#010114');
+  assert.equal(opaque.colors['sideBar.background'], palette.sidebar);
+  assert.equal(transparent.colors['sideBar.background'], palette.sidebar + '00');
+  assert.equal(opaque.colors['editor.background'], palette.background);
+  assert.equal(opaque.colors['panel.background'], palette.panel);
+});
+
 test('transparent variant changes only workbench surfaces and declared translucent details', () => {
   const detailColors = {
     'editor.lineHighlightBackground': withAlpha(palette.line, '80'),

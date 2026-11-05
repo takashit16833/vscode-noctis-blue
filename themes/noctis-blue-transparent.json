@@ -171,7 +171,7 @@
     "editorOverviewRuler.background": "#01011100",
     "terminal.background": "#01011100",
     "minimap.background": "#01011100",
-    "sideBar.background": "#01011100",
+    "sideBar.background": "#01011400",
     "panel.background": "#001E4A00",
     "auxiliaryBar.background": "#01011100",
     "activityBar.background": "#001E4A00",
