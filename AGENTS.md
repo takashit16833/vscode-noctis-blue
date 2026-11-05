@@ -51,7 +51,7 @@
 - 内蔵 Markdown Editor の本文基準色は標準テーマ色 `editor.foreground` を通じて通常の `palette.foreground` を使う。見出しだけを `palette.pale`（Emacs 版 `fg-pale`）へ分離できる公開テーマ色があるかは、推測せず実機と上流 CSS で確認する。
 - コードブロック背景は標準テーマ色 `textCodeBlock.background` を使う。基準色は Emacs 版 `org-block-bg` と揃え、Transparent 版ではアルファ値だけを下げる。
 - コードブロック枠線は Markdown Editor 側が汎用 `widget.border` を使うため、テーマ色 `widget.border` は変更せず `pre.md-code-block` だけ CSS で枠線を消す。
-- Markdown 文書内のリンク・表ヘッダー・表罫線・見出し下線は Emacs 版の `fg-muted = #316CBD` に揃える。
+- Markdown 見出しの下線は Markdown Editor 標準の色・太さを維持し、Noctis Blue から上書きしない。リンク・表ヘッダー・表罫線は実DOMを確認してから Emacs 版の `fg-muted = #316CBD` に揃える。
 - インラインコードは `editor.foreground` と `textCodeBlock.background` を参照し、通常版/透過版のコードブロックと同じ背景を使う。
 - 引用は内容や左線を維持し、ブロック背景だけを透明化する。
 - 公開 API で届かない Markdown Editor 固有の CSS は、利用者が明示的に有効化した場合だけ `markdown-editor-out/editor.css` に追記する。
