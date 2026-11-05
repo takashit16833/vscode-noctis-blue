@@ -45,6 +45,7 @@ workbench の管理ファイルは、バックアップと読み込みスクリ�
   "noctisBlue.wallpaper.tint": "#FFFFFF",
   "noctisBlue.opacity": {
     "editor": 0.91,
+    "minimap": 0.5,
     "sidebar": 0.93,
     "panel": 0.94,
     "auxiliaryBar": 0.86,
@@ -55,6 +56,7 @@ workbench の管理ファイルは、バックアップと読み込みスクリ�
 ```
 
 背景画像の設定は `noctisBlue.wallpaper.*` を使用する。
+`minimap` はミニマップ自身の背景色（通常版の `minimap.background`）に追加する不透明度であり、文字やスクロール位置の表示は薄くしない。エディタ全体の背景色の上に重なるため、`minimap: 0.5` が画面上で50%の不透明度になるわけではない。0にすると従来と同様にミニマップ固有の背景は透明になる。
 
 ## 自動適用
 
