@@ -7,7 +7,7 @@ const os = require('node:os');
 const path = require('node:path');
 const automatic = require('../src/workbench/auto-apply');
 const {
-  STATE_KEY, MIGRATION_KEY, adoptInstalledWallpaper,
+  STATE_KEY,
   enableAutomaticAppearance, syncAutomaticAppearance, disableAutomaticAppearance
 } = require('../src/automaticAppearance');
 
@@ -42,7 +42,6 @@ async function fixture(t) {
             })[key] ?? fallback;
           }
         };
-        if (section === 'vscodeWallpaper') return { get: (_key, fallback) => fallback };
         throw new Error(section);
       }
     },
@@ -92,15 +91,9 @@ test('workbench 自動適用の同意がない場合は管理ファイルを作�
   assert.equal((await automatic.inspect(f.vscode.env.appRoot)).installed, false);
 });
 
-test('管理済みの旧ワークベンチだけ初回に有効状態を引き継ぐ', async t => {
+test('自動適用が無効なら、管理済みのファイルがあっても勝手に有効化しない', async t => {
   const f = await fixture(t);
   await automatic.enable(f.vscode.env.appRoot, 'body{}', 'project');
-  assert.equal(f.state[STATE_KEY], false);
-  assert.equal(await adoptInstalledWallpaper(f.vscode, f.context), true);
-  assert.equal(f.state[STATE_KEY], true);
-  assert.equal(f.state[MIGRATION_KEY], true);
-  // A later explicit choice must survive subsequent startups.
-  f.state[STATE_KEY] = false;
-  assert.equal(await adoptInstalledWallpaper(f.vscode, f.context), false);
+  assert.equal(await syncAutomaticAppearance(f.vscode, f.context), false);
   assert.equal(f.state[STATE_KEY], false);
 });
