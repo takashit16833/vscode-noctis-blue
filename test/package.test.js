@@ -50,7 +50,19 @@ test('開発用の診断コマンドはコマンドパレットに表示しな�
   }
 });
 
-test('Noctis Blue prefers the workspace host and falls back to the UI host', () => {
+test('背景管理を内包するため UI host を優先する', () => {
   const manifest = require('../package.json');
-  assert.deepEqual(manifest.extensionKind, ['workspace', 'ui']);
+  assert.deepEqual(manifest.extensionKind, ['ui', 'workspace']);
+});
+
+test('統合した壁紙の実装と設定を同じ VSIX に含む', () => {
+  const manifest = require('../package.json');
+  assert.equal(manifest.version, '0.12.0');
+  assert.equal(manifest.extensionDependencies, undefined);
+  for (const name of ['auto-apply', 'renderer-loader', 'wallpaper', 'workspace-id']) {
+    assert.ok(fs.existsSync(path.join(root, 'src', 'workbench', name + '.js')));
+  }
+  for (const key of ['enabled', 'image', 'alternateImage', 'switchMode', 'maxAspectRatio', 'maxWidth', 'tint']) {
+    assert.ok(manifest.contributes.configuration.properties['noctisBlue.wallpaper.' + key]);
+  }
 });

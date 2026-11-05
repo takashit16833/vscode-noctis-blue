@@ -1,20 +1,14 @@
 'use strict';
 
-const { generateCss } = require('./appearance');
+const { generateCss: generateAppearanceCss } = require('./appearance');
+const automatic = require('./workbench/auto-apply');
+const { currentWorkspaceId } = require('./workbench/workspace-id');
+const { readSettings, generateCss: generateWallpaperCss } = require('./workbench/wallpaper');
 
-const WALLPAPER_BRIDGE_VERSION = 2;
-const WALLPAPER_BRIDGE_COMMANDS = Object.freeze({
-  version: '_vscodeWallpaper.bridgeVersion',
-  setLayer: '_vscodeWallpaper.setLayer',
-  removeLayer: '_vscodeWallpaper.removeLayer',
-  enableAutomatic: '_vscodeWallpaper.enableAutomatic'
-});
-const LAYER_ID = 'takashit16833.noctis-blue';
-// Registered in package.json, and discoverable from the local UI host even
-// when Noctis Blue runs in a remote workspace extension host.
-const OWNER_COMMAND_ID = 'noctisBlue.enableAutomaticAppearance';
 const STATE_KEY = 'noctisBlue.automaticAppearanceEnabled';
 const TRANSPARENT_THEME = 'Noctis Blue Transparent';
+const LEGACY_WALLPAPER_ID = 'takashit16833.vscode-wallpaper';
+const LAYER_ID = 'takashit16833.noctis-blue';
 
 function currentTheme(vscode) {
   return vscode.workspace.getConfiguration('workbench').get('colorTheme');
@@ -24,107 +18,78 @@ function isTransparentTheme(vscode) {
   return currentTheme(vscode) === TRANSPARENT_THEME;
 }
 
-function currentCss(vscode) {
-  const opacity = vscode.workspace.getConfiguration('noctisBlue').get('opacity', {});
-  return generateCss(opacity);
+function ensureNoLegacyExtension(vscode) {
+  if (vscode.extensions.getExtension(LEGACY_WALLPAPER_ID)) {
+    throw new Error('旧 VS Code Wallpaper がインストールされています。旧拡張をアンインストールして Reload Window を実行してください。');
+  }
 }
 
-async function wallpaperBridge(vscode, optional = false) {
-  try {
-    const version = await vscode.commands.executeCommand(WALLPAPER_BRIDGE_COMMANDS.version);
-    if (version !== WALLPAPER_BRIDGE_VERSION) {
-      throw new Error('VS Code Wallpaper v0.11.1 以降が必要です。');
-    }
+function currentCss(vscode) {
+  const opacity = vscode.workspace.getConfiguration('noctisBlue').get('opacity', {});
+  return generateAppearanceCss(opacity);
+}
 
-    return {
-      setLayer: (id, css, options) =>
-        vscode.commands.executeCommand(WALLPAPER_BRIDGE_COMMANDS.setLayer, id, css, options),
-      removeLayer: id =>
-        vscode.commands.executeCommand(WALLPAPER_BRIDGE_COMMANDS.removeLayer, id),
-      enableAutomatic: () =>
-        vscode.commands.executeCommand(WALLPAPER_BRIDGE_COMMANDS.enableAutomatic)
-    };
-  } catch (error) {
-    if (optional) return null;
-    if (/v0\.11\.1/.test(error?.message ?? '')) throw error;
-    throw new Error('VS Code Wallpaper v0.11.1 以降をローカル側にインストールしてください。');
-  }
+function currentWallpaperCss(vscode) {
+  const settings = readSettings(vscode.workspace.getConfiguration('noctisBlue.wallpaper'));
+  const folder = vscode.workspace.workspaceFolders?.[0]?.uri;
+  // A remote workspace folder is not a local macOS path.
+  const workspaceDirectory = folder?.scheme === 'file' ? folder.fsPath : undefined;
+  return generateWallpaperCss(settings, { workspaceDirectory });
+}
+
+async function styles(vscode) {
+  const workspaceId = await currentWorkspaceId(vscode.workspace);
+  const layers = isTransparentTheme(vscode) ? { [LAYER_ID]: currentCss(vscode) } : {};
+  return { workspaceId, layers, wallpaper: currentWallpaperCss(vscode) };
 }
 
 async function syncAutomaticAppearance(vscode, context) {
   if (!context.globalState.get(STATE_KEY, false)) return false;
-
-  const api = await wallpaperBridge(vscode);
-  if (isTransparentTheme(vscode)) {
-    await api.setLayer(LAYER_ID, currentCss(vscode), {
-      ownerExtensionId: LAYER_ID,
-      ownerCommandId: OWNER_COMMAND_ID
-    });
-  } else {
-    await api.removeLayer(LAYER_ID);
-  }
+  ensureNoLegacyExtension(vscode);
+  const state = await automatic.inspect(vscode.env.appRoot);
+  if (!state.installed) return false; // A new workbench patch requires user consent.
+  const { wallpaper, workspaceId, layers } = await styles(vscode);
+  await automatic.sync(vscode.env.appRoot, wallpaper, workspaceId, layers);
   return true;
 }
 
 async function enableAutomaticAppearance(vscode, context) {
-  if (!isTransparentTheme(vscode)) {
-    throw new Error('Noctis Blue Transparent を選択してから自動適用を有効にしてください。');
-  }
-
-  const api = await wallpaperBridge(vscode);
-  const wasEnabled = context.globalState.get(STATE_KEY, false);
-  let registered = false;
-  try {
-    await api.setLayer(LAYER_ID, currentCss(vscode), {
-      ownerExtensionId: LAYER_ID,
-      ownerCommandId: OWNER_COMMAND_ID
-    });
-    registered = true;
-
-    const enabled = await api.enableAutomatic();
-    if (!enabled) {
-      if (!wasEnabled) await api.removeLayer(LAYER_ID);
-      return false;
-    }
-
-    await context.globalState.update(STATE_KEY, true);
-    return true;
-  } catch (error) {
-    if (registered && !wasEnabled) {
-      try {
-        await api.removeLayer(LAYER_ID);
-      } catch {}
-    }
-    throw error;
-  }
+  ensureNoLegacyExtension(vscode);
+  const choice = await vscode.window.showWarningMessage(
+    '背景画像と透過の自動適用では、VS Code 本体の workbench.html に管理ローダーを追加します。元ファイルをバックアップしますが、整合性警告が表示される場合があります。VS Code 更新後の修復が必要になることがあります。',
+    { modal: true }, '自動適用を有効にする'
+  );
+  if (choice !== '自動適用を有効にする') return false;
+  const { wallpaper, workspaceId, layers } = await styles(vscode);
+  await automatic.enable(vscode.env.appRoot, wallpaper, workspaceId, layers);
+  await context.globalState.update(STATE_KEY, true);
+  return true;
 }
 
 async function disableAutomaticAppearance(vscode, context) {
-  const api = await wallpaperBridge(vscode, true);
-  if (!api) {
-    throw new Error(
-      'VS Code Wallpaper が見つからないため CSS レイヤーを解除できません。' +
-      'Wallpaper を再インストールしてからもう一度解除してください。'
-    );
-  }
-
-  await api.removeLayer(LAYER_ID);
+  ensureNoLegacyExtension(vscode);
+  await automatic.disable(vscode.env.appRoot);
   await context.globalState.update(STATE_KEY, false);
   return true;
 }
 
+async function repairAutomaticAppearance(vscode, context) {
+  ensureNoLegacyExtension(vscode);
+  const choice = await vscode.window.showWarningMessage(
+    'VS Code 更新後に残った管理ファイルを確認し、所有を確認できるものだけを整理して再導入します。現在の workbench.html は修復処理で直接復元しません。',
+    { modal: true }, '背景読み込みを修復する'
+  );
+  if (choice !== '背景読み込みを修復する') return false;
+  await automatic.repairStale(vscode.env.appRoot);
+  const { wallpaper, workspaceId, layers } = await styles(vscode);
+  await automatic.enable(vscode.env.appRoot, wallpaper, workspaceId, layers);
+  await context.globalState.update(STATE_KEY, true);
+  return true;
+}
+
 module.exports = {
-  WALLPAPER_BRIDGE_VERSION,
-  WALLPAPER_BRIDGE_COMMANDS,
-  LAYER_ID,
-  OWNER_COMMAND_ID,
-  STATE_KEY,
-  TRANSPARENT_THEME,
-  currentTheme,
-  isTransparentTheme,
-  currentCss,
-  wallpaperBridge,
-  syncAutomaticAppearance,
-  enableAutomaticAppearance,
-  disableAutomaticAppearance
+  STATE_KEY, TRANSPARENT_THEME, LEGACY_WALLPAPER_ID, LAYER_ID,
+  currentTheme, isTransparentTheme, currentCss, currentWallpaperCss,
+  styles, ensureNoLegacyExtension, syncAutomaticAppearance,
+  enableAutomaticAppearance, disableAutomaticAppearance, repairAutomaticAppearance
 };

@@ -8,7 +8,8 @@ const {
   TRANSPARENT_THEME,
   syncAutomaticAppearance,
   enableAutomaticAppearance,
-  disableAutomaticAppearance
+  disableAutomaticAppearance,
+  repairAutomaticAppearance
 } = require('./automaticAppearance');
 const {
   syncMarkdownEditorAppearance,
@@ -116,6 +117,14 @@ function activate(context) {
     }
   });
 
+  registerCommand(context, 'noctisBlue.repairWorkbench', async () => {
+    try {
+      await repairAutomaticAppearance(vscode, context);
+    } catch (error) {
+      void vscode.window.showErrorMessage('Noctis Blue: ' + error.message);
+    }
+  });
+
   registerCommand(context, 'noctisBlue.disableAutomaticAppearance', async () => {
     try {
       await disableAutomaticAppearance(vscode, context);
@@ -152,7 +161,8 @@ function activate(context) {
   context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event => {
     const themeChanged = event.affectsConfiguration('workbench.colorTheme');
 
-    if (event.affectsConfiguration('noctisBlue.opacity') || themeChanged) {
+    if (event.affectsConfiguration('noctisBlue.opacity') ||
+        event.affectsConfiguration('noctisBlue.wallpaper') || themeChanged) {
       syncAutomaticAppearance(vscode, context).catch(reportSyncError);
     }
     if (event.affectsConfiguration('noctisBlue.markdownActiveBlockOpacity') || themeChanged) {

@@ -2,7 +2,7 @@
   "name": "noctis-blue",
   "displayName": "Noctis Blue",
   "description": "A blue VS Code theme with customizable translucent surfaces.",
-  "version": "0.11.2",
+  "version": "0.12.0",
   "publisher": "takashit16833",
   "private": true,
   "engines": {
@@ -69,6 +69,10 @@
       {
         "command": "noctisBlue.disableMarkdownEditorAppearance",
         "title": "Noctis Blue: Disable Markdown Editor Appearance"
+      },
+      {
+        "command": "noctisBlue.repairWorkbench",
+        "title": "Noctis Blue: Repair Background Loader"
       }
     ],
     "menus": {
@@ -141,7 +145,7 @@
               "description": "浮動パネルの間と外周の隙間に重ねる背景色の不透明度。"
             }
           },
-          "markdownDescription": "Noctis Blue Transparent の領域別背景色の不透明度。0は透明、1は不透明。色はNoctis Blueの配色を使い、文字などの要素全体を薄くしません。`Noctis Blue: Enable Automatic Appearance` を有効にすると、VS Code Wallpaper の共通ローダー経由で次回再読み込みから適用されます。"
+          "markdownDescription": "Noctis Blue Transparent の領域別背景色の不透明度。0は透明、1は不透明。色はNoctis Blueの配色を使い、文字などの要素全体を薄くしません。`Noctis Blue: Enable Automatic Appearance` を有効にすると、Noctis Blue の共通ローダー経由で次回再読み込みから適用されます。"
         },
         "noctisBlue.markdownActiveBlockOpacity": {
           "type": "number",
@@ -150,6 +154,63 @@
           "minimum": 0,
           "maximum": 1,
           "markdownDescription": "内蔵Markdown Editorの編集中ブロックの**背景色**と周囲の影に適用する不透明度。元の背景色・角丸・強調表示を維持します。`Noctis Blue: Enable Markdown Editor Appearance` を有効にすると、組み込み Markdown Editor の管理 CSS に反映されます。"
+        },
+        "noctisBlue.wallpaper.enabled": {
+          "type": "boolean",
+          "default": false,
+          "scope": "window",
+          "description": "壁紙用 CSS の生成を有効にする。VS Code 本体への自動適用は別途有効にする。"
+        },
+        "noctisBlue.wallpaper.image": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": "",
+          "scope": "window",
+          "description": "通常表示する背景画像。https://、file:///、絶対パス、~/、./ などを指定する。null または空文字で非表示。"
+        },
+        "noctisBlue.wallpaper.alternateImage": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": "",
+          "scope": "window",
+          "description": "縦長・狭い画面などで使う代替画像。空文字の場合は切り替えない。"
+        },
+        "noctisBlue.wallpaper.switchMode": {
+          "type": "string",
+          "enum": [
+            "orientation",
+            "aspect-ratio",
+            "width"
+          ],
+          "default": "orientation",
+          "scope": "window",
+          "description": "代替画像への切り替え条件。orientation は縦長、aspect-ratio は指定した縦横比以下、width は指定した幅以下。"
+        },
+        "noctisBlue.wallpaper.maxAspectRatio": {
+          "type": "string",
+          "default": "16/10",
+          "pattern": "^[0-9]+\\s*/\\s*[0-9]+$",
+          "scope": "window",
+          "description": "switchMode が aspect-ratio のときに代替画像へ切り替える縦横比。例: 16/10。"
+        },
+        "noctisBlue.wallpaper.maxWidth": {
+          "type": "integer",
+          "default": 1400,
+          "minimum": 1,
+          "maximum": 10000,
+          "scope": "window",
+          "description": "switchMode が width のときに代替画像へ切り替える最大幅（CSS ピクセル）。"
+        },
+        "noctisBlue.wallpaper.tint": {
+          "type": "string",
+          "default": "#FFFFFF",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "scope": "window",
+          "description": "背景画像に乗算する色。#FFFFFF（白）なら画像の色を変えない。"
         }
       }
     }
@@ -163,10 +224,11 @@
     "onCommand:noctisBlue.enableAutomaticAppearance",
     "onCommand:noctisBlue.disableAutomaticAppearance",
     "onCommand:noctisBlue.enableMarkdownEditorAppearance",
-    "onCommand:noctisBlue.disableMarkdownEditorAppearance"
+    "onCommand:noctisBlue.disableMarkdownEditorAppearance",
+    "onCommand:noctisBlue.repairWorkbench"
   ],
   "extensionKind": [
-    "workspace",
-    "ui"
+    "ui",
+    "workspace"
   ]
 }
