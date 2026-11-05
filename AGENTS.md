@@ -23,6 +23,7 @@
 
 - v0.7.0 以降は `vscode-wallpaper` v0.10.0 以降の CSS レイヤー API v3 を使う。
 - Noctis Blue のレイヤー ID は `takashit16833.noctis-blue`。API v3 では同じ ID を `ownerExtensionId` として登録し、拡張無効化・削除時の孤児レイヤー整理に使う。
+- Remote/Dev Container 側では Wallpaper bridge v2（v0.11.1 以降）を使い、`ownerCommandId: 'noctisBlue.enableAutomaticAppearance'` も渡す。このコマンドは `contributes.commands` に登録済みであり、UI host がリモート拡張の在籍確認に利用する。
 - `Noctis Blue Transparent` のときだけ Noctis の CSS レイヤーを登録する。
 - 通常版 `Noctis Blue` および他テーマでは Noctis のレイヤーを削除する。
 - wallpaper 側は常に背景画像・乗算・画像切り替えだけを生成するため、表示面所有権のフラグは使わない。

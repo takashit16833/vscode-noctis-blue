@@ -2,7 +2,7 @@
 
 const { generateCss } = require('./appearance');
 
-const WALLPAPER_BRIDGE_VERSION = 1;
+const WALLPAPER_BRIDGE_VERSION = 2;
 const WALLPAPER_BRIDGE_COMMANDS = Object.freeze({
   version: '_vscodeWallpaper.bridgeVersion',
   setLayer: '_vscodeWallpaper.setLayer',
@@ -10,6 +10,9 @@ const WALLPAPER_BRIDGE_COMMANDS = Object.freeze({
   enableAutomatic: '_vscodeWallpaper.enableAutomatic'
 });
 const LAYER_ID = 'takashit16833.noctis-blue';
+// Registered in package.json, and discoverable from the local UI host even
+// when Noctis Blue runs in a remote workspace extension host.
+const OWNER_COMMAND_ID = 'noctisBlue.enableAutomaticAppearance';
 const STATE_KEY = 'noctisBlue.automaticAppearanceEnabled';
 const TRANSPARENT_THEME = 'Noctis Blue Transparent';
 
@@ -30,7 +33,7 @@ async function wallpaperBridge(vscode, optional = false) {
   try {
     const version = await vscode.commands.executeCommand(WALLPAPER_BRIDGE_COMMANDS.version);
     if (version !== WALLPAPER_BRIDGE_VERSION) {
-      throw new Error('VS Code Wallpaper v0.11.0 以降が必要です。');
+      throw new Error('VS Code Wallpaper v0.11.1 以降が必要です。');
     }
 
     return {
@@ -43,8 +46,8 @@ async function wallpaperBridge(vscode, optional = false) {
     };
   } catch (error) {
     if (optional) return null;
-    if (/v0\.11\.0/.test(error?.message ?? '')) throw error;
-    throw new Error('VS Code Wallpaper v0.11.0 以降をローカル側にインストールしてください。');
+    if (/v0\.11\.1/.test(error?.message ?? '')) throw error;
+    throw new Error('VS Code Wallpaper v0.11.1 以降をローカル側にインストールしてください。');
   }
 }
 
@@ -54,7 +57,8 @@ async function syncAutomaticAppearance(vscode, context) {
   const api = await wallpaperBridge(vscode);
   if (isTransparentTheme(vscode)) {
     await api.setLayer(LAYER_ID, currentCss(vscode), {
-      ownerExtensionId: LAYER_ID
+      ownerExtensionId: LAYER_ID,
+      ownerCommandId: OWNER_COMMAND_ID
     });
   } else {
     await api.removeLayer(LAYER_ID);
@@ -72,7 +76,8 @@ async function enableAutomaticAppearance(vscode, context) {
   let registered = false;
   try {
     await api.setLayer(LAYER_ID, currentCss(vscode), {
-      ownerExtensionId: LAYER_ID
+      ownerExtensionId: LAYER_ID,
+      ownerCommandId: OWNER_COMMAND_ID
     });
     registered = true;
 
@@ -112,6 +117,7 @@ module.exports = {
   WALLPAPER_BRIDGE_VERSION,
   WALLPAPER_BRIDGE_COMMANDS,
   LAYER_ID,
+  OWNER_COMMAND_ID,
   STATE_KEY,
   TRANSPARENT_THEME,
   currentTheme,

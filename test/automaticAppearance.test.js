@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 const {
   LAYER_ID,
+  OWNER_COMMAND_ID,
   STATE_KEY,
   TRANSPARENT_THEME,
   WALLPAPER_BRIDGE_COMMANDS,
@@ -39,7 +40,7 @@ function fixture(options = {}) {
           throw new Error('command not found: ' + id);
         }
         if (id === WALLPAPER_BRIDGE_COMMANDS.version) {
-          return options.bridgeVersion ?? 1;
+          return options.bridgeVersion ?? 2;
         }
         if (id === WALLPAPER_BRIDGE_COMMANDS.setLayer) {
           return true;
@@ -83,7 +84,10 @@ test('自動適用はコマンド橋渡しで提供元付き Noctis CSS レイ�
   const set = callsFor(f, WALLPAPER_BRIDGE_COMMANDS.setLayer)[0];
   assert.equal(set[1], LAYER_ID);
   assert.match(set[2], /\.monaco-workbench \.part\.editor/);
-  assert.deepEqual(set[3], { ownerExtensionId: LAYER_ID });
+  assert.deepEqual(set[3], {
+    ownerExtensionId: LAYER_ID,
+    ownerCommandId: OWNER_COMMAND_ID
+  });
   assert.equal(callsFor(f, WALLPAPER_BRIDGE_COMMANDS.enableAutomatic).length, 1);
   assert.equal(f.state[STATE_KEY], true);
 });
@@ -122,7 +126,10 @@ test('起動時同期は透過版だけレイヤーを持ち、他テーマで�
   const set = callsFor(f, WALLPAPER_BRIDGE_COMMANDS.setLayer)[0];
   assert.equal(set[1], LAYER_ID);
   assert.match(set[2], /\.part\.editor/);
-  assert.equal(set[3].ownerExtensionId, LAYER_ID);
+  assert.deepEqual(set[3], {
+    ownerExtensionId: LAYER_ID,
+    ownerCommandId: OWNER_COMMAND_ID
+  });
 
   f.setTheme('Noctis Blue');
   await syncAutomaticAppearance(f.vscode, f.context);
@@ -146,8 +153,14 @@ test('古い command bridge は明示的に拒否する', async () => {
   const f = fixture({ bridgeVersion: 0, stateEnabled: true });
   await assert.rejects(
     syncAutomaticAppearance(f.vscode, f.context),
-    /v0\.11\.0/
+    /v0\.11\.1/
   );
+});
+
+test('旧ブリッジではリモート提供元が誤削除されるため明示的に拒否する', async () => {
+  const f = fixture({ bridgeVersion: 1, stateEnabled: true });
+  await assert.rejects(syncAutomaticAppearance(f.vscode, f.context), /v0\.11\.1/);
+  assert.equal(callsFor(f, WALLPAPER_BRIDGE_COMMANDS.setLayer).length, 0);
 });
 
 test('解除はレイヤー削除成功後にだけ無効状態を保存する', async () => {

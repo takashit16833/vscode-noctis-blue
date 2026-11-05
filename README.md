@@ -33,7 +33,7 @@ Emacs版 [Retro Hacker Blue](https://github.com/takashit16833/emacs-retro-hacker
 
 ## インストール
 
-先に VS Code Wallpaper v0.11.0 以降をローカル側へインストールする。
+先に VS Code Wallpaper v0.11.1 以降をローカル側へインストールする。
 
 ```bash
 cd ~/vscode-wallpaper
@@ -79,7 +79,8 @@ Noctis Blue 自身は `workbench.html` を変更しない。Markdown Editor の�
 
 ## 自動適用
 
-Noctis Blue v0.11.0 以降は VS Code Wallpaper v0.11.0 の内部コマンド橋渡しを使い、Remote/Dev Container からでもローカル側の CSS レイヤーを更新する。
+Noctis Blue v0.11.1 以降は VS Code Wallpaper v0.11.1 の内部コマンド橋渡しを使い、Remote/Dev Container からでもローカル側の CSS レイヤーを更新する。
+リモート側で動作する Noctis Blue の存在をローカル側で確認できるよう、登録済みのコマンド ID も CSS レイヤーと一緒に通知する。これにより提供元を誤ってアンインストール済みと判断しない。
 
 1. `Noctis Blue Transparent` を選ぶ。
 2. **Noctis Blue: Enable Automatic Appearance** を実行する。
