@@ -64,13 +64,13 @@ test('移行前の wallpaper 設定を読み、移行後は新しい設定を優
   const old = fixture({ legacySettings: {
     enabled: true, image: 'https://example.org/old.png'
   } });
-  assert.match(currentWallpaperCss(old.vscode), /old\\.png/);
+  assert.ok(currentWallpaperCss(old.vscode).includes('old.png'));
   const modern = fixture({
     legacySettings: { enabled: true, image: 'https://example.org/old.png' },
     modernSettings: { enabled: true, image: 'https://example.org/new.png' }
   });
-  assert.match(currentWallpaperCss(modern.vscode), /new\\.png/);
-  assert.doesNotMatch(currentWallpaperCss(modern.vscode), /old\\.png/);
+  assert.ok(currentWallpaperCss(modern.vscode).includes('new.png'));
+  assert.ok(!currentWallpaperCss(modern.vscode).includes('old.png'));
 });
 
 test('旧拡張のインストール中は二重に workbench を管理しない', () => {
