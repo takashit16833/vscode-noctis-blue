@@ -10,6 +10,7 @@
 - VS Code 標準のテーマ機能・公開 API を最優先する。
 - Apc へ依存せず、Noctis Blue 独自の `workbench.html` 改変は行わない。内蔵 Markdown Editor だけは公開 API で届かない要素に限り、組み込み Markdown 拡張の `markdown-editor-out/editor.css` 末尾へ管理ブロックを追記する。
 - wallpaper と同じ表示処理を二重実装しない。
+- Noctis Blue は `extensionKind: ["ui"]` とし、Dev Container / SSH / WSL でもローカル Extension Host で動かす。`vscode-wallpaper` の API とローカル VS Code 資源を扱うため、Remote Extension Host では実行しない。
 
 ## 情報の置き場所
 
