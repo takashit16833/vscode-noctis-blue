@@ -28,7 +28,6 @@ function generateMarkdownCss(opacity) {
     '/* Noctis Blue Markdown Editor appearance. */',
     '.md-heading {',
     '  color: ' + palette.pale + ' !important;',
-    '  border-bottom-color: ' + palette.muted + ' !important;',
     '}',
     '',
     'pre.md-code-block {',
