@@ -152,6 +152,11 @@ function buildTheme(p,transparent){
     rule("Functions",["entity.name.function","support.function","meta.function-call","meta.method-call"],p.function,"bold"),
     rule("Types",["entity.name.type","entity.name.class","support.type","support.class","meta.return-type"],p.typeBright,"bold"),
     rule("Variables",["variable","support.variable","meta.definition.variable.name"],p.pale),
+    rule("JSON properties",[
+      "support.type.property-name.json",
+      "support.type.property-name.json.comments",
+      "support.type.property-name.json.lines"
+    ],p.foreground),
     rule("HTML tags",["entity.name.tag","entity.other.attribute-name","meta.tag"],p.foreground),
     rule("CSS properties",["support.type.property-name.css","support.constant.property-value"],p.light),
     rule("Markdown heading",["markup.heading"],p.pale,"bold"),
