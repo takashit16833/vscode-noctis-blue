@@ -104,6 +104,7 @@
             "editor": 0.91,
             "minimap": 0.5,
             "tabs": 0.75,
+            "breadcrumbs": 0.75,
             "sidebar": 0.93,
             "panel": 0.94,
             "auxiliaryBar": 0.86,
@@ -129,6 +130,12 @@
               "minimum": 0,
               "maximum": 1,
               "description": "タブが並ぶ領域全体の追加背景色の不透明度。選択中・非選択のタブ自身の背景とは別に設定します。"
+            },
+            "breadcrumbs": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "パンくずリストの背景色の不透明度。タブ領域とは独立して設定します。"
             },
             "sidebar": {
               "type": "number",
