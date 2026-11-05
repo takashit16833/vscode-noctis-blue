@@ -21,7 +21,7 @@
     return { selector, background: css?.backgroundColor, image: css?.backgroundImage.slice(0, 90) };
   }));
   console.log('layers:',
-    document.querySelector('link[href*="vscode-wallpaper-layers-"]')?.sheet?.cssRules?.length);
+    document.querySelector('link[href*="noctis-blue-layers-"]')?.sheet?.cssRules?.length);
 })();
 ```
 
