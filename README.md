@@ -10,6 +10,7 @@ Emacs版 [Retro Hacker Blue](https://github.com/takashit16833/emacs-retro-hacker
 - **Noctis Blue**: 通常の不透明テーマ。
 - **Noctis Blue Transparent**: 背景画像を見せるための透過テーマ。
 - 配色の唯一の管理元は `palette/colors.json`。
+- JSON / JSONC / JSON Lines のプロパティ名は基本文字色 `#5EAFFF` に揃える。
 - `themes/*.json` は `npm run build` で生成する。
 
 ## 責務
