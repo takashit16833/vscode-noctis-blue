@@ -6,13 +6,16 @@ const opaque = require('../themes/noctis-blue.json');
 const transparent = require('../themes/noctis-blue-transparent.json');
 const { normalizeOpacity, generateCss, generateTemporaryScript } = require('../src/appearance');
 
-test('configuration includes separately adjustable minimap and tab-strip surfaces', () => {
+test('configuration includes adjustable gutter, minimap and tab-strip surfaces', () => {
   const properties = manifest.contributes.configuration.properties['noctisBlue.opacity'];
-  const keys = ['editor', 'minimap', 'tabs', 'breadcrumbs', 'sidebar', 'panel', 'auxiliaryBar', 'chrome', 'gap'];
+  const keys = ['editor', 'gutter', 'minimap', 'tabs', 'breadcrumbs', 'sidebar', 'panel', 'auxiliaryBar', 'chrome', 'gap'];
   assert.deepEqual(Object.keys(properties.properties), keys);
   assert.deepEqual(Object.keys(normalizeOpacity()), keys);
   assert.deepEqual(normalizeOpacity({ editor: 0 }).editor, 0);
   assert.deepEqual(normalizeOpacity({ editor: 1 }).editor, 1);
+  assert.equal(normalizeOpacity().gutter, 0.5);
+  assert.equal(normalizeOpacity({ gutter: 0 }).gutter, 0);
+  assert.equal(normalizeOpacity({ gutter: 1 }).gutter, 1);
   assert.equal(normalizeOpacity().minimap, 0.5);
   assert.equal(normalizeOpacity({ minimap: 0 }).minimap, 0);
   assert.equal(normalizeOpacity({ minimap: 1 }).minimap, 1);
@@ -31,6 +34,7 @@ test('configuration includes separately adjustable minimap and tab-strip surface
 test('bad settings fail without emitting CSS', () => {
   for (const invalid of [null, [], 5, { editor: '0.9' }, { editor: NaN },
     { editor: Infinity }, { panel: -0.1 }, { panel: 1.1 },
+    { gutter: '0.5' }, { gutter: -0.1 }, { gutter: 1.1 },
     { minimap: '0.5' }, { minimap: -0.1 }, { minimap: 1.1 },
     { tabs: '0.75' }, { tabs: -0.1 }, { tabs: 1.1 },
     { breadcrumbs: '0.75' }, { breadcrumbs: -0.1 }, { breadcrumbs: 1.1 }, { unknown: 0.5 }]) {
@@ -40,10 +44,11 @@ test('bad settings fail without emitting CSS', () => {
 
 test('area CSS uses actual opaque Noctis colors, without any wallpaper image', () => {
   const css = generateCss({
-    editor: 0.5, minimap: 0.25, tabs: 0.75, breadcrumbs: 0.25, sidebar: 0.8, panel: 1, auxiliaryBar: 0.4, chrome: 0.9, gap: 0
+    editor: 0.5, gutter: 0.35, minimap: 0.25, tabs: 0.75, breadcrumbs: 0.25, sidebar: 0.8, panel: 1, auxiliaryBar: 0.4, chrome: 0.9, gap: 0
   });
   for (const [key, percent] of [
     ['editor.background', '50%'],
+    ['editorGutter.background', '35%'],
     ['minimap.background', '25%'],
     ['editorGroupHeader.tabsBackground', '75%'],
     ['editorGroupHeader.tabsBackground', '25%'],
@@ -83,6 +88,23 @@ test('inactive titlebar uses its original theme color at chrome opacity', () => 
       inactiveColor + ' ' + percent + ', transparent) !important; }'
     ));
     assert.ok(!css.includes('.part.statusbar.inactive'));
+  }
+});
+
+test('gutter has one adjustable layer without replacing current-line highlights', () => {
+  const gutterColor = opaque.colors['editorGutter.background'];
+  assert.equal(transparent.colors['editorGutter.background'], gutterColor + '00');
+  assert.notEqual(opaque.colors['editor.lineHighlightBackground'], gutterColor);
+  for (const [opacity, percent] of [[0, '0%'], [0.5, '50%'], [1, '100%']]) {
+    const css = generateCss({ editor: 0.88, gutter: opacity });
+    const selector = '.part.editor .monaco-editor .margin';
+    const expected = selector + ' { background-color: color-mix(in srgb, ' +
+      gutterColor + ' ' + percent + ', transparent) !important; }';
+    assert.equal(css.split(expected).length - 1, 1);
+    assert.ok(css.includes('background-color: transparent !important;'));
+    assert.ok(!css.includes('.line-numbers { background-color:'));
+    assert.ok(!css.includes('.current-line-margin { background-color:'));
+    assert.ok(!css.includes('.margin-view-overlays { background-color:'));
   }
 });
 
