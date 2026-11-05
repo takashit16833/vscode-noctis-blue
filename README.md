@@ -29,6 +29,8 @@ bash ./install.sh
 ```
 
 `install.sh` はテスト・VSIX 作成・ローカル VS Code への導入を行う。ほかの拡張のインストール状態は変更しない。
+
+**VS Code 本体の読み込み方式が変わる版へ更新するときは、更新前の Noctis Blue で `Disable Automatic Appearance` を実行し、`Developer: Reload Window` で復元を確認してからインストールする。** 更新後は `Enable Automatic Appearance` で再度有効化する。すでに更新して解除できない場合、管理していた版を一時的に再導入して解除する。管理ファイルを手動削除しない。
 workbench の管理ファイルは、バックアップと読み込みスクリプトを検証できた場合だけ変更する。検証できない場合は停止し、無断で修正・削除しない。
 
 ## 基本設定
