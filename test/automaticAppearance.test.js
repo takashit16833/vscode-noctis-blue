@@ -6,6 +6,7 @@ const {
   LAYER_ID,
   STATE_KEY,
   TRANSPARENT_THEME,
+  WALLPAPER_BRIDGE_COMMANDS,
   syncAutomaticAppearance,
   enableAutomaticAppearance,
   disableAutomaticAppearance
@@ -15,24 +16,6 @@ function fixture(options = {}) {
   const calls = [];
   const state = { [STATE_KEY]: options.stateEnabled ?? false };
   let theme = options.theme ?? TRANSPARENT_THEME;
-
-  const api = {
-    apiVersion: options.apiVersion ?? 3,
-    setLayer: async (...args) => { calls.push(['setLayer', ...args]); },
-    removeLayer: async (...args) => {
-      calls.push(['removeLayer', ...args]);
-      if (options.removeLayerError) throw options.removeLayerError;
-    },
-    enableAutomatic: async () => {
-      calls.push(['enableAutomatic']);
-      return options.wallpaperEnabled ?? true;
-    }
-  };
-  const extension = options.installed === false ? undefined : {
-    isActive: true,
-    exports: api,
-    activate: async () => api
-  };
 
   const vscode = {
     workspace: {
@@ -48,13 +31,31 @@ function fixture(options = {}) {
         throw new Error('Unexpected configuration: ' + section);
       }
     },
-    extensions: {
-      getExtension: id => {
-        calls.push(['getExtension', id]);
-        return extension;
+    commands: {
+      async executeCommand(id, ...args) {
+        calls.push([id, ...args]);
+
+        if (options.installed === false) {
+          throw new Error('command not found: ' + id);
+        }
+        if (id === WALLPAPER_BRIDGE_COMMANDS.version) {
+          return options.bridgeVersion ?? 1;
+        }
+        if (id === WALLPAPER_BRIDGE_COMMANDS.setLayer) {
+          return true;
+        }
+        if (id === WALLPAPER_BRIDGE_COMMANDS.removeLayer) {
+          if (options.removeLayerError) throw options.removeLayerError;
+          return true;
+        }
+        if (id === WALLPAPER_BRIDGE_COMMANDS.enableAutomatic) {
+          return options.wallpaperEnabled ?? true;
+        }
+        throw new Error('Unexpected command: ' + id);
       }
     }
   };
+
   const context = {
     globalState: {
       get: (key, fallback) => Object.hasOwn(state, key) ? state[key] : fallback,
@@ -71,29 +72,37 @@ function fixture(options = {}) {
   };
 }
 
-test('自動適用は透過版テーマで提供元付き Noctis CSS レイヤーを登録する', async () => {
+function callsFor(fixture, command) {
+  return fixture.calls.filter(call => call[0] === command);
+}
+
+test('自動適用はコマンド橋渡しで提供元付き Noctis CSS レイヤーを登録する', async () => {
   const f = fixture();
   assert.equal(await enableAutomaticAppearance(f.vscode, f.context), true);
 
-  const set = f.calls.find(call => call[0] === 'setLayer');
+  const set = callsFor(f, WALLPAPER_BRIDGE_COMMANDS.setLayer)[0];
   assert.equal(set[1], LAYER_ID);
   assert.match(set[2], /\.monaco-workbench \.part\.editor/);
   assert.deepEqual(set[3], { ownerExtensionId: LAYER_ID });
-  assert.ok(f.calls.some(call => call[0] === 'enableAutomatic'));
+  assert.equal(callsFor(f, WALLPAPER_BRIDGE_COMMANDS.enableAutomatic).length, 1);
   assert.equal(f.state[STATE_KEY], true);
 });
 
 test('初回有効化で wallpaper 側の確認をキャンセルしたら登録レイヤーを戻す', async () => {
   const f = fixture({ wallpaperEnabled: false });
   assert.equal(await enableAutomaticAppearance(f.vscode, f.context), false);
-  assert.ok(f.calls.some(call => call[0] === 'removeLayer' && call[1] === LAYER_ID));
+  assert.equal(
+    callsFor(f, WALLPAPER_BRIDGE_COMMANDS.removeLayer)
+      .some(call => call[1] === LAYER_ID),
+    true
+  );
   assert.equal(f.state[STATE_KEY], false);
 });
 
 test('有効化済み状態で再度 Enable をキャンセルしても既存レイヤーを消さない', async () => {
   const f = fixture({ stateEnabled: true, wallpaperEnabled: false });
   assert.equal(await enableAutomaticAppearance(f.vscode, f.context), false);
-  assert.equal(f.calls.some(call => call[0] === 'removeLayer'), false);
+  assert.equal(callsFor(f, WALLPAPER_BRIDGE_COMMANDS.removeLayer).length, 0);
   assert.equal(f.state[STATE_KEY], true);
 });
 
@@ -103,42 +112,41 @@ test('透過版以外では自動適用の有効化を拒否する', async () =>
     enableAutomaticAppearance(f.vscode, f.context),
     /Transparent/
   );
-  assert.equal(f.calls.some(call => call[0] === 'setLayer'), false);
+  assert.equal(callsFor(f, WALLPAPER_BRIDGE_COMMANDS.setLayer).length, 0);
 });
 
 test('起動時同期は透過版だけレイヤーを持ち、他テーマでは削除する', async () => {
   const f = fixture({ stateEnabled: true });
   assert.equal(await syncAutomaticAppearance(f.vscode, f.context), true);
-  assert.ok(f.calls.some(call =>
-    call[0] === 'setLayer' && call[1] === LAYER_ID &&
-    call[2].includes('.part.editor') &&
-    call[3].ownerExtensionId === LAYER_ID
-  ));
+
+  const set = callsFor(f, WALLPAPER_BRIDGE_COMMANDS.setLayer)[0];
+  assert.equal(set[1], LAYER_ID);
+  assert.match(set[2], /\.part\.editor/);
+  assert.equal(set[3].ownerExtensionId, LAYER_ID);
 
   f.setTheme('Noctis Blue');
   await syncAutomaticAppearance(f.vscode, f.context);
-  assert.ok(f.calls.some(call =>
-    call[0] === 'removeLayer' && call[1] === LAYER_ID
-  ));
 
   f.setTheme('Dark Modern');
   await syncAutomaticAppearance(f.vscode, f.context);
-  assert.ok(f.calls.filter(call =>
-    call[0] === 'removeLayer' && call[1] === LAYER_ID
-  ).length >= 2);
+
+  assert.ok(
+    callsFor(f, WALLPAPER_BRIDGE_COMMANDS.removeLayer)
+      .filter(call => call[1] === LAYER_ID).length >= 2
+  );
 });
 
-test('自動適用が無効なら wallpaper 拡張を起動しない', async () => {
+test('自動適用が無効なら Wallpaper のコマンドを呼ばない', async () => {
   const f = fixture({ stateEnabled: false });
   assert.equal(await syncAutomaticAppearance(f.vscode, f.context), false);
   assert.equal(f.calls.length, 0);
 });
 
-test('古い wallpaper API は明示的に拒否する', async () => {
-  const f = fixture({ apiVersion: 2, stateEnabled: true });
+test('古い command bridge は明示的に拒否する', async () => {
+  const f = fixture({ bridgeVersion: 0, stateEnabled: true });
   await assert.rejects(
     syncAutomaticAppearance(f.vscode, f.context),
-    /v0\.10\.0/
+    /v0\.11\.0/
   );
 });
 
@@ -146,8 +154,11 @@ test('解除はレイヤー削除成功後にだけ無効状態を保存する',
   const f = fixture({ stateEnabled: true });
   assert.equal(await disableAutomaticAppearance(f.vscode, f.context), true);
   assert.equal(f.state[STATE_KEY], false);
-  assert.ok(f.calls.some(call => call[0] === 'removeLayer' && call[1] === LAYER_ID));
-  assert.equal(f.calls.some(call => call[0] === 'disableAutomatic'), false);
+  assert.equal(
+    callsFor(f, WALLPAPER_BRIDGE_COMMANDS.removeLayer)
+      .some(call => call[1] === LAYER_ID),
+    true
+  );
 });
 
 test('removeLayer が失敗したら有効状態を維持して次回同期可能にする', async () => {
@@ -162,7 +173,7 @@ test('removeLayer が失敗したら有効状態を維持して次回同期可�
   assert.equal(f.state[STATE_KEY], true);
 });
 
-test('wallpaper が未導入なら解除済みと記録しない', async () => {
+test('Wallpaper の command bridge が未導入なら解除済みと記録しない', async () => {
   const f = fixture({ stateEnabled: true, installed: false });
   await assert.rejects(
     disableAutomaticAppearance(f.vscode, f.context),
