@@ -61,22 +61,22 @@ test('VS Code 更新で元 CSS が変わったとき古いバックアップを�
   const f = await fixture(t, '/* vscode old */\n');
   await applyMarkdownEditorCss(f.filename, '.old{}');
   await fs.writeFile(f.filename, '/* vscode new */\n');
-  await assert.rejects(applyMarkdownEditorCss(f.filename, '.new{}'), /既存バックアップ/);
+  await assert.rejects(applyMarkdownEditorCss(f.filename, '.new{}'), /由来が分かりません/);
   assert.equal(await fs.readFile(f.filename + BACKUP_SUFFIX, 'utf8'), '/* vscode old */\n');
   assert.equal(await fs.readFile(f.filename, 'utf8'), '/* vscode new */\n');
 });
 
-test('元 CSS と同一のバックアップだけ再利用できる', async t => {
+test('元 CSS と同一でも由来不明のバックアップは採用も削除もしない', async t => {
   const f = await fixture(t);
   await fs.writeFile(f.filename + BACKUP_SUFFIX, f.content);
-  await applyMarkdownEditorCss(f.filename, '.safe{}');
+  await assert.rejects(applyMarkdownEditorCss(f.filename, '.safe{}'), /由来が分かりません/);
   assert.equal(await fs.readFile(f.filename + BACKUP_SUFFIX, 'utf8'), f.content);
 });
 
 test('既存のバックアップは上書きせず、内容が異なれば停止する', async t => {
   const f = await fixture(t);
   await fs.writeFile(f.filename + BACKUP_SUFFIX, 'unrelated file');
-  await assert.rejects(applyMarkdownEditorCss(f.filename, '.safe{}'), /既存バックアップ/);
+  await assert.rejects(applyMarkdownEditorCss(f.filename, '.safe{}'), /由来が分かりません/);
   assert.equal(await fs.readFile(f.filename + BACKUP_SUFFIX, 'utf8'), 'unrelated file');
 });
 

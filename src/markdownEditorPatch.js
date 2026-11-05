@@ -116,17 +116,12 @@ async function applyMarkdownEditorCss(filename, css, io = fs) {
     original = backup.content;
     validatePatchedContent(current, original);
   } else {
-    // A stale backup may belong to an unrelated operation. Do not overwrite or
-    // delete it. Reuse only when byte-for-byte identical to the clean CSS.
+    // Unpatched CSS offers no proof that a pre-existing backup is ours,
+    // even when its contents happen to match.
     original = current;
     const existing = await readBackup(filename, io);
-    if (existing) {
-      if (existing.content !== current) {
-        throw new Error('Markdown Editor CSS の既存バックアップが現在の元ファイルと一致しません。削除せず停止します。');
-      }
-    } else {
-      await createBackupExclusive(filename, filename + BACKUP_SUFFIX, original, io);
-    }
+    if (existing) throw new Error('Markdown Editor CSS の既存バックアップの由来が分かりません。削除・上書きせず停止します。');
+    await createBackupExclusive(filename, filename + BACKUP_SUFFIX, original, io);
   }
 
   const next = original + separatorFor(original) + managedBlock(css);
