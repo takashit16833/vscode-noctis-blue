@@ -23,6 +23,8 @@ test('Markdown Editor CSS follows the Emacs document palette', () => {
   assert.match(css, /color: #4C9EEB !important;/i);
   assert.match(css, /background-color: #001947 !important;/i);
   assert.match(css, /border-color: #5EAFFF !important;/i);
+  assert.match(css, /border-left-width: 2px !important;/);
+  assert.doesNotMatch(css, /border-left-width: 5px !important;/);
 
   assert.match(css, /\.md-document code:not\(pre code\) \{/);
   assert.match(css, /color: #7CBEFF !important;/i);
