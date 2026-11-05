@@ -3,6 +3,7 @@
 // Explicit, reversible VS Code workbench patch. No checksum bypass or debug port.
 // The renderer selects a different stylesheet for each window's workspace ID.
 const fs = require('node:fs/promises');
+const crypto = require('node:crypto');
 const path = require('node:path');
 
 const HTML_RELATIVE_PATH = 'out/vs/code/electron-browser/workbench/workbench.html';
@@ -145,13 +146,16 @@ async function inspect(appRoot) {
 }
 
 async function atomicWrite(filename, content, mode) {
-  const temp = filename + '.tmp-' + process.pid + '-' + Math.random().toString(16).slice(2);
+  const temp = filename + '.tmp-' + crypto.randomUUID();
+  let created = false;
   try {
     await fs.writeFile(temp, content, { flag: 'wx', mode });
+    created = true;
     await fs.rename(temp, filename);
-  } catch (error) {
-    await fs.unlink(temp).catch(() => {});
-    throw error;
+    created = false;
+  } finally {
+    // A failed exclusive create does not give us ownership of this path.
+    if (created) await fs.unlink(temp).catch(() => {});
   }
 }
 
@@ -248,6 +252,14 @@ async function disableUnlocked(appRoot) {
   for (const name of names) {
     const header = name.startsWith('noctis-blue-layers-') ? LAYERS_CSS_HEADER : CSS_HEADER;
     await readOwnedCss(path.join(info.files.dir, name), header);
+  }
+  // The VS Code updater does not participate in our lock. Refuse to restore
+  // over an HTML that was replaced after inspect() validated it.
+  const currentStat = await regularOrAbsent(info.files.html);
+  const currentHtml = await fs.readFile(info.files.html, 'utf8');
+  if (!currentStat || currentHtml !== info.html ||
+      currentStat.dev !== info.stat.dev || currentStat.ino !== info.stat.ino) {
+    throw new Error('検証後に VS Code 本体の HTML が変更されました。復元しません。');
   }
   await atomicWrite(info.files.html, info.backup, info.stat.mode);
   for (const name of names) await fs.unlink(path.join(info.files.dir, name));
