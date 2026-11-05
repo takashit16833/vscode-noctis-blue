@@ -43,15 +43,50 @@ VS Code の
 ```css
 .md-heading {
   color: #A6CAFF !important;
+  border-bottom-color: #316CBD !important;
 }
 
 pre.md-code-block {
   border: none !important;
 }
+
+.md-inline-code {
+  color: var(--vscode-editor-foreground) !important;
+  background: var(--vscode-textCodeBlock-background) !important;
+}
+
+.md-blockquote {
+  background: transparent !important;
+}
+
+.md-link,
+.md-editor a {
+  color: #316CBD !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+}
+
+.md-table th,
+.md-editor table th {
+  color: #316CBD !important;
+  font-weight: 700 !important;
+}
+
+.md-table,
+.md-table th,
+.md-table td,
+.md-editor table,
+.md-editor table th,
+.md-editor table td {
+  border-color: #316CBD !important;
+}
 ```
+
+`#316CBD` は Emacs 版の `fg-muted` であり、リンク・表ヘッダー・表罫線・見出し下線に共通で使う。
 
 コードブロック背景は公開テーマ色 `textCodeBlock.background` で管理し、
 Emacs 版の `org-block-bg` と同じ `#0A1A36` を使う。
+インラインコードはこのテーマ色を参照するため、Transparent 版ではコードブロックと同じ透過背景になる。
 
 編集中ブロックは `--md-block-active-background` の元色を保持し、
 `noctisBlue.markdownActiveBlockOpacity` で背景と影のアルファ値だけを調整する。
