@@ -66,7 +66,7 @@ test('Noctis が一覧で確認できた場合だけ旧 Wallpaper を削除す�
   const f = await fixture(t);
   const result = run(f, {
     LIST_FAIL: '0',
-    EXTENSION_LIST: 'takashit16833.noctis-blue\\ntakashit16833.vscode-wallpaper'
+    EXTENSION_LIST: ['takashit16833.noctis-blue', 'takashit16833.vscode-wallpaper'].join(String.fromCharCode(10))
   });
   assert.equal(result.status, 0, result.stderr);
   const calls = await fs.readFile(f.logger, 'utf8');
