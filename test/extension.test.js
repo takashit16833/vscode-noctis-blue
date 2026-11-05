@@ -20,3 +20,11 @@ test('コマンドの JavaScript 文書表示は共通 helper を使う', () => 
   assert.match(source, /async function showScript\(content\)/);
   assert.match(source, /function registerCommand\(context, id, handler\)/);
 });
+
+
+test('Markdown Editor automatic appearance commands are registered without forced reload', () => {
+  assert.match(source, /noctisBlue\.enableMarkdownEditorAppearance/);
+  assert.match(source, /noctisBlue\.disableMarkdownEditorAppearance/);
+  assert.match(source, /syncMarkdownEditorAppearance/);
+  assert.doesNotMatch(source, /executeCommand\(['"]workbench\.action\.reloadWindow/);
+});

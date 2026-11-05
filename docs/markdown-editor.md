@@ -2,130 +2,122 @@
 
 ## 結論
 
-現行 VS Code の公開 API だけを使って、別拡張から内蔵 Markdown Editor
-（`vscode.markdown.editor`）の親 Webview へ任意 CSS を追加する方法はない。
+VS Code の公開 API だけでは、別拡張から内蔵 Markdown Editor
+（`vscode.markdown.editor`）の親 Webview へ任意 CSS を追加できない。
 
-Noctis Blue では、VS Code 本体や組み込み Markdown 拡張を改変せず、
-編集中ブロックの不透明度変更は開発・診断用の手動 CSS に留める。
-
-## 対象の仕組み
-
-VS Code 本体の
-`extensions/markdown-language-features/src/preview/markdownEditorProvider.ts`
-では、`MarkdownEditorProvider` が `vscode.CustomTextEditorProvider` として
-`vscode.markdown.editor` を登録している。
-
-`#configureWebview()` は組み込み拡張自身が受け取った `Webview` を設定し、
-`#getHtml()` が生成した HTML を代入する。
-
-`#getHtml()` が親 Webview に読み込むスタイルは、組み込み拡張自身の
+Noctis Blue では、公開テーマ色で表現できない要素に限り、
+利用者が明示的に有効化した場合だけ組み込み Markdown 拡張の
 
 ```text
 markdown-editor-out/editor.css
 ```
 
-だけである。
+末尾へ Noctis Blue 管理ブロックを追記する。
 
-CSP の `style-src` 自体は Webview 内のスタイルを許可しているが、
-別拡張へその Webview オブジェクトを渡す公開経路がないため、
-CSP が許可していることと「外部拡張が CSS を注入できること」は別問題である。
+`workbench.html`、Markdown Editor provider の JavaScript、
+Webview HTML、組み込み拡張の package.json は変更しない。
 
-## Preview 用の拡張点は届かない
+## 根拠
 
-VS Code の公開 Markdown 拡張機構には次がある。
+VS Code の
+`extensions/markdown-language-features/src/preview/markdownEditorProvider.ts`
+では、`MarkdownEditorProvider` が `vscode.markdown.editor` を所有する。
+
+`#getHtml()` は `markdown-editor-out/editor.css` を唯一の親 Webview
+スタイルシートとして読み込む。
+
+通常 Preview 用の
 
 - `markdown.previewStyles`
 - `markdown.previewScripts`
 - `markdown.markdownItPlugins`
-- `markdown.codeBlockEditorProviders`
 
-前3つは通常の Markdown Preview 用である。
-`MarkdownEditorProvider` の実装には `previewStyles` / `previewScripts` /
-`markdownItPlugins` の参照がない。
+はこの親 Webview には適用されない。
+`markdown.codeBlockEditorProviders` も fenced code block の子 editor 用であり、
+親 DOM の `.md-heading` や `.md-code-block` は変更できない。
 
-そのため、通常 Preview へ CSS を追加できても、
-同じ CSS が `vscode.markdown.editor` の親 Webview へ入るわけではない。
+## 適用する CSS
 
-## codeBlockEditorProviders では代用できない
+実機で確認済みの DOM に対して次を適用する。
 
-`markdown.codeBlockEditorProviders` は内蔵 Markdown Editor 内の fenced code block を
-個別の iframe エディタへ置き換えるための拡張点である。
+```css
+.md-heading {
+  color: #A6CAFF !important;
+}
 
-これはコードブロック単位の子 iframe を提供する機能であり、
+pre.md-code-block {
+  border: none !important;
+}
+```
 
-- Markdown Editor 全体の親 DOM
-- `.md-editor`
-- `.md-block-active`
-- `--md-block-active-background`
+コードブロック背景は公開テーマ色 `textCodeBlock.background` で管理し、
+Emacs 版の `org-block-bg` と同じ `#0A1A36` を使う。
 
-を変更するための仕組みではない。
+編集中ブロックは `--md-block-active-background` の元色を保持し、
+`noctisBlue.markdownActiveBlockOpacity` で背景と影のアルファ値だけを調整する。
 
-## 他拡張から WebviewPanel を取得できない
+## 安全策
 
-Custom Editor API では、`WebviewPanel` はその custom editor provider の
-`resolveCustomTextEditor()` に渡される。
+`src/markdownEditorPatch.js` が変更を管理する。
 
-Noctis Blue は `vscode.markdown.editor` の provider ではないため、
-組み込み Markdown Editor が所有する `WebviewPanel` を受け取らない。
-既存の他拡張所有 Webview を列挙して HTML/CSS を変更する公開 API もない。
+- 対象パスは VS Code 組み込み `vscode.markdown-language-features` の
+  `extensionUri` から解決する。固定パスを推測しない。
+- 初回適用時に元 `editor.css` を
+  `editor.css.noctis-blue.backup` へ完全保存する。
+- Noctis Blue の CSS は開始・終了マーカーで囲んでファイル末尾へ追記する。
+- 設定変更時は元CSSとバックアップが一致することを確認して管理ブロックだけ更新する。
+- 解除時は元CSS部分がバックアップと一致することを確認して完全復元する。
+- 管理マーカー破損、バックアップ欠落、管理外変更を検出した場合は安全側で中止する。
+- VS Code 更新で `editor.css` 自体が新しい未加工ファイルへ置き換わった場合は、
+  古いバックアップを破棄し、新しいファイルをバックアップして再適用する。
 
-## テーマ色でできること
+## 有効化と解除
 
-VS Code のテーマ変数は Webview 側へ渡されるため、
-テーマ側で公開 theme color を設定する範囲は Markdown Editor にも反映される。
+有効化:
 
-一方、編集中ブロックは Markdown Editor 内部の CSS 変数
-`--md-block-active-background` を使う。
-これは VS Code の公開 theme color ID ではないため、
-通常の color theme JSON から不透明度だけを差し替えることはできない。
+```text
+Noctis Blue: Enable Markdown Editor Appearance
+```
 
-## 診断方法
+初回だけ、組み込み Markdown 拡張の CSS を変更することを説明する
+モーダル確認を表示する。
 
-`src/markdownAppearance.js` は元の
-`--md-block-active-background` を保持したまま、
-`background` と `box-shadow` だけを
-`color-mix(..., transparent)` で半透明にする CSS を生成する。
+解除:
 
-`Noctis Blue: Show Markdown Active Block Test` で生成したスクリプトを
-Developer Tools の Markdown Editor フレームで実行すると、
-この CSS を一時的に追加できる。
+```text
+Noctis Blue: Disable Markdown Editor Appearance
+```
 
-これは正式な自動適用経路ではなく、CSS の挙動確認と原因切り分けに使う。
+管理ブロックを削除するのではなく、保存した元 `editor.css` を完全復元する。
 
-## 採用しない方法
+有効状態は Noctis Blue の `globalState` に保存する。
+Noctis Blue / Noctis Blue Transparent のときだけ管理 CSS を適用し、
+他テーマでは一時的に元CSSへ戻す。Noctis Blue に戻すと再適用する。
 
-### VS Code 本体または組み込み Markdown 拡張の改変
+## VS Code 更新
 
-`MarkdownEditorProvider.#getHtml()` へ CSS を追加する方法は、
-VS Code 更新ごとに差分管理が必要になり、本プロジェクトの方針に反する。
+VS Code 更新で組み込み Markdown 拡張が更新されると、
+`editor.css` も置き換わる可能性がある。
 
-### 独自 Markdown Editor の再実装
+有効状態が保存されていれば次回起動時に新しい `editor.css` を検出し、
+その新しいファイルを元として再適用する。
 
-Noctis Blue 自身が `CustomTextEditorProvider` を持てば Webview は制御できるが、
-Markdown Editor 本体の編集・保存・カーソル・補完・レンダリングなどを
-再実装または追従する必要がある。
+## アンインストール
 
-テーマの責務を大きく超えるため採用しない。
+Noctis Blue 自体が削除された後は管理コードを実行できない。
+そのためアンインストール前に
 
-### `markdown.codeBlockEditorProviders` の悪用
+```text
+Noctis Blue: Disable Markdown Editor Appearance
+```
 
-親 Webview の CSS を変更できず、目的を満たさないため採用しない。
-
-## 再検討条件
-
-VS Code に次のいずれかが追加された場合は再調査する。
-
-- `vscode.markdown.editor` 向けの stylesheet contribution point
-- Markdown Editor の親 Webview を拡張する公式 API
-- active block の背景色・不透明度を公開 theme color / setting として指定する機能
+を実行して元CSSへ戻す。
 
 ## 参照
 
-- VS Code Markdown Extension API  
+- VS Code Markdown Extension API
   https://code.visualstudio.com/api/extension-guides/markdown-extension
-- VS Code Custom Editor API  
+- VS Code Custom Editor API
   https://code.visualstudio.com/api/extension-guides/custom-editors
-- VS Code `MarkdownEditorProvider`  
+- VS Code `MarkdownEditorProvider`
   https://github.com/microsoft/vscode/blob/main/extensions/markdown-language-features/src/preview/markdownEditorProvider.ts
-- VS Code `markdownExtensions.ts`  
-  https://github.com/microsoft/vscode/blob/main/extensions/markdown-language-features/src/markdownExtensions.ts

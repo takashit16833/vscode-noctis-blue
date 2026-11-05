@@ -7,7 +7,7 @@
 - `palette/colors.json` を配色の唯一の管理元とする。
 - `themes/*.json` は生成物。変更後は `npm run build && npm test` を実行する。
 - VS Code 標準のテーマ機能・公開 API を最優先する。
-- Apc への依存や Noctis Blue 独自の `workbench.html` 改変を行わない。
+- Apc へ依存せず、Noctis Blue 独自の `workbench.html` 改変は行わない。内蔵 Markdown Editor だけは公開 API で届かない要素に限り、組み込み Markdown 拡張の `markdown-editor-out/editor.css` 末尾へ管理ブロックを追記する。
 - wallpaper と同じ表示処理を二重実装しない。
 
 ## 情報の置き場所
@@ -51,11 +51,15 @@
 - 内蔵 Markdown Editor の本文基準色は標準テーマ色 `editor.foreground` を通じて通常の `palette.foreground` を使う。見出しだけを `palette.pale`（Emacs 版 `fg-pale`）へ分離できる公開テーマ色があるかは、推測せず実機と上流 CSS で確認する。
 - コードブロック背景は標準テーマ色 `textCodeBlock.background` を使う。基準色は Emacs 版 `org-block-bg` と揃え、Transparent 版ではアルファ値だけを下げる。
 - コードブロック枠線は Markdown Editor 側が汎用 `widget.border` を使っており、Markdown 専用の公開テーマ色はない。枠線だけのために `widget.border` を透明化して他UIへ影響させない。
-- したがって現行公開 API だけでは編集中ブロックの CSS 常時自動適用は行わない。
-- VS Code 本体改変や独自 Markdown Editor の再実装は採用しない。
+- 公開 API で届かない Markdown Editor 固有の CSS は、利用者が明示的に有効化した場合だけ `markdown-editor-out/editor.css` に追記する。
+- 元 `editor.css` は `.noctis-blue.backup` として完全保存し、解除時は内容一致を確認して復元する。
+- 管理ブロック以外の変更、壊れたマーカー、バックアップ欠落を検出した場合は上書き・解除せず停止する。
+- VS Code 更新で管理ブロックのない新しい `editor.css` に置き換わった場合は、それを新しい元ファイルとしてバックアップし直して再適用する。
+- provider の JavaScript、package.json、Webview HTML は変更しない。
 - `markdown.editor.highlightActiveBlock=false` で強調表示自体を消さない。
-- `--md-block-active-background` の色を固定色へ置き換えず、診断時は背景と影の不透明度だけを変更する。
-- `noctisBlue.markdownActiveBlockOpacity` と `src/markdownAppearance.js` は開発・診断用として扱う。
+- `--md-block-active-background` の色を固定色へ置き換えず、背景と影の不透明度だけを変更する。
+- `noctisBlue.markdownActiveBlockOpacity` は自動適用する Markdown Editor CSS の設定として扱う。
+- Noctis Blue のアンインストール前には Markdown Editor Appearance を解除する。
 
 ## 開発用診断
 

@@ -6,8 +6,12 @@ const manifest = require('../package.json');
 const { validateOpacity, generateMarkdownCss, generateTemporaryMarkdownScript } =
   require('../src/markdownAppearance');
 
-test('Markdown active block translucency preserves theme-supplied color', () => {
+test('Markdown Editor CSS includes verified heading, code block, and active-block rules', () => {
   const css = generateMarkdownCss(0.65);
+  assert.match(css, /\.md-heading \{/);
+  assert.match(css, /color: #A6CAFF !important;/i);
+  assert.match(css, /pre\.md-code-block \{/);
+  assert.match(css, /border: none !important;/);
   assert.match(css, /--md-block-active-background/);
   assert.match(css, /65%, transparent/);
   assert.match(css, /background: color-mix\(in srgb, var\(--md-block-active-background, #f8f8f8\) 65%, transparent\) !important;/);

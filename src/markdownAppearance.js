@@ -3,6 +3,8 @@
 // The rich Markdown editor is an independent webview. The active block uses
 // its own CSS color variable, which is not a VS Code theme color ID.
 // Never replace that color: only mix it with transparency.
+const palette = require('../palette/colors.json');
+
 const CSS_VARIABLE = 'var(--md-block-active-background, #f8f8f8)';
 const SELECTOR = '.md-editor:not(.md-no-active-block-highlight) .md-block-active';
 const STYLE_ID = 'noctis-blue-markdown-active-test';
@@ -18,7 +20,16 @@ function generateMarkdownCss(opacity) {
   const percent = Math.round(validateOpacity(opacity) * 10000) / 100;
   const background = 'color-mix(in srgb, ' + CSS_VARIABLE + ' ' + percent + '%, transparent)';
   return [
-    '/* Keep the Markdown Editor active-block highlight; change only alpha. */',
+    '/* Noctis Blue Markdown Editor appearance. */',
+    '.md-heading {',
+    '  color: ' + palette.pale + ' !important;',
+    '}',
+    '',
+    'pre.md-code-block {',
+    '  border: none !important;',
+    '}',
+    '',
+    '/* Keep the active-block highlight; change only alpha. */',
     SELECTOR + ' {',
     '  background: ' + background + ' !important;',
     '  box-shadow: 0 0 0 8px ' + background + ' !important;',

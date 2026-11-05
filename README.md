@@ -47,7 +47,7 @@ bash ./install.sh
 ```
 
 Noctis Blue の `install.sh` はテスト、VSIX 作成、インストールまで行う。
-Noctis Blue 自身は `workbench.html` を変更しない。
+Noctis Blue 自身は `workbench.html` を変更しない。Markdown Editor の非公開CSS調整は、利用者が明示的に有効化した場合だけ組み込み Markdown 拡張の `editor.css` へ管理ブロックを追記する。
 
 ## 基本設定
 
@@ -100,20 +100,21 @@ VS Code 内蔵のリッチ Markdown Editor（`vscode.markdown.editor`）は独�
 
 Noctis Blue の通常本文色は従来どおり `#5EAFFF` を使う。パレット上の `white` は Emacs 版 Retro Hacker Blue の `fg-pale` と同じ `#A6CAFF` に揃える。コードブロック背景は Emacs 版の `org-block-bg` と同じ `#0A1A36` を基準にし、Transparent 版では 75% 不透明（`#0A1A36BF`）で描画する。
 
-テーマ色による背景透過は利用できるが、編集中ブロックの
-`--md-block-active-background` は公開 theme color ではない。
-現行 VS Code の公開 API には、別拡張からこの Webview 本体へ CSS を追加する拡張点もない。
+公開 API だけでは Webview 本体へ任意 CSS を追加できないため、Noctis Blue は明示的に有効化した場合だけ、VS Code 組み込み Markdown 拡張の `markdown-editor-out/editor.css` 末尾へ管理ブロックを追記する。
 
-そのため、
+**Noctis Blue: Enable Markdown Editor Appearance** を一度実行して確認ダイアログを承認すると、次を自動適用する。
+
+- 見出し `.md-heading`: Emacs `fg-pale` と同じ `#A6CAFF`
+- `pre.md-code-block`: 枠線なし
+- 編集中ブロック: 元の `--md-block-active-background` を維持したまま指定不透明度へ調整
 
 ```jsonc
 "noctisBlue.markdownActiveBlockOpacity": 0.65
 ```
 
-は開発・診断用である。
-**Noctis Blue: Show Markdown Active Block Test** で生成したコードを
-Markdown Editor の開発者ツール上で実行すると、元の強調表示を残したまま
-背景と影の不透明度だけを確認できる。
+元の `editor.css` は隣にバックアップし、**Noctis Blue: Disable Markdown Editor Appearance** で完全復元する。VS Code 更新で元 `editor.css` が入れ替わった場合は、次回起動時に新しい元ファイルへ管理ブロックを再適用する。Noctis Blue 管理外の変更を検出した場合は上書きせず停止する。
+
+変更後は開いている Markdown Editor を閉じて開き直すか、**Developer: Reload Window** を実行する。Noctis Blue をアンインストールする前には Markdown Editor Appearance を無効化する。
 
 詳細は [docs/markdown-editor.md](docs/markdown-editor.md)。
 
