@@ -1,22 +1,22 @@
 # 背景画像と領域背景の設計
 
-## 役割分担
+## 1つの拡張内での役割分担
 
-### vscode-wallpaper
+### `src/workbench/wallpaper.js`
 
 - 画面全体の背景画像を描画する。
 - 代替画像と画面条件による切り替えを担当する。
 - tint と背景画像の乗算を担当する。
-- Noctis Blue を含む外部 CSS レイヤーの共通読み込み口を管理する。
+- 共通 CSS 読み込みは `src/workbench/auto-apply.js` と `renderer-loader.js` が担当する。
 - editor / sidebar / panel 等の領域背景やぼかしは管理しない。
 
-### Noctis Blue
+### `src/appearance.js` と配色テーマ
 
 - 通常版と透過版の配色を管理する。
 - editor / sidebar / panel / auxiliaryBar / chrome / gap の背景色と不透明度を管理する。
 - 同じ領域の重複下地を透明化する。
 - Sticky Scroll や補完候補など、前面の文字を薄くせず背後だけをぼかす。
-- 背景画像のパス、乗算、画像切り替えは管理しない。
+- 背景画像のパス、乗算、画像切り替えは `src/workbench/wallpaper.js` に任せる。
 
 ## 領域の不透明度
 
@@ -50,7 +50,7 @@ Source Control のコミットメッセージ欄のように、
 
 ## 乗算と領域透過を分ける
 
-背景画像の tint と乗算は wallpaper 側の処理である。
+背景画像の tint と乗算は `src/workbench/wallpaper.js` の処理である。
 
 領域背景の半透明化は Noctis Blue 側の通常の重ね合わせであり、
 画像と領域色を直接 multiply する処理ではない。
@@ -59,15 +59,17 @@ Source Control のコミットメッセージ欄のように、
 
 ## 適用経路を一つにする
 
-Noctis Blue 自身は `workbench.html` を変更しない。
+Noctis Blue だけが `workbench.html` の読み込み口を管理する。外部の Wallpaper 拡張には依存しない。
 
-自動適用では `vscode-wallpaper` API v3 の `setLayer(id, css, { ownerExtensionId })` を使い、
-本体への読み込み処理は wallpaper 側だけが所有する。
+`src/automaticAppearance.js` が背景画像 CSS と透過 CSS を組み立て、
+`src/workbench/auto-apply.js` が安全検査した `workbench.html` に 1 つのローダーを配置する。
+ローダーは画像 CSS を先に、透過 CSS を後に読み込む。
 
-Noctis Blue はレイヤーの提供元として自身の拡張 ID を登録し、無効化・削除時に wallpaper が孤児レイヤーを整理できるようにする。
+旧 `vscode-wallpaper` の管理済み HTML / CSS / ローダー名は移行の互換性のため維持する。
+旧拡張と新拡張が同時に書き換えることは禁止し、旧拡張が残っていたら動作を止める。
 
-wallpaper 自身は表示面 CSS を生成しないため、
-Noctis Blue が所有権フラグを渡して wallpaper の描画を止める仕組みも不要である。
+リモート接続中も壁紙の処理はローカル UI host で実行する。
+リモート内蔵 Markdown Editor は `workspace.fs` による個別の経路を使う。
 
 ## テーマJSONだけでは完結しない理由
 
@@ -80,7 +82,7 @@ Noctis Blue が所有権フラグを渡して wallpaper の描画を止める仕
 
 - 配色そのものはテーマ JSON
 - 領域の一度塗り、内部下地の透明化、ぼかしは Noctis Blue の CSS
-- 背景画像と乗算は vscode-wallpaper
+- 背景画像と乗算は `src/workbench/wallpaper.js`
 
 という分担にする。
 

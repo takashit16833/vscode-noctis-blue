@@ -103,8 +103,8 @@ Emacs版の `fg-muted = #316CBD`、太字、下線に揃える。
 
 `src/markdownEditorPatch.js` が変更を管理する。
 
-- 対象パスは VS Code 組み込み `vscode.markdown-language-features` の
-  `extensionUri` から解決する。固定パスを推測しない。
+- ローカル表示の対象パスは組み込み `vscode.markdown-language-features` の `extensionUri` から解決する。
+- Remote/Dev Container では UI host から直接ローカル `fs` でリモート CSS を開かない。`src/markdownEditorRemote.js` がローカル VS Code の commit を検査し、既知のサーバー配置内で実在するファイルだけを `workspace.fs` 経由で扱う。発見できなければ中止する。
 - 初回適用時に元 `editor.css` を
   `editor.css.noctis-blue.backup` へ完全保存する。
 - Noctis Blue の CSS は開始・終了マーカーで囲んでファイル末尾へ追記する。
@@ -113,6 +113,18 @@ Emacs版の `fg-muted = #316CBD`、太字、下線に揃える。
 - 管理マーカー破損、バックアップ欠落、管理外変更を検出した場合は安全側で中止する。
 - VS Code 更新で `editor.css` 自体が新しい未加工ファイルへ置き換わった場合は、
   古いバックアップを破棄し、新しいファイルをバックアップして再適用する。
+
+## Dev Container の権限と制約
+
+統合後の拡張は、ローカル Mac 側 UI host で背景処理を担当する。
+リモート側 Markdown Editor の `editor.css` は VS Code リモートファイル操作 API 経由で読み書きする。
+
+`workspace.fs` は `chmod` を提供しない。root 所有ディレクトリでファイルを新規作成できない場合、
+自動の `sudo` / `chown` や VS Code Server の改変は行わず、明確な権限エラーで停止する。
+ユーザー環境での所有者・書き込み権限を実測してから、セットアップ方法を選ぶ。
+
+リモートのパスやバージョンを実測せずに増やすことを禁止する。
+VS Code Server の配置が異なれば、対応方法を調査する。
 
 ## 有効化と解除
 
