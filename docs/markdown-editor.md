@@ -68,6 +68,15 @@ blockquote.md-blockquote {
   text-decoration: underline !important;
   text-decoration-color: #316CBD !important;
 }
+
+.md-table tr:first-child > td {
+  color: #316CBD !important;
+  font-weight: 700 !important;
+}
+
+.md-table td {
+  border-color: #316CBD !important;
+}
 ```
 
 見出し下線は Markdown Editor 標準の色・太さを維持する。
@@ -82,6 +91,9 @@ Emacs 版の `org-block-bg` と同じ `#0A1A36` を使う。
 
 通常リンクは実機でクラスなしの `A` 要素として確認済みであり、
 Emacs版の `fg-muted = #316CBD`、太字、下線に揃える。
+
+表は実機で先頭行の `TD` が見出し、通常セルも `TD` と確認済みである。
+見出しは `#316CBD` + 太字、罫線は既存の太さ・線種を維持して色だけ `#316CBD` にする。
 
 編集中ブロックは `--md-block-active-background` の元色を保持し、
 `noctisBlue.markdownActiveBlockOpacity` で背景と影のアルファ値だけを調整する。
