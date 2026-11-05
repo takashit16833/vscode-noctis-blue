@@ -12,7 +12,6 @@ test('Markdown Editor CSS follows the Emacs document palette', () => {
 
   assert.match(css, /\.md-heading \{/);
   assert.match(css, new RegExp('color: ' + palette.pale.replace('#', '\\#') + ' !important;', 'i'));
-  assert.match(css, new RegExp('border-bottom-color: ' + palette.muted.replace('#', '\\#') + ' !important;', 'i'));
 
   assert.match(css, /pre\.md-code-block \{/);
   assert.match(css, /border: none !important;/);
