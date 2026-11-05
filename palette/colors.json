@@ -31,5 +31,6 @@
   "inactiveForeground": "#20467B",
   "black": "#000000",
   "cyanDim": "#00CED1",
-  "selectionUi": "#173366"
+  "selectionUi": "#173366",
+  "markdownCodeBlockBackground": "#0A1A36"
 }
