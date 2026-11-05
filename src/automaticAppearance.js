@@ -42,7 +42,7 @@ function currentWallpaperCss(vscode) {
         ['globalValue', 'workspaceValue', 'workspaceFolderValue'].some(name =>
           inspect[name] !== undefined);
       const modernValue = modern.get(key, fallback);
-      return explicitlyConfigured ? modernValue : legacy.get(key, modernValue);
+      return modernValue;
     }
   });
   const folder = vscode.workspace.workspaceFolders?.[0]?.uri;
