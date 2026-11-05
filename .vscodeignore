@@ -1,6 +1,5 @@
 scripts/**
 test/**
 .github/**
-palette/**
 .gitignore
 AGENTS.md
