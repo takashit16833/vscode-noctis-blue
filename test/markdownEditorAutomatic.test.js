@@ -2,6 +2,9 @@
 
 const assert = require('node:assert/strict');
 const test = require('node:test');
+const fs = require('node:fs/promises');
+const os = require('node:os');
+const path = require('node:path');
 const {
   MARKDOWN_EXTENSION_ID,
   STATE_KEY,
@@ -97,5 +100,45 @@ test('従来の単一真偽値は新しい接続先を許可しない', async ()
   const f = fixture();
   f.context.globalState.get = (key, fallback) =>
     key === 'noctisBlue.markdownEditorAppearanceEnabled' ? true : fallback;
+  assert.equal(await syncMarkdownEditorAppearance(f.vscode, f.context), false);
+});
+
+test('CSS 自動更新の途中で解除しても、最後は元の CSS に復元される', async t => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'noctis-editor-queue-'));
+  t.after(() => fs.rm(directory, { recursive: true, force: true }));
+  const extensionDir = path.join(directory, 'markdown-language-features');
+  const filename = path.join(extensionDir, 'markdown-editor-out', 'editor.css');
+  await fs.mkdir(path.dirname(filename), { recursive: true });
+  const original = 'body { color: red; }\n';
+  await fs.writeFile(filename, original);
+
+  const options = { enabled: true, opacity: 0.65 };
+  const f = fixture(options);
+  f.vscode.extensions.getExtension = () => ({ extensionUri: { fsPath: extensionDir } });
+  await enableMarkdownEditorAppearance(f.vscode, f.context);
+  options.opacity = 0.4;
+
+  let releaseRename;
+  let notifyRename;
+  const entered = new Promise(resolve => { notifyRename = resolve; });
+  const originalRename = fs.rename;
+  let blocked = false;
+  t.mock.method(fs, 'rename', async (from, to) => {
+    if (to === filename && !blocked) {
+      blocked = true;
+      notifyRename();
+      await new Promise(resolve => { releaseRename = resolve; });
+    }
+    return originalRename(from, to);
+  });
+
+  const updating = syncMarkdownEditorAppearance(f.vscode, f.context);
+  await entered;
+  const disabling = disableMarkdownEditorAppearance(f.vscode, f.context);
+  releaseRename();
+  await Promise.all([updating, disabling]);
+  assert.equal(await fs.readFile(filename, 'utf8'), original);
+  await assert.rejects(fs.stat(filename + '.noctis-blue.backup'), { code: 'ENOENT' });
+  assert.deepEqual(f.state[STATE_KEY], {});
   assert.equal(await syncMarkdownEditorAppearance(f.vscode, f.context), false);
 });
