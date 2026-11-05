@@ -49,12 +49,39 @@ pre.md-code-block {
   border: none !important;
 }
 
+blockquote.md-blockquote {
+  background: color-mix(
+    in srgb,
+    var(--vscode-textBlockQuote-background, #222222) 65%,
+    transparent
+  ) !important;
+}
+
+.md-document code:not(pre code) {
+  color: var(--vscode-editor-foreground, #5EAFFF) !important;
+  background: var(--vscode-textCodeBlock-background, #0A1A36) !important;
+}
+
+.md-document a {
+  color: #316CBD !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #316CBD !important;
+}
 ```
 
 見出し下線は Markdown Editor 標準の色・太さを維持する。
 
 コードブロック背景は公開テーマ色 `textCodeBlock.background` で管理し、
 Emacs 版の `org-block-bg` と同じ `#0A1A36` を使う。
+インラインコードも同じテーマ色を参照するため、Transparent 版ではコードブロックと同じ半透明背景になる。
+
+引用は実機で `BLOCKQUOTE.md-block.md-blockquote` と
+`--vscode-textBlockQuote-background: #222222` を確認済みである。
+色そのものを消さず、`color-mix()` で65%だけ残して半透明化する。
+
+通常リンクは実機でクラスなしの `A` 要素として確認済みであり、
+Emacs版の `fg-muted = #316CBD`、太字、下線に揃える。
 
 編集中ブロックは `--md-block-active-background` の元色を保持し、
 `noctisBlue.markdownActiveBlockOpacity` で背景と影のアルファ値だけを調整する。
