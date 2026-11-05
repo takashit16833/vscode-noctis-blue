@@ -34,8 +34,22 @@ function remoteFileOperations(vscode, workspaceUri) {
     async readFile(filename) {
       return Buffer.from(await safe(() => files.readFile(uri(filename)))).toString('utf8');
     },
-    async writeFile(filename, content) {
+    async writeFile(filename, content, options = {}) {
+      // workspace.fs.writeFile cannot create exclusively. A random temporary
+      // name is checked first; there is still a race until writeFile returns.
+      if (options.flag === 'wx') {
+        try {
+          await files.stat(uri(filename));
+          throw new Error('リモート一時ファイルが既に存在します: ' + filename);
+        } catch (error) {
+          if (errorCode(error) !== 'FileNotFound') throw normalize(error);
+        }
+      }
       await safe(() => files.writeFile(uri(filename), Buffer.from(content)));
+    },
+    async copyFileExclusive(from, to) {
+      // workspace.fs.copy has an explicit non-overwrite guarantee.
+      await safe(() => files.copy(uri(from), uri(to), { overwrite: false }));
     },
     // FileSystemProvider does not expose chmod. Never invent permissions.
     async chmod() {},
