@@ -32,18 +32,7 @@ function currentCss(vscode) {
 
 function currentWallpaperCss(vscode) {
   const modern = vscode.workspace.getConfiguration('noctisBlue.wallpaper');
-  // Keep existing installations working until the user's settings are migrated.
-  // inspect() distinguishes an explicit empty value from the default empty value.
-  const settings = readSettings({
-    get(key, fallback) {
-      const inspect = modern.inspect?.(key);
-      const explicitlyConfigured = inspect &&
-        ['globalValue', 'workspaceValue', 'workspaceFolderValue'].some(name =>
-          inspect[name] !== undefined);
-      const modernValue = modern.get(key, fallback);
-      return modernValue;
-    }
-  });
+  const settings = readSettings(modern);
   const folder = vscode.workspace.workspaceFolders?.[0]?.uri;
   // A remote workspace folder is not a local macOS path.
   const workspaceDirectory = folder?.scheme === 'file' ? folder.fsPath : undefined;
