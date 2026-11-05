@@ -2,8 +2,13 @@
 
 const { generateCss } = require('./appearance');
 
-const WALLPAPER_EXTENSION_ID = 'takashit16833.vscode-wallpaper';
-const WALLPAPER_API_VERSION = 3;
+const WALLPAPER_BRIDGE_VERSION = 1;
+const WALLPAPER_BRIDGE_COMMANDS = Object.freeze({
+  version: '_vscodeWallpaper.bridgeVersion',
+  setLayer: '_vscodeWallpaper.setLayer',
+  removeLayer: '_vscodeWallpaper.removeLayer',
+  enableAutomatic: '_vscodeWallpaper.enableAutomatic'
+});
 const LAYER_ID = 'takashit16833.noctis-blue';
 const STATE_KEY = 'noctisBlue.automaticAppearanceEnabled';
 const TRANSPARENT_THEME = 'Noctis Blue Transparent';
@@ -21,27 +26,32 @@ function currentCss(vscode) {
   return generateCss(opacity);
 }
 
-async function wallpaperApi(vscode, optional = false) {
-  const extension = vscode.extensions.getExtension(WALLPAPER_EXTENSION_ID);
-  if (!extension) {
-    if (optional) return null;
-    throw new Error('VS Code Wallpaper v0.10.0 以降をインストールしてください。');
-  }
+async function wallpaperBridge(vscode, optional = false) {
+  try {
+    const version = await vscode.commands.executeCommand(WALLPAPER_BRIDGE_COMMANDS.version);
+    if (version !== WALLPAPER_BRIDGE_VERSION) {
+      throw new Error('VS Code Wallpaper v0.11.0 以降が必要です。');
+    }
 
-  const api = extension.isActive ? extension.exports : await extension.activate();
-  if (!api || api.apiVersion !== WALLPAPER_API_VERSION ||
-      typeof api.setLayer !== 'function' ||
-      typeof api.removeLayer !== 'function' ||
-      typeof api.enableAutomatic !== 'function') {
-    throw new Error('VS Code Wallpaper v0.10.0 以降が必要です。');
+    return {
+      setLayer: (id, css, options) =>
+        vscode.commands.executeCommand(WALLPAPER_BRIDGE_COMMANDS.setLayer, id, css, options),
+      removeLayer: id =>
+        vscode.commands.executeCommand(WALLPAPER_BRIDGE_COMMANDS.removeLayer, id),
+      enableAutomatic: () =>
+        vscode.commands.executeCommand(WALLPAPER_BRIDGE_COMMANDS.enableAutomatic)
+    };
+  } catch (error) {
+    if (optional) return null;
+    if (/v0\.11\.0/.test(error?.message ?? '')) throw error;
+    throw new Error('VS Code Wallpaper v0.11.0 以降をローカル側にインストールしてください。');
   }
-  return api;
 }
 
 async function syncAutomaticAppearance(vscode, context) {
   if (!context.globalState.get(STATE_KEY, false)) return false;
 
-  const api = await wallpaperApi(vscode);
+  const api = await wallpaperBridge(vscode);
   if (isTransparentTheme(vscode)) {
     await api.setLayer(LAYER_ID, currentCss(vscode), {
       ownerExtensionId: LAYER_ID
@@ -57,7 +67,7 @@ async function enableAutomaticAppearance(vscode, context) {
     throw new Error('Noctis Blue Transparent を選択してから自動適用を有効にしてください。');
   }
 
-  const api = await wallpaperApi(vscode);
+  const api = await wallpaperBridge(vscode);
   const wasEnabled = context.globalState.get(STATE_KEY, false);
   let registered = false;
   try {
@@ -85,7 +95,7 @@ async function enableAutomaticAppearance(vscode, context) {
 }
 
 async function disableAutomaticAppearance(vscode, context) {
-  const api = await wallpaperApi(vscode, true);
+  const api = await wallpaperBridge(vscode, true);
   if (!api) {
     throw new Error(
       'VS Code Wallpaper が見つからないため CSS レイヤーを解除できません。' +
@@ -99,15 +109,15 @@ async function disableAutomaticAppearance(vscode, context) {
 }
 
 module.exports = {
-  WALLPAPER_EXTENSION_ID,
-  WALLPAPER_API_VERSION,
+  WALLPAPER_BRIDGE_VERSION,
+  WALLPAPER_BRIDGE_COMMANDS,
   LAYER_ID,
   STATE_KEY,
   TRANSPARENT_THEME,
   currentTheme,
   isTransparentTheme,
   currentCss,
-  wallpaperApi,
+  wallpaperBridge,
   syncAutomaticAppearance,
   enableAutomaticAppearance,
   disableAutomaticAppearance
