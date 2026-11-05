@@ -32,18 +32,13 @@ VSIX="$TMP_DIR/noctis-blue.vsix"
 )
 
 "$VSCODE_CLI" --install-extension "$VSIX" --force
-# Installing the replacement first keeps the user's existing workbench files.
-# Removing the obsolete extension does not change its managed workbench.html.
+# Verify the requested extension without changing other installed extensions.
 if ! installed_extensions="$("$VSCODE_CLI" --list-extensions)"; then
-  printf '[noctis-blue] ERROR: could not list installed extensions; old Wallpaper was left intact.\n' >&2
+  printf '[noctis-blue] ERROR: could not list installed extensions.\n' >&2
   exit 1
 fi
 if ! printf '%s\n' "$installed_extensions" | grep -Fxi 'takashit16833.noctis-blue' >/dev/null; then
-  printf '[noctis-blue] ERROR: new extension is not listed; old Wallpaper was left intact.\n' >&2
+  printf '[noctis-blue] ERROR: Noctis Blue is not listed after installation.\n' >&2
   exit 1
-fi
-if printf '%s\n' "$installed_extensions" | grep -Fxi 'takashit16833.vscode-wallpaper' >/dev/null; then
-  printf '[noctis-blue] Uninstalling obsolete VS Code Wallpaper extension\n'
-  "$VSCODE_CLI" --uninstall-extension takashit16833.vscode-wallpaper
 fi
 printf '[noctis-blue] Noctis Blue installed. Use Developer: Reload Window when you want generated CSS changes to appear.\n'
