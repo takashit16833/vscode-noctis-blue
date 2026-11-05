@@ -17,7 +17,7 @@
       link.onerror = () => {
         link.remove();
         if (required) {
-          console.warn('VS Code Wallpaper: CSS is not available yet. Reload Window after the extension generates it.');
+          console.warn('Noctis Blue: CSS is not available yet. Reload Window after the extension generates it.');
         }
       };
       document.head.append(link);
@@ -26,9 +26,9 @@
     // External layers are deliberately appended after the wallpaper stylesheet.
     // This keeps one workbench loader while allowing a theme extension to own
     // translucent surfaces without duplicating the workbench.html patch.
-    appendStylesheet('vscode-wallpaper-' + workspaceId + '.css', true);
-    appendStylesheet('vscode-wallpaper-layers-' + workspaceId + '.css', false);
+    appendStylesheet('noctis-blue-' + workspaceId + '.css', true);
+    appendStylesheet('noctis-blue-layers-' + workspaceId + '.css', false);
   } catch (error) {
-    console.warn('VS Code Wallpaper: could not load workspace stylesheet', error);
+    console.warn('Noctis Blue: could not load workspace stylesheet', error);
   }
 })();
