@@ -63,6 +63,24 @@ test('area CSS uses actual opaque Noctis colors, without any wallpaper image', (
   assert.ok(!css.includes('url('));
 });
 
+test('inactive titlebar uses its original theme color at chrome opacity', () => {
+  const activeColor = opaque.colors['titleBar.activeBackground'];
+  const inactiveColor = opaque.colors['titleBar.inactiveBackground'];
+  assert.notEqual(activeColor, inactiveColor);
+  for (const [opacity, percent] of [[0, '0%'], [0.5, '50%'], [1, '100%']]) {
+    const css = generateCss({ chrome: opacity });
+    assert.ok(css.includes(
+      '.monaco-workbench .part.titlebar { background-color: color-mix(in srgb, ' +
+      activeColor + ' ' + percent + ', transparent) !important; }'
+    ));
+    assert.ok(css.includes(
+      '.monaco-workbench .part.titlebar.inactive { background-color: color-mix(in srgb, ' +
+      inactiveColor + ' ' + percent + ', transparent) !important; }'
+    ));
+    assert.ok(!css.includes('.part.statusbar.inactive'));
+  }
+});
+
 test('minimap paints only its own background, without changing canvas or slider', () => {
   for (const [opacity, percent] of [[0, '0%'], [0.5, '50%'], [1, '100%']]) {
     const css = generateCss({ editor: 0.88, minimap: opacity });
