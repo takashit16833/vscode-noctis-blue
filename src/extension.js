@@ -137,7 +137,7 @@ function activate(context) {
     const choice = await vscode.window.showWarningMessage(
       'Markdown Editor の自動CSSでは、VS Code 組み込み Markdown 拡張の editor.css に ' +
       'Noctis Blue 管理ブロックを追記します。元ファイルはバックアップし、解除時に復元します。' +
-      'VS Code 更新後は新しい editor.css へ再適用されます。',
+      'VS Code 更新で未加工の CSS と古いバックアップが併存する場合は、安全のため再適用を停止します。',
       { modal: true },
       'Markdown Editor CSS を有効にする'
     );

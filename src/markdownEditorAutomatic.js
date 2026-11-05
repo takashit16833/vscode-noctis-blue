@@ -9,6 +9,21 @@ const MARKDOWN_EXTENSION_ID = 'vscode.markdown-language-features';
 const STATE_KEY = 'noctisBlue.markdownEditorAppearanceEnabledTargets';
 const NOCTIS_THEMES = new Set(['Noctis Blue', 'Noctis Blue Transparent']);
 
+const pendingByTarget = new Map();
+
+// A configuration update must not reapply CSS after an explicit disable.
+// Serialize the file operation together with its saved enable/disable state.
+async function withTargetQueue(scope, task) {
+  const previous = pendingByTarget.get(scope);
+  const current = (previous ?? Promise.resolve()).catch(() => {}).then(task);
+  pendingByTarget.set(scope, current);
+  try {
+    return await current;
+  } finally {
+    if (pendingByTarget.get(scope) === current) pendingByTarget.delete(scope);
+  }
+}
+
 function currentTheme(vscode) {
   return vscode.workspace.getConfiguration('workbench').get('colorTheme');
 }
@@ -58,13 +73,14 @@ function enabledTargets(context) {
 }
 
 async function syncMarkdownEditorAppearance(vscode, context) {
-  // Applying to each VS Code installation requires explicit per-target consent.
-  if (!enabledTargets(context)[targetScope(vscode)]) return false;
-  const { filename, io } = await cssTarget(vscode);
-  // Shared editor.css contains theme-scoped rules; switching a window's theme
-  // must never remove styles used by other windows.
-  await applyMarkdownEditorCss(filename, currentMarkdownCss(vscode), io);
-  return true;
+  const scope = targetScope(vscode);
+  return withTargetQueue(scope, async () => {
+    if (!enabledTargets(context)[scope]) return false;
+    const { filename, io } = await cssTarget(vscode);
+    // The CSS is shared across windows and scoped to the Noctis Blue themes.
+    await applyMarkdownEditorCss(filename, currentMarkdownCss(vscode), io);
+    return true;
+  });
 }
 
 async function enableMarkdownEditorAppearance(vscode, context) {
@@ -72,20 +88,24 @@ async function enableMarkdownEditorAppearance(vscode, context) {
     throw new Error('Noctis Blue または Noctis Blue Transparent を選択してから有効にしてください。');
   }
   const scope = targetScope(vscode);
-  const { filename, io } = await cssTarget(vscode);
-  await applyMarkdownEditorCss(filename, currentMarkdownCss(vscode), io);
-  await context.globalState.update(STATE_KEY, { ...enabledTargets(context), [scope]: true });
-  return true;
+  return withTargetQueue(scope, async () => {
+    const { filename, io } = await cssTarget(vscode);
+    await applyMarkdownEditorCss(filename, currentMarkdownCss(vscode), io);
+    await context.globalState.update(STATE_KEY, { ...enabledTargets(context), [scope]: true });
+    return true;
+  });
 }
 
 async function disableMarkdownEditorAppearance(vscode, context) {
   const scope = targetScope(vscode);
-  const { filename, io } = await cssTarget(vscode);
-  await removeMarkdownEditorCss(filename, io);
-  const state = { ...enabledTargets(context) };
-  delete state[scope];
-  await context.globalState.update(STATE_KEY, state);
-  return true;
+  return withTargetQueue(scope, async () => {
+    const { filename, io } = await cssTarget(vscode);
+    await removeMarkdownEditorCss(filename, io);
+    const state = { ...enabledTargets(context) };
+    delete state[scope];
+    await context.globalState.update(STATE_KEY, state);
+    return true;
+  });
 }
 
 module.exports = {

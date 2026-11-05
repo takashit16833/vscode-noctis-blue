@@ -57,6 +57,30 @@ test('設定変更は元CSSを維持したまま管理ブロックだけ更新�
   assert.equal(await fs.readFile(f.filename + BACKUP_SUFFIX, 'utf8'), f.content);
 });
 
+test('初回適用の書き込み失敗後は作成したバックアップだけを戻す', async t => {
+  const f = await fixture(t);
+  const originalRename = fs.rename;
+  t.mock.method(fs, 'rename', async (from, to) => {
+    if (to === f.filename) throw new Error('simulated rename failure');
+    return originalRename(from, to);
+  });
+  await assert.rejects(applyMarkdownEditorCss(f.filename, '.safe{}'), /simulated rename failure/);
+  assert.equal(await fs.readFile(f.filename, 'utf8'), f.content);
+  await assert.rejects(fs.stat(f.filename + BACKUP_SUFFIX), { code: 'ENOENT' });
+  t.mock.restoreAll();
+  assert.equal((await applyMarkdownEditorCss(f.filename, '.safe{}')).patched, true);
+});
+
+test('別ウィンドウのロックがあるとき Markdown CSS を変更しない', async t => {
+  const f = await fixture(t);
+  const lock = f.filename + '.noctis-blue.lock';
+  await fs.writeFile(lock, 'another window');
+  await assert.rejects(applyMarkdownEditorCss(f.filename, '.safe{}'), /別のウィンドウ/);
+  assert.equal(await fs.readFile(f.filename, 'utf8'), f.content);
+  assert.equal(await fs.readFile(lock, 'utf8'), 'another window');
+  await assert.rejects(fs.stat(f.filename + BACKUP_SUFFIX), { code: 'ENOENT' });
+});
+
 test('VS Code 更新で元 CSS が変わったとき古いバックアップを消さず停止する', async t => {
   const f = await fixture(t, '/* vscode old */\n');
   await applyMarkdownEditorCss(f.filename, '.old{}');

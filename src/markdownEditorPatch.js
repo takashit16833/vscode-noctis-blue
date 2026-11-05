@@ -100,13 +100,14 @@ function validatePatchedContent(current, original) {
   }
 }
 
-async function applyMarkdownEditorCss(filename, css, io = fs) {
+async function applyUnlocked(filename, css, io = fs) {
   const stat = await regularFile(filename, io);
   if (!stat) throw new Error('Markdown Editor CSS が見つかりません: ' + filename);
 
   const current = await io.readFile(filename, 'utf8');
   const state = markerState(current);
   let original;
+  let createdBackup = false;
 
   if (state.patched) {
     const backup = await readBackup(filename, io);
@@ -122,14 +123,26 @@ async function applyMarkdownEditorCss(filename, css, io = fs) {
     const existing = await readBackup(filename, io);
     if (existing) throw new Error('Markdown Editor CSS の既存バックアップの由来が分かりません。削除・上書きせず停止します。');
     await createBackupExclusive(filename, filename + BACKUP_SUFFIX, original, io);
+    createdBackup = true;
   }
 
   const next = original + separatorFor(original) + managedBlock(css);
-  if (next !== current) await atomicWrite(filename, next, stat.mode, io);
+  try {
+    if (next !== current) await atomicWrite(filename, next, stat.mode, io);
+  } catch (error) {
+    // Roll back a backup created by this attempt only if the original CSS
+    // is still untouched. Never remove a pre-existing or changed backup.
+    if (createdBackup &&
+        await io.readFile(filename, 'utf8').catch(() => null) === original &&
+        await io.readFile(filename + BACKUP_SUFFIX, 'utf8').catch(() => null) === original) {
+      await io.unlink(filename + BACKUP_SUFFIX).catch(() => {});
+    }
+    throw error;
+  }
   return { changed: next !== current, patched: true };
 }
 
-async function removeMarkdownEditorCss(filename, io = fs) {
+async function removeUnlocked(filename, io = fs) {
   const stat = await regularFile(filename, io);
   if (!stat) return { changed: false, patched: false };
 
@@ -150,6 +163,44 @@ async function removeMarkdownEditorCss(filename, io = fs) {
   await atomicWrite(filename, backup.content, stat.mode, io);
   await io.unlink(backup.filename);
   return { changed: true, patched: false };
+}
+
+
+async function withLocalLock(filename, io, task) {
+  // Other local VS Code windows run in separate extension hosts. A per-host
+  // queue alone cannot keep their shared editor.css safe.
+  if (io !== fs) return task();
+  const lock = filename + '.noctis-blue.lock';
+  let handle;
+  try {
+    handle = await fs.open(lock, 'wx', 0o600);
+  } catch (error) {
+    if (error.code === 'EEXIST') {
+      throw new Error('別のウィンドウが Markdown Editor CSS を操作中です。後で再実行してください。');
+    }
+    throw error;
+  }
+  try {
+    return await task();
+  } finally {
+    const owned = await handle.stat();
+    await handle.close();
+    const current = await fs.lstat(lock).catch(error => {
+      if (error.code === 'ENOENT') return null;
+      throw error;
+    });
+    if (current && current.dev === owned.dev && current.ino === owned.ino) {
+      await fs.unlink(lock);
+    }
+  }
+}
+
+async function applyMarkdownEditorCss(filename, css, io = fs) {
+  return withLocalLock(filename, io, () => applyUnlocked(filename, css, io));
+}
+
+async function removeMarkdownEditorCss(filename, io = fs) {
+  return withLocalLock(filename, io, () => removeUnlocked(filename, io));
 }
 
 module.exports = {
