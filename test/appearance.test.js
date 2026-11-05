@@ -50,6 +50,7 @@ test('area CSS uses actual opaque Noctis colors, without any wallpaper image', (
   assert.equal(transparent.colors['minimap.background'], opaque.colors['minimap.background'] + '00');
   assert.ok(css.includes('.monaco-grid-view'));
   assert.ok(css.includes('.part.editor .tabs-and-actions-container'));
+  assert.ok(!css.includes('.tabs-container > .tab > .tab-fill'));
   assert.ok(css.includes('background-color: transparent !important'));
   assert.ok(!css.includes('--nb-gap-color'));
   assert.ok(!css.includes('background-blend-mode'));
