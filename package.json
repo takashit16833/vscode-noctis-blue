@@ -228,7 +228,6 @@
     "onCommand:noctisBlue.repairWorkbench"
   ],
   "extensionKind": [
-    "ui",
-    "workspace"
+    "ui"
   ]
 }
