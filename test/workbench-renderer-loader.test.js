@@ -28,7 +28,7 @@ async function openWorkbench(workspaceId, options = {}) {
       head: {
         append(link) {
           links.push(link);
-          if (options.cssMissing && !link.href.includes('vscode-wallpaper-layers-')) link.onerror?.();
+          if (options.cssMissing && !link.href.includes('noctis-blue-layers-')) link.onerror?.();
         }
       }
     },
@@ -48,8 +48,8 @@ test('起動時にワークスペース固有の CSS を一度だけ読み込む
   assert.equal(links.length, 2);
   assert.equal(links[0].rel, 'stylesheet');
   assert.equal(links[1].rel, 'stylesheet');
-  assert.match(links[0].href, /vscode-wallpaper-project-a\.css\?startup=123$/);
-  assert.match(links[1].href, /vscode-wallpaper-layers-project-a\.css\?startup=123$/);
+  assert.match(links[0].href, /noctis-blue-project-a\.css\?startup=123$/);
+  assert.match(links[1].href, /noctis-blue-layers-project-a\.css\?startup=123$/);
   assert.equal(warnings.length, 0);
 });
 
@@ -76,7 +76,7 @@ test('まだ CSS がない場合は再試行せず、Reload Window が必要と�
 
 test('作業領域がないウィンドウは empty 用 CSS を参照する', async () => {
   const { links } = await openWorkbench();
-  assert.match(links[0].href, /vscode-wallpaper-empty\.css/);
+  assert.match(links[0].href, /noctis-blue-empty\.css/);
 });
 
 test('不正なワークスペース ID は使わない', async () => {
