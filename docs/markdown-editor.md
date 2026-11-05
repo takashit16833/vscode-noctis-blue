@@ -43,7 +43,6 @@ VS Code の
 ```css
 .md-heading {
   color: #A6CAFF !important;
-  border-bottom-color: #316CBD !important;
 }
 
 pre.md-code-block {
@@ -82,7 +81,7 @@ pre.md-code-block {
 }
 ```
 
-`#316CBD` は Emacs 版の `fg-muted` であり、リンク・表ヘッダー・表罫線・見出し下線に共通で使う。
+`#316CBD` は Emacs 版の `fg-muted` である。見出し下線は Markdown Editor 標準の色・太さを維持する。
 
 コードブロック背景は公開テーマ色 `textCodeBlock.background` で管理し、
 Emacs 版の `org-block-bg` と同じ `#0A1A36` を使う。
