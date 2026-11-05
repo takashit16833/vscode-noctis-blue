@@ -7,9 +7,9 @@ const START_MARKER = '/* >>> Noctis Blue Markdown Editor CSS >>> */';
 const END_MARKER = '/* <<< Noctis Blue Markdown Editor CSS <<< */';
 const BACKUP_SUFFIX = '.noctis-blue.backup';
 
-async function regularFile(filename) {
+async function regularFile(filename, io = fs) {
   try {
-    const stat = await fs.lstat(filename);
+    const stat = await io.lstat(filename);
     if (!stat.isFile()) {
       throw new Error('通常ファイルではありません: ' + filename);
     }
@@ -50,26 +50,26 @@ function markerState(content) {
   return { patched: true, start, end: end + END_MARKER.length };
 }
 
-async function atomicWrite(filename, content, mode) {
+async function atomicWrite(filename, content, mode, io = fs) {
   const directory = path.dirname(filename);
   const temporary = path.join(
     directory,
     '.' + path.basename(filename) + '.noctis-blue-' + process.pid + '.tmp'
   );
   try {
-    await fs.writeFile(temporary, content, { mode });
-    await fs.chmod(temporary, mode);
-    await fs.rename(temporary, filename);
+    await io.writeFile(temporary, content, { mode });
+    await io.chmod(temporary, mode);
+    await io.rename(temporary, filename);
   } finally {
-    await fs.rm(temporary, { force: true }).catch(() => {});
+    await io.rm(temporary, { force: true }).catch(() => {});
   }
 }
 
-async function readBackup(filename) {
+async function readBackup(filename, io = fs) {
   const backup = filename + BACKUP_SUFFIX;
-  const stat = await regularFile(backup);
+  const stat = await regularFile(backup, io);
   if (!stat) return null;
-  return { filename: backup, stat, content: await fs.readFile(backup, 'utf8') };
+  return { filename: backup, stat, content: await io.readFile(backup, 'utf8') };
 }
 
 function validatePatchedContent(current, original) {
@@ -83,16 +83,16 @@ function validatePatchedContent(current, original) {
   }
 }
 
-async function applyMarkdownEditorCss(filename, css) {
-  const stat = await regularFile(filename);
+async function applyMarkdownEditorCss(filename, css, io = fs) {
+  const stat = await regularFile(filename, io);
   if (!stat) throw new Error('Markdown Editor CSS が見つかりません: ' + filename);
 
-  const current = await fs.readFile(filename, 'utf8');
+  const current = await io.readFile(filename, 'utf8');
   const state = markerState(current);
   let original;
 
   if (state.patched) {
-    const backup = await readBackup(filename);
+    const backup = await readBackup(filename, io);
     if (!backup) {
       throw new Error('Markdown Editor CSS のバックアップがありません。安全のため更新しません。');
     }
@@ -102,28 +102,28 @@ async function applyMarkdownEditorCss(filename, css) {
     // A VS Code update replaces editor.css but can leave our sidecar backup.
     // Once the current file has no managed marker, it is the new clean source.
     original = current;
-    const staleBackup = await readBackup(filename);
-    if (staleBackup) await fs.unlink(staleBackup.filename);
+    const staleBackup = await readBackup(filename, io);
+    if (staleBackup) await io.unlink(staleBackup.filename);
     const backupFilename = filename + BACKUP_SUFFIX;
-    await fs.writeFile(backupFilename, original, { mode: stat.mode });
-    await fs.chmod(backupFilename, stat.mode);
+    await io.writeFile(backupFilename, original, { mode: stat.mode });
+    await io.chmod(backupFilename, stat.mode);
   }
 
   const next = original + separatorFor(original) + managedBlock(css);
-  if (next !== current) await atomicWrite(filename, next, stat.mode);
+  if (next !== current) await atomicWrite(filename, next, stat.mode, io);
   return { changed: next !== current, patched: true };
 }
 
-async function removeMarkdownEditorCss(filename) {
-  const stat = await regularFile(filename);
+async function removeMarkdownEditorCss(filename, io = fs) {
+  const stat = await regularFile(filename, io);
   if (!stat) return { changed: false, patched: false };
 
-  const current = await fs.readFile(filename, 'utf8');
+  const current = await io.readFile(filename, 'utf8');
   const state = markerState(current);
-  const backup = await readBackup(filename);
+  const backup = await readBackup(filename, io);
 
   if (!state.patched) {
-    if (backup) await fs.unlink(backup.filename);
+    if (backup) await io.unlink(backup.filename);
     return { changed: false, patched: false };
   }
   if (!backup) {
@@ -131,8 +131,8 @@ async function removeMarkdownEditorCss(filename) {
   }
 
   validatePatchedContent(current, backup.content);
-  await atomicWrite(filename, backup.content, stat.mode);
-  await fs.unlink(backup.filename);
+  await atomicWrite(filename, backup.content, stat.mode, io);
+  await io.unlink(backup.filename);
   return { changed: true, patched: false };
 }
 
