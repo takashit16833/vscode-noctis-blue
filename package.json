@@ -102,6 +102,7 @@
           "scope": "window",
           "default": {
             "editor": 0.91,
+            "gutter": 0.5,
             "minimap": 0.5,
             "tabs": 0.75,
             "breadcrumbs": 0.75,
@@ -118,6 +119,12 @@
               "minimum": 0,
               "maximum": 1,
               "description": "中央のエディタ領域（内蔵Markdown Editorの外側を含む）の背景色の不透明度。"
+            },
+            "gutter": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "行番号や折りたたみ記号が並ぶ左側の背景色の不透明度。現在行の色分けにはVS Code標準の強調表示を使います。"
             },
             "minimap": {
               "type": "number",
