@@ -118,6 +118,17 @@ test('現在の管理外ローダーには上書きせず停止する', async t 
   assert.equal(await fs.readFile(files.loader, 'utf8'), '// unrelated loader');
 });
 
+test('別の workbench ローダーが残っていたら上書き・二重適用しない', async t => {
+  const { root, files } = await fixture(t);
+  const modified = original.replace(cssAnchor,
+    cssAnchor + '\n\t\t<script type="module" src="./other-loader.js"></script>');
+  await fs.writeFile(files.html, modified);
+
+  await assert.rejects(enable(root, 'body{}', 'project'), /以前の壁紙ファイル/);
+  assert.equal(await fs.readFile(files.html, 'utf8'), modified);
+  await assert.rejects(fs.stat(files.backup), { code: 'ENOENT' });
+});
+
 test('不正な外部 CSS レイヤーはファイルを書き換える前に拒否する', async t => {
   const { root, files } = await fixture(t);
   await assert.rejects(enable(root, 'body{}', 'project', { '../bad': 'a{}' }), /レイヤー識別子/);
