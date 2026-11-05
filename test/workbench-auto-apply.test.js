@@ -4,11 +4,15 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const os = require('node:os');
+const crypto = require('node:crypto');
 const { pathsFor, workspaceStylePath, workspaceLayersPath, inspect, enable, sync, disable,
   repairStale, patchedHtml, composeLayers, CSS_HEADER, LAYERS_CSS_HEADER } = require('../src/workbench/auto-apply');
 
 const cssAnchor = '<link rel="stylesheet" href="../../../workbench/workbench.desktop.main.css">';
 const original = '<!doctype html>\n<html><head>\n\t' + cssAnchor + '\n</head><body></body></html>\n';
+const backupMarker = '/* Noctis Blue workbench backup sha256: ' +
+  crypto.createHash('sha256').update(original).digest('hex') + ' */\n';
+
 
 async function fixture(t) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'noctis-workbench-test-'));
@@ -28,7 +32,7 @@ test('ワークスペースごとの CSS を起動用 HTML から読み分ける
   assert.equal(await fs.readFile(workspaceStylePath(files, 'folder-a'), 'utf8'),
     CSS_HEADER + 'body { color: red; }');
   assert.equal(await fs.readFile(workspaceLayersPath(files, 'folder-a'), 'utf8'),
-    LAYERS_CSS_HEADER);
+    LAYERS_CSS_HEADER + backupMarker);
   assert.equal(await fs.readFile(files.loader, 'utf8'),
     await fs.readFile(path.join(__dirname, '..', 'src', 'workbench', 'renderer-loader.js'), 'utf8'));
 
@@ -55,7 +59,7 @@ test('画像が設定されていないワークスペースも空の CSS で管
   const { root, files } = await fixture(t);
   await enable(root, '', 'empty');
   assert.equal(await fs.readFile(workspaceStylePath(files, 'empty'), 'utf8'), CSS_HEADER);
-  assert.equal(await fs.readFile(workspaceLayersPath(files, 'empty'), 'utf8'), LAYERS_CSS_HEADER);
+  assert.equal(await fs.readFile(workspaceLayersPath(files, 'empty'), 'utf8'), LAYERS_CSS_HEADER + backupMarker);
   assert.equal((await inspect(root)).installed, true);
 });
 
@@ -104,7 +108,7 @@ test('外部 CSS レイヤーを識別子順に一つの管理ファイルへ出
   await enable(root, 'body{}', 'project', layers);
   assert.equal(
     await fs.readFile(workspaceLayersPath(files, 'project'), 'utf8'),
-    LAYERS_CSS_HEADER + composeLayers(layers)
+    LAYERS_CSS_HEADER + backupMarker + composeLayers(layers)
   );
   assert.match(composeLayers(layers), /^\/\* layer: noctis-blue \*\//);
   assert.ok(composeLayers(layers).indexOf('noctis-blue') < composeLayers(layers).indexOf('z-last'));
