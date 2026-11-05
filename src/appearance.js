@@ -118,8 +118,6 @@ function buildClearBackgroundRules() {
       ROOT + ' .part.editor :is(.breadcrumbs-below-tabs, .breadcrumbs-control, .breadcrumbs-editor-type)',
       ROOT + ' .part.editor .breadcrumbs-below-tabs :is(.breadcrumbs-control, .monaco-breadcrumbs)'
     ].join(',\n') + ' { background-image: none !important; }',
-    ROOT + '.modern-ui-tabs .part.editor .tabs-container > .tab > .tab-fill' +
-      ' { background-color: transparent !important; }',
     ROOT + ' { --vscode-scrollbar-background: transparent !important;' +
       ' --vscode-breadcrumb-background: transparent !important; }',
     ROOT + ' :is(.part.editor, .part.panel) .monaco-scrollable-element > .scrollbar' +
