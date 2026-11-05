@@ -45,20 +45,6 @@ async function styles(vscode) {
   return { workspaceId, layers, wallpaper: currentWallpaperCss(vscode) };
 }
 
-// Adopt the previous extension's existing workbench patch only after checking
-// that its loader, backup and HTML are intact. Never infer prior consent from
-// the presence of a similarly named file alone.
-async function adoptInstalledWallpaper(vscode, context) {
-  if (context.globalState.get(MIGRATION_KEY, false)) return false;
-  ensureNoLegacyExtension(vscode);
-  const existing = await automatic.inspect(vscode.env.appRoot);
-  if (existing.installed && !context.globalState.get(STATE_KEY, false)) {
-    await context.globalState.update(STATE_KEY, true);
-  }
-  await context.globalState.update(MIGRATION_KEY, true);
-  return existing.installed;
-}
-
 async function syncAutomaticAppearance(vscode, context) {
   if (!context.globalState.get(STATE_KEY, false)) return false;
   ensureNoLegacyExtension(vscode);
