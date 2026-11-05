@@ -20,11 +20,19 @@ test('Markdown Editor CSS follows the Emacs document palette', () => {
   assert.match(css, /border: none !important;/);
 
   assert.match(css, /blockquote\.md-blockquote \{/);
-  assert.match(css, /--vscode-textCodeBlock-background, #0A1A36\)/i);
+  assert.match(css, /color: #4C9EEB !important;/i);
+  assert.match(css, /background-color: #001947 !important;/i);
+  assert.match(css, /border-color: #5EAFFF !important;/i);
 
   assert.match(css, /\.md-document code:not\(pre code\) \{/);
-  assert.match(css, /--vscode-editor-foreground, #5EAFFF\)/i);
-  assert.match(css, /--vscode-textCodeBlock-background, #0A1A36\)/i);
+  assert.match(css, /color: #7CBEFF !important;/i);
+  assert.match(css, /background-color: #052A59 !important;/i);
+  assert.match(css, /padding: 0\.15em 0\.35em !important;/);
+  assert.match(css, /border: none !important;/);
+  assert.match(css, /body\[data-vscode-theme-id="Noctis Blue Transparent"\] blockquote\.md-blockquote \{/);
+  assert.match(css, /background-color: color-mix\(in srgb, #001947 45%, transparent\) !important;/i);
+  assert.match(css, /body\[data-vscode-theme-id="Noctis Blue Transparent"\] \.md-document code:not\(pre code\) \{/);
+  assert.match(css, /background-color: color-mix\(in srgb, #052A59 45%, transparent\) !important;/i);
 
   assert.match(css, /\.md-document a \{/);
   assert.match(css, /color: #316CBD !important;/i);

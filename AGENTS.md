@@ -63,8 +63,8 @@
 - コードブロック枠線は Markdown Editor 側が汎用 `widget.border` を使うため、テーマ色 `widget.border` は変更せず `pre.md-code-block` だけ CSS で枠線を消す。
 - H1/H2 は文字位置を動かさず、`::before` を `left: -14px` に絶対配置して左縦線を付ける。縦線は `top: 0.6em` / `height: 1em` / `translateY(-50%)` で文字行の中心に合わせる。H2 の下線だけは非表示にし、H1 と H3 以下の既存下線は変更しない。
 - 引用・インラインコード・リンク・表など Markdown Editor 固有要素は、実DOMと Computed Style を確認してから個別に上書きする。推測したクラス名や `background: transparent` のような色を消す指定を入れない。
-- 引用は実機で `BLOCKQUOTE.md-block.md-blockquote` を確認済み。背景はコードブロックと同じ `textCodeBlock.background` に統一する。
-- インラインコードは実機で `CODE`、fenced code は `PRE.md-code-block > CODE` と確認済み。非 `PRE` 配下の `CODE` だけを `editor.foreground` + `textCodeBlock.background` へ揃える。
+- 引用は実機で `BLOCKQUOTE.md-block.md-blockquote` を確認済み。背景・前景・枠色は Obsidian の配色に揃え、コードブロックとは分ける。
+- インラインコードは実機で `CODE`、fenced code は `PRE.md-code-block > CODE` と確認済み。非 `PRE` 配下の `CODE` に Obsidian と同じ文字・背景色を適用し、左右の余白を確保する。
 - `language-text` / `language-plaintext` の fenced code は通常本文と同じ `editor.foreground` を使う。
 - 通常リンクは実機でクラスなしの `A` 要素と確認済み。Markdown Editor 文書内だけ `fg-muted = #316CBD`、太字、下線へ揃える。
 - 表は実DOM確認済み。見出しは `#316CBD` + 太字、罫線は太さと線種を変えず `widget.border` を使う。

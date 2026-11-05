@@ -10,6 +10,7 @@ const STYLE_ID = 'noctis-blue-markdown-active-test';
 const THEME_ROOT = 'body:is([data-vscode-theme-id="Noctis Blue"], ' +
   '[data-vscode-theme-id="Noctis Blue Transparent"])';
 const scoped = selector => THEME_ROOT + ' ' + selector;
+const TRANSPARENT_THEME_ROOT = 'body[data-vscode-theme-id="Noctis Blue Transparent"]';
 
 function validateOpacity(value) {
   if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 1) {
@@ -54,15 +55,27 @@ function generateMarkdownCss(opacity) {
     '  border: none !important;',
     '}',
     '',
-    '/* Keep quote background aligned with fenced code blocks. */',
+    '/* Match Obsidian quote colors without changing the existing border width. */',
     scoped('blockquote.md-blockquote') + ' {',
-    '  background: var(--vscode-textCodeBlock-background, ' + palette.markdownCodeBlockBackground + ') !important;',
+    '  color: ' + palette.dim + ' !important;',
+    '  background-color: ' + palette.markdownQuoteBackground + ' !important;',
+    '  border-color: ' + palette.foreground + ' !important;',
     '}',
     '',
-    '/* Observed: inline code is CODE outside PRE; keep fenced code unchanged. */',
+    '/* Inline code is CODE outside PRE; fenced blocks keep their own styling. */',
     scoped('.md-document code:not(pre code)') + ' {',
-    '  color: var(--vscode-editor-foreground, ' + palette.foreground + ') !important;',
-    '  background: var(--vscode-textCodeBlock-background, ' + palette.markdownCodeBlockBackground + ') !important;',
+    '  color: ' + palette.light + ' !important;',
+    '  background-color: ' + palette.focus + ' !important;',
+    '  border: none !important;',
+    '  padding: 0.15em 0.35em !important;',
+    '}',
+    '',
+    '/* Obsidian uses 45% block opacity when its wallpaper is visible. */',
+    TRANSPARENT_THEME_ROOT + ' blockquote.md-blockquote {',
+    '  background-color: color-mix(in srgb, ' + palette.markdownQuoteBackground + ' 45%, transparent) !important;',
+    '}',
+    TRANSPARENT_THEME_ROOT + ' .md-document code:not(pre code) {',
+    '  background-color: color-mix(in srgb, ' + palette.focus + ' 45%, transparent) !important;',
     '}',
     '',
     '/* Observed: normal Markdown links are plain A elements. */',
