@@ -92,7 +92,7 @@
 - `src/markdownEditorRemote.js` はローカル `product.json` から VS Code commit を取得し、既知の Dev Container / Remote server ディレクトリの **存在を確認したファイル** のみを `vscode.workspace.fs` で扱う。パスの推測による書き込みは行わない。
 - `src/markdownEditorPatch.js` は共通の安全な CSS バックアップ・検証・復元ロジックとする。ローカル `node:fs` とリモート `workspace.fs` はファイル操作の実装だけを分ける。
 - `workspace.fs` に `chmod` はない。自動 `chown` / `sudo` / 権限緩和を追加しない。コンテナの root 所有ディレクトリへの書き込み失敗は **未解決の運用問題** として、実機で検証する。権限がない場合はエラーで停止し、状態の変更・バックアップ破壊を避ける。
-- VS Code 更新・違う remote server 布置は実機の場所と権限を調査してから候補を増やす。検証していない環境に動くと断定しない。
+- VS Code 更新・違う remote server 配置は実機の場所と権限を調査してから候補を増やす。検証していない環境に動くと断定しない。
 - 内蔵 Markdown Editor は組み込み Webview。標準 Markdown Preview や外部 Live Preview と混同しない。
 
 ## 統合テストとリリース
