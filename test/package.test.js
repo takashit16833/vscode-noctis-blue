@@ -25,3 +25,8 @@ test('markdownAppearance resolves the packaged runtime palette', () => {
   assert.match(source, /require\(['"]\.\.\/palette\/colors\.json['"]\)/);
   assert.doesNotThrow(() => require('../src/markdownAppearance'));
 });
+
+test('Noctis Blue always runs in the local UI extension host', () => {
+  const manifest = require('../package.json');
+  assert.deepEqual(manifest.extensionKind, ['ui']);
+});
