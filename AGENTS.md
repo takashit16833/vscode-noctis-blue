@@ -78,7 +78,7 @@
 - `--md-block-active-background` の色を固定色へ置き換えず、背景と影の不透明度だけを変更する。
 - `noctisBlue.markdownActiveBlockOpacity` は複数ウィンドウが共有する `editor.css` の設定なので `scope: application` とする。ウィンドウごとに異なる値を共有 CSS へ上書きさせない。
 - Markdown Editor CSS は `body[data-vscode-theme-id]` で Noctis Blue 2テーマに限定し、ウィンドウのテーマ切替だけで共有 CSS を削除しない。テーマの識別子は `package.json` の themes[].id と一致させる。
-- 内蔵 Markdown CSS の有効化は `noctisBlue.markdownEditorAppearanceEnabledTargets` に接続先ごと保存する。旧単一真偽値は別の接続先に対する許可とみなさず、新しい対象では利用者に再有効化してもらう。
+- 内蔵 Markdown CSS の有効化は `noctisBlue.markdownEditorAppearanceEnabledTargets` に接続先ごと保存する。許可が確認できない接続先では適用せず、利用者の明示的な有効化を求める。
 - Noctis Blue のアンインストール前には Markdown Editor Appearance を解除する。
 
 ## 開発用診断
@@ -92,14 +92,14 @@
 
 ## リモート Markdown Editor と権限
 
-- 統合で Noctis Blue の拡張実行場所を Mac 側 UI host へ変更した。VS Code Server 側の内蔵 Markdown Editor CSS は別の場所にある。
+- Noctis Blue は Mac 側 UI host で実行する。VS Code Server 側の内蔵 Markdown Editor CSS は別の場所にある。
 - `src/markdownEditorRemote.js` は観測済みの `/vscode/extensions/...` と、ローカル `product.json` の commit に対応する既知の Remote server ディレクトリを `workspace.fs` で調べる。候補が一つだけのときに操作し、複数見つかれば止める。Webview が実際に読み込んだ URI との照合は実機で行う。
 - `src/markdownEditorPatch.js` は共通の安全な CSS バックアップ・検証・復元ロジックとする。ローカル `node:fs` とリモート `workspace.fs` はファイル操作の実装だけを分ける。
-- `workspace.fs` に `chmod` も排他的 `writeFile` もない。バックアップ作成は `workspace.fs.copy(overwrite: false)` を使う。自動 `chown` / `sudo` / 権限緩和を追加しない。コンテナの root 所有ディレクトリへの書き込み失敗は **未解決の運用問題** として、実機で検証する。権限がない場合はエラーで停止し、状態の変更・バックアップ破壊を避ける。
+- `workspace.fs` に `chmod` も排他的 `writeFile` もない。バックアップ作成は `workspace.fs.copy(overwrite: false)` を使う。自動 `chown` / `sudo` / 権限緩和を追加しない。コンテナで書き込み権限がない場合はエラーで停止し、所有者や設定を勝手に変更しない。
 - VS Code 更新・違う remote server 配置は実機の場所と権限を調査してから候補を増やす。検証していない環境に動くと断定しない。
 - 内蔵 Markdown Editor は組み込み Webview。標準 Markdown Preview や外部 Live Preview と混同しない。
 
-## 統合テストとリリース
+## テストとリリース
 
 - `npm run build && npm test`。画像・画面切替・ローダー・作業領域 ID・バックアップ安全性テストを維持する。
 - Mac 実機背景、Dev Container の Markdown Editor、workbench 管理ファイルの解除・再適用を検証する。実機を利用できない場合は、未検証項目と確認方法を明記し、テスト成功を実機成功と混同しない。
