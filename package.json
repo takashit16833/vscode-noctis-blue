@@ -2,7 +2,7 @@
   "name": "noctis-blue",
   "displayName": "Noctis Blue",
   "description": "A blue VS Code theme with customizable translucent surfaces.",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "publisher": "takashit16833",
   "private": true,
   "engines": {
@@ -61,6 +61,14 @@
       {
         "command": "noctisBlue.disableAutomaticAppearance",
         "title": "Noctis Blue: Disable Automatic Appearance"
+      },
+      {
+        "command": "noctisBlue.enableMarkdownEditorAppearance",
+        "title": "Noctis Blue: Enable Markdown Editor Appearance"
+      },
+      {
+        "command": "noctisBlue.disableMarkdownEditorAppearance",
+        "title": "Noctis Blue: Disable Markdown Editor Appearance"
       }
     ],
     "configuration": {
@@ -125,7 +133,7 @@
           "default": 0.65,
           "minimum": 0,
           "maximum": 1,
-          "markdownDescription": "内蔵Markdown Editorの編集中ブロックの**背景色**と周囲の影に適用する不透明度。元の背景色・角丸・強調表示を維持します。現在は `Noctis Blue: Show Markdown Active Block Test` から生成する一時CSSの検証専用です。"
+          "markdownDescription": "内蔵Markdown Editorの編集中ブロックの**背景色**と周囲の影に適用する不透明度。元の背景色・角丸・強調表示を維持します。`Noctis Blue: Enable Markdown Editor Appearance` を有効にすると、組み込み Markdown Editor の管理 CSS に反映されます。"
         }
       }
     }
@@ -137,6 +145,8 @@
     "onCommand:noctisBlue.showMarkdownActiveBlockTest",
     "onCommand:noctisBlue.showCombinedTransparencyTest",
     "onCommand:noctisBlue.enableAutomaticAppearance",
-    "onCommand:noctisBlue.disableAutomaticAppearance"
+    "onCommand:noctisBlue.disableAutomaticAppearance",
+    "onCommand:noctisBlue.enableMarkdownEditorAppearance",
+    "onCommand:noctisBlue.disableMarkdownEditorAppearance"
   ]
 }
