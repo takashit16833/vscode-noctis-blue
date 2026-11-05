@@ -60,7 +60,7 @@ test('リモートワークスペースの URI を Mac の画像パスとして�
   assert.match(currentWallpaperCss(f.vscode), /https:\/\/example\.org\/blue\.png/);
 });
 
-test('移行前の wallpaper 設定を読み、移行後は新しい設定を優先する', () => {
+test('設定の互換処理を整理するための基準テスト', () => {
   const old = fixture({ legacySettings: {
     enabled: true, image: 'https://example.org/old.png'
   } });
