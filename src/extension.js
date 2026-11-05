@@ -65,7 +65,7 @@ function activate(context) {
       );
     } catch (error) {
       void vscode.window.showErrorMessage(
-        '統合検証スクリプトの生成に失敗: ' + error.message
+        '透過表示の検証スクリプトの生成に失敗: ' + error.message
       );
     }
   });
