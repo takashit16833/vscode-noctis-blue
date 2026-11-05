@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('node:path');
+const { remoteMarkdownEditorTarget } = require('./markdownEditorRemote');
 const { generateMarkdownCss } = require('./markdownAppearance');
 const {
   applyMarkdownEditorCss,
@@ -27,6 +28,11 @@ function markdownEditorCssPath(vscode) {
   return path.join(extension.extensionUri.fsPath, 'markdown-editor-out', 'editor.css');
 }
 
+async function cssTarget(vscode) {
+  if (vscode.env?.remoteName) return remoteMarkdownEditorTarget(vscode);
+  return { filename: markdownEditorCssPath(vscode) };
+}
+
 function currentMarkdownCss(vscode) {
   const opacity = vscode.workspace.getConfiguration('noctisBlue')
     .get('markdownActiveBlockOpacity', 0.65);
@@ -36,11 +42,11 @@ function currentMarkdownCss(vscode) {
 async function syncMarkdownEditorAppearance(vscode, context) {
   if (!context.globalState.get(STATE_KEY, false)) return false;
 
-  const filename = markdownEditorCssPath(vscode);
+  const { filename, io } = await cssTarget(vscode);
   if (isNoctisTheme(vscode)) {
-    await applyMarkdownEditorCss(filename, currentMarkdownCss(vscode));
+    await applyMarkdownEditorCss(filename, currentMarkdownCss(vscode), io);
   } else {
-    await removeMarkdownEditorCss(filename);
+    await removeMarkdownEditorCss(filename, io);
   }
   return true;
 }
@@ -50,20 +56,20 @@ async function enableMarkdownEditorAppearance(vscode, context) {
     throw new Error('Noctis Blue または Noctis Blue Transparent を選択してから有効にしてください。');
   }
 
-  const filename = markdownEditorCssPath(vscode);
-  await applyMarkdownEditorCss(filename, currentMarkdownCss(vscode));
+  const { filename, io } = await cssTarget(vscode);
+  await applyMarkdownEditorCss(filename, currentMarkdownCss(vscode), io);
   try {
     await context.globalState.update(STATE_KEY, true);
   } catch (error) {
-    await removeMarkdownEditorCss(filename).catch(() => {});
+    await removeMarkdownEditorCss(filename, io).catch(() => {});
     throw error;
   }
   return true;
 }
 
 async function disableMarkdownEditorAppearance(vscode, context) {
-  const filename = markdownEditorCssPath(vscode);
-  await removeMarkdownEditorCss(filename);
+  const { filename, io } = await cssTarget(vscode);
+  await removeMarkdownEditorCss(filename, io);
   await context.globalState.update(STATE_KEY, false);
   return true;
 }
@@ -75,6 +81,7 @@ module.exports = {
   currentTheme,
   isNoctisTheme,
   markdownEditorCssPath,
+  cssTarget,
   currentMarkdownCss,
   syncMarkdownEditorAppearance,
   enableMarkdownEditorAppearance,
