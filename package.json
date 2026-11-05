@@ -2,7 +2,7 @@
   "name": "noctis-blue",
   "displayName": "Noctis Blue",
   "description": "A blue VS Code theme with customizable translucent surfaces.",
-  "version": "0.10.3",
+  "version": "0.10.4",
   "publisher": "takashit16833",
   "private": true,
   "engines": {
