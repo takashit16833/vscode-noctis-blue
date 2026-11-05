@@ -5,8 +5,7 @@
 ## 1. 設定・拡張の管理場所
 
 - Noctis Blue をローカル UI host にインストールし、`extensionKind: ["ui"]` で選択されることを確認する。
-- 旧 `takashit16833.vscode-wallpaper` がインストールされていないことを確認する。
-- ユーザー設定では `noctisBlue.wallpaper.*` のみを利用し、古い設定との重複管理を避ける。
+- ユーザー設定では `noctisBlue.wallpaper.*` のみを利用する。
 
 ## 2. 背景画像と領域透過
 
