@@ -318,8 +318,13 @@ async function repairStaleUnlocked(appRoot) {
       throw new Error('更新済み HTML と管理ファイルの関係が確認できません。修復しません。');
     }
   } else {
-    // Without the original HTML backup there is no independent proof of
-    // ownership. Never delete a standalone loader or stylesheet.
+    // A completed restore can leave only the exact known loader if its final
+    // unlink failed. Never infer ownership from a filename alone.
+    if (names.length === 0) {
+      await validateManagedLoader(files.loader);
+      await fs.unlink(files.loader);
+      return { changed: true, installed: false };
+    }
     throw new Error('元 HTML のバックアップがなく、残存ファイルの所有を確認できません。');
   }
   if (loaderStat) await validateManagedLoader(files.loader);
@@ -343,8 +348,8 @@ async function repairStaleUnlocked(appRoot) {
   }
 
   for (const name of names) await fs.unlink(path.join(files.dir, name));
-  if (loaderStat) await fs.unlink(files.loader);
   if (backupStat) await fs.unlink(files.backup);
+  if (loaderStat) await fs.unlink(files.loader);
   return { changed: true, installed: false };
 }
 
