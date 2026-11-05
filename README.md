@@ -45,6 +45,7 @@ workbench の管理ファイルは、バックアップと読み込みスクリ�
   "noctisBlue.wallpaper.tint": "#FFFFFF",
   "noctisBlue.opacity": {
     "editor": 0.91,
+    "gutter": 0.5,
     "minimap": 0.5,
     "tabs": 0.75,
     "breadcrumbs": 0.75,
@@ -58,6 +59,10 @@ workbench の管理ファイルは、バックアップと読み込みスクリ�
 ```
 
 背景画像の設定は `noctisBlue.wallpaper.*` を使用する。
+
+`gutter` は行番号・折りたたみ記号のある左側の領域に、通常版の `editorGutter.background` の色を重ねる不透明度。現在行の数字は `editorLineNumber.activeForeground` で色分けされ、行全体の背景は `editor.lineHighlightBackground` によって強調される。行番号領域にも現在行の背景を表示するには、VS Code 標準の `"editor.renderLineHighlight": "all"` を設定する。現在行専用の不透明度項目は増やさない。
+
+エディタ全体の背景の上に描画するため、`gutter` を高くすると行番号の背景は濃くなる。行番号をエディタ本体より透かすための設定ではない。
 `minimap` はミニマップ自身の背景色（通常版の `minimap.background`）に追加する不透明度であり、文字やスクロール位置の表示は薄くしない。エディタ全体の背景色の上に重なるため、`minimap: 0.5` が画面上で50%の不透明度になるわけではない。0にすると従来と同様にミニマップ固有の背景は透明になる。
 
 `tabs` はタブ一覧と操作ボタンの領域、`breadcrumbs` はパンくずリストの背景色の不透明度を、それぞれ独立して設定する。どちらも通常版の `editorGroupHeader.tabsBackground`（現在 `#000E2F`）を使用するが、共通の親要素 `.title.tabs` は塗らない。エディタ背景の上に重なるため、設定値は画面上の最終不透明度とは異なる。
