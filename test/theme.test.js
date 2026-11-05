@@ -82,6 +82,18 @@ test('palette white aliases fg-pale while editor text keeps the base blue', () =
     withAlpha(palette.markdownCodeBlockBackground, 'BF'));
 });
 
+test('JSON property names use the base editor blue without changing global property semantics', () => {
+  const jsonRule = opaque.tokenColors.find(rule => rule.name === 'JSON properties');
+  assert.ok(jsonRule);
+  assert.deepEqual(jsonRule.scope, [
+    'support.type.property-name.json',
+    'support.type.property-name.json.comments',
+    'support.type.property-name.json.lines'
+  ]);
+  assert.equal(jsonRule.settings.foreground, palette.foreground);
+  assert.equal(opaque.semanticTokenColors.property, palette.pale);
+});
+
 test('colors are valid and cursor / errors use palette pink', () => {
   assert.equal(opaque.colors['editorCursor.foreground'], palette.cursor);
   assert.equal(opaque.colors['editorError.foreground'], palette.cursor);
