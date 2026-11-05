@@ -28,6 +28,12 @@ test('Markdown Editor CSS follows the Emacs document palette', () => {
   assert.match(css, /font-weight: 700 !important;/);
   assert.match(css, /text-decoration: underline !important;/);
 
+  assert.match(css, /\.md-table tr:first-child > td \{/);
+  assert.match(css, /\.md-table td \{/);
+  assert.match(css, /border-color: #316CBD !important;/i);
+  assert.doesNotMatch(css, /border-width:/);
+  assert.doesNotMatch(css, /border-style:/);
+
   assert.match(css, /--md-block-active-background/);
   assert.match(css, /65%, transparent/);
   assert.match(css, /box-shadow: 0 0 0 8px color-mix/);
@@ -82,6 +88,8 @@ test('generated JavaScript applies and then removes only its own style node', ()
   assert.match(style.textContent, /blockquote\.md-blockquote/);
   assert.match(style.textContent, /code:not\(pre code\)/);
   assert.match(style.textContent, /\.md-document a/);
+  assert.match(style.textContent, /\.md-table tr:first-child > td/);
+  assert.match(style.textContent, /\.md-table td/);
   assert.match(style.textContent, /var\(--md-block-active-background/);
   assert.match(vm.runInNewContext(script, context), /解除/);
   assert.equal(nodes.size, 0);
