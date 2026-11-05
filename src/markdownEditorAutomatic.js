@@ -7,7 +7,6 @@ const { applyMarkdownEditorCss, removeMarkdownEditorCss } = require('./markdownE
 
 const MARKDOWN_EXTENSION_ID = 'vscode.markdown-language-features';
 const STATE_KEY = 'noctisBlue.markdownEditorAppearanceEnabledTargets';
-const LEGACY_STATE_KEY = 'noctisBlue.markdownEditorAppearanceEnabled';
 const NOCTIS_THEMES = new Set(['Noctis Blue', 'Noctis Blue Transparent']);
 
 function currentTheme(vscode) {
@@ -59,8 +58,7 @@ function enabledTargets(context) {
 }
 
 async function syncMarkdownEditorAppearance(vscode, context) {
-  // A global boolean from older versions cannot authorize modifying any
-  // newly connected remote server. Only explicit per-target enable does.
+  // Applying to each VS Code installation requires explicit per-target consent.
   if (!enabledTargets(context)[targetScope(vscode)]) return false;
   const { filename, io } = await cssTarget(vscode);
   // Shared editor.css contains theme-scoped rules; switching a window's theme
@@ -91,7 +89,7 @@ async function disableMarkdownEditorAppearance(vscode, context) {
 }
 
 module.exports = {
-  MARKDOWN_EXTENSION_ID, STATE_KEY, LEGACY_STATE_KEY, NOCTIS_THEMES,
+  MARKDOWN_EXTENSION_ID, STATE_KEY, NOCTIS_THEMES,
   currentTheme, isNoctisTheme, markdownEditorCssPath, remoteFolder, targetScope,
   cssTarget, currentMarkdownCss, enabledTargets,
   syncMarkdownEditorAppearance, enableMarkdownEditorAppearance, disableMarkdownEditorAppearance
