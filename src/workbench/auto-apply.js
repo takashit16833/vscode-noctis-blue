@@ -6,14 +6,20 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 
 const HTML_RELATIVE_PATH = 'out/vs/code/electron-browser/workbench/workbench.html';
-const BACKUP_NAME = 'workbench.html.vscode-wallpaper.backup';
-const LOADER_NAME = 'vscode-wallpaper-loader.js';
-const CSS_HEADER = '/* VS Code Wallpaper: managed stylesheet; generated from user settings. */\n';
-const LAYERS_CSS_HEADER = '/* VS Code Wallpaper: managed external CSS layers. */\n';
+const BACKUP_NAME = 'workbench.html.noctis-blue.backup';
+const LOADER_NAME = 'noctis-blue-loader.js';
+const CSS_HEADER = '/* Noctis Blue: managed stylesheet; generated from user settings. */\n';
+const LAYERS_CSS_HEADER = '/* Noctis Blue: managed external CSS layers. */\n';
 const WORKBENCH_CSS = '<link rel="stylesheet" href="../../../workbench/workbench.desktop.main.css">';
-const LINK = '<!-- VS Code Wallpaper: managed per-workspace stylesheet -->\n\t\t<script type="module" src="./vscode-wallpaper-loader.js"></script>';
+const LINK = '<!-- Noctis Blue: managed per-workspace stylesheet -->\n\t\t<script type="module" src="./noctis-blue-loader.js"></script>';
 const ID_PATTERN = /^[a-zA-Z0-9_-]{1,128}$/;
 const LAYER_ID_PATTERN = /^[a-zA-Z0-9._-]{1,128}$/;
+
+// Reject a pre-existing workbench module loader we do not own. A filename
+// change must never stack a second loader over an existing installation.
+function hasUnrecognizedLoader(html) {
+  return /<script\s+type=["']module["']\s+src=["']\.\/[^"']+-loader\.js["']\s*><\/script>/i.test(html);
+}
 
 function pathsFor(appRoot) {
   if (typeof appRoot !== 'string' || !path.isAbsolute(appRoot)) {
@@ -32,11 +38,11 @@ function validateWorkspaceId(id) {
 }
 
 function workspaceStylePath(files, id) {
-  return path.join(files.dir, 'vscode-wallpaper-' + validateWorkspaceId(id) + '.css');
+  return path.join(files.dir, 'noctis-blue-' + validateWorkspaceId(id) + '.css');
 }
 
 function workspaceLayersPath(files, id) {
-  return path.join(files.dir, 'vscode-wallpaper-layers-' + validateWorkspaceId(id) + '.css');
+  return path.join(files.dir, 'noctis-blue-layers-' + validateWorkspaceId(id) + '.css');
 }
 
 function normalizeLayers(layers = {}) {
@@ -96,7 +102,7 @@ async function readOwnedCss(filename, header) {
 
 async function managedCssNames(files) {
   return (await fs.readdir(files.dir)).filter(name =>
-    /^vscode-wallpaper-(?:layers-)?[a-zA-Z0-9_-]+\.css$/.test(name));
+    /^noctis-blue-(?:layers-)?[a-zA-Z0-9_-]+\.css$/.test(name));
 }
 
 async function validateManagedLoader(filename) {
@@ -132,7 +138,7 @@ async function inspect(appRoot) {
     };
   }
 
-  if (backupStat || loaderStat || html.includes('vscode-wallpaper')) {
+  if (backupStat || loaderStat || hasUnrecognizedLoader(html)) {
     throw new Error('以前の壁紙ファイルが残っています。確認せずに上書きしません。');
   }
   return { installed: false, files, stat, html };
@@ -240,7 +246,7 @@ async function disableUnlocked(appRoot) {
   // Check all managed CSS files before restoring the HTML.
   const names = await managedCssNames(info.files);
   for (const name of names) {
-    const header = name.startsWith('vscode-wallpaper-layers-') ? LAYERS_CSS_HEADER : CSS_HEADER;
+    const header = name.startsWith('noctis-blue-layers-') ? LAYERS_CSS_HEADER : CSS_HEADER;
     await readOwnedCss(path.join(info.files.dir, name), header);
   }
   await atomicWrite(info.files.html, info.backup, info.stat.mode);
@@ -261,7 +267,7 @@ async function repairStaleUnlocked(appRoot) {
 
   const html = await fs.readFile(files.html, 'utf8');
   if (html.includes(LINK)) return { changed: false, installed: true };
-  if (html.includes('vscode-wallpaper')) {
+  if (hasUnrecognizedLoader(html)) {
     throw new Error('VS Code 本体の HTML に不明な壁紙変更があります。修復しません。');
   }
 
@@ -280,7 +286,7 @@ async function repairStaleUnlocked(appRoot) {
 
   if (backupStat) {
     const backup = await fs.readFile(files.backup, 'utf8');
-    if (backup.includes('vscode-wallpaper') ||
+    if (hasUnrecognizedLoader(backup) ||
         backup.indexOf(WORKBENCH_CSS) < 0 ||
         backup.indexOf(WORKBENCH_CSS, backup.indexOf(WORKBENCH_CSS) + 1) >= 0) {
       throw new Error('壁紙バックアップの元 HTML 形式が確認できません。修復しません。');
@@ -295,7 +301,7 @@ async function repairStaleUnlocked(appRoot) {
   }
   if (loaderStat) await validateManagedLoader(files.loader);
   for (const name of names) {
-    const header = name.startsWith('vscode-wallpaper-layers-') ? LAYERS_CSS_HEADER : CSS_HEADER;
+    const header = name.startsWith('noctis-blue-layers-') ? LAYERS_CSS_HEADER : CSS_HEADER;
     await readOwnedCss(path.join(files.dir, name), header);
   }
 
