@@ -302,6 +302,24 @@ test('一時ファイルの排他的作成が失敗しても、他者のファ�
   assert.equal(await fs.readFile(foreign, 'utf8'), 'unrelated');
 });
 
+test('有効化の途中で VS Code の HTML が交換された場合も上書きしない', async t => {
+  const { root, files } = await fixture(t);
+  const layerFile = workspaceLayersPath(files, 'project');
+  const updated = original.replace('</body>', '<main>updated</main></body>');
+  const originalRename = fs.rename;
+  let replaced = false;
+  t.mock.method(fs, 'rename', async (source, destination) => {
+    if (!replaced && destination === layerFile) {
+      replaced = true;
+      await fs.writeFile(files.html, updated);
+    }
+    return originalRename(source, destination);
+  });
+  await assert.rejects(enable(root, 'body{}', 'project'), /検証後に/);
+  assert.equal(await fs.readFile(files.html, 'utf8'), updated);
+  assert.equal(await fs.readFile(files.backup, 'utf8'), original);
+});
+
 test('検証後に VS Code の HTML が交換された場合は復元しない', async t => {
   const { root, files } = await fixture(t);
   await enable(root, 'body{}', 'project');
