@@ -7,7 +7,6 @@ const { readSettings, generateCss: generateWallpaperCss } = require('./workbench
 
 const STATE_KEY = 'noctisBlue.automaticAppearanceEnabled';
 const TRANSPARENT_THEME = 'Noctis Blue Transparent';
-const LEGACY_WALLPAPER_ID = 'takashit16833.vscode-wallpaper';
 const LAYER_ID = 'takashit16833.noctis-blue';
 
 function currentTheme(vscode) {
@@ -16,12 +15,6 @@ function currentTheme(vscode) {
 
 function isTransparentTheme(vscode) {
   return currentTheme(vscode) === TRANSPARENT_THEME;
-}
-
-function ensureNoLegacyExtension(vscode) {
-  if (vscode.extensions.getExtension(LEGACY_WALLPAPER_ID)) {
-    throw new Error('旧 VS Code Wallpaper がインストールされています。旧拡張をアンインストールして Reload Window を実行してください。');
-  }
 }
 
 function currentCss(vscode) {
@@ -46,7 +39,6 @@ async function styles(vscode) {
 
 async function syncAutomaticAppearance(vscode, context) {
   if (!context.globalState.get(STATE_KEY, false)) return false;
-  ensureNoLegacyExtension(vscode);
   const state = await automatic.inspect(vscode.env.appRoot);
   if (!state.installed) return false; // A new workbench patch requires user consent.
   const { wallpaper, workspaceId, layers } = await styles(vscode);
@@ -55,7 +47,6 @@ async function syncAutomaticAppearance(vscode, context) {
 }
 
 async function enableAutomaticAppearance(vscode, context) {
-  ensureNoLegacyExtension(vscode);
   const choice = await vscode.window.showWarningMessage(
     '背景画像と透過の自動適用では、VS Code 本体の workbench.html に管理ローダーを追加します。元ファイルをバックアップしますが、整合性警告が表示される場合があります。VS Code 更新後の修復が必要になることがあります。',
     { modal: true }, '自動適用を有効にする'
@@ -68,14 +59,12 @@ async function enableAutomaticAppearance(vscode, context) {
 }
 
 async function disableAutomaticAppearance(vscode, context) {
-  ensureNoLegacyExtension(vscode);
   await automatic.disable(vscode.env.appRoot);
   await context.globalState.update(STATE_KEY, false);
   return true;
 }
 
 async function repairAutomaticAppearance(vscode, context) {
-  ensureNoLegacyExtension(vscode);
   const choice = await vscode.window.showWarningMessage(
     'VS Code 更新後に残った管理ファイルを確認し、所有を確認できるものだけを整理して再導入します。現在の workbench.html は修復処理で直接復元しません。',
     { modal: true }, '背景読み込みを修復する'
@@ -91,8 +80,8 @@ async function repairAutomaticAppearance(vscode, context) {
 }
 
 module.exports = {
-  STATE_KEY, TRANSPARENT_THEME, LEGACY_WALLPAPER_ID, LAYER_ID,
+  STATE_KEY, TRANSPARENT_THEME, LAYER_ID,
   currentTheme, isTransparentTheme, currentCss, currentWallpaperCss,
-  styles, ensureNoLegacyExtension, syncAutomaticAppearance,
+  styles, syncAutomaticAppearance,
   enableAutomaticAppearance, disableAutomaticAppearance, repairAutomaticAppearance
 };
