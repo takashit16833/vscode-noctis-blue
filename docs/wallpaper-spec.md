@@ -13,7 +13,7 @@
 ### `src/appearance.js` と配色テーマ
 
 - 通常版と透過版の配色を管理する。
-- editor / minimap / tabs / sidebar / panel / auxiliaryBar / chrome / gap の背景色と不透明度を管理する。
+- editor / minimap / tabs / breadcrumbs / sidebar / panel / auxiliaryBar / chrome / gap の背景色と不透明度を管理する。
 - 同じ領域の重複下地を透明化する。
 - Sticky Scroll や補完候補など、前面の文字を薄くせず背後だけをぼかす。
 - 背景画像のパス、乗算、画像切り替えは `src/workbench/wallpaper.js` に任せる。
@@ -22,11 +22,12 @@
 
 `noctisBlue.opacity` は背景色の不透明度であり、文字や要素全体の不透明度ではない。
 
-対象は次の8領域である。
+対象は次の9領域である。
 
 - `editor`
 - `minimap`
 - `tabs`
+- `breadcrumbs`
 - `sidebar`
 - `panel`
 - `auxiliaryBar`
@@ -48,7 +49,7 @@ VS Code では、同じ見た目の領域でも外側と内側の複数要素が
 2. 同じ領域内で重複する下地だけを透明にする。
 3. 文字、アイコン、選択行、ホバー、罫線など意味を持つ前景表現は維持する。
 
-タブが並ぶ領域全体は、通常版の `editorGroupHeader.tabsBackground` を基準とした `tabs` の不透明度で描画する。実DOMと VS Code の描画規則に従い、`.part.editor .editor-group-container > .title.tabs` だけに背景を設定し、内側の `.tabs-and-actions-container` と `.tabs-container` は透明のままにする。エディタ領域に重ねる追加背景であり、最終的な不透明度とは異なる。
+タブとパンくずリストは `.title.tabs` を共有するが、異なる子要素である。そのため共通の親を透明にし、`.title.tabs > .tabs-and-actions-container` へ `tabs`、`.title .breadcrumbs-below-tabs` へ `breadcrumbs` の背景をそれぞれ一度だけ描く。両者の基準色には通常版の `editorGroupHeader.tabsBackground` を使い、色の重複定義を増やさない。内側の `.tabs-container` や `.breadcrumbs-control` は透明のままとする。パンくずリストがヘッダー内にネストする構造でも、子孫セレクタで同じ描画面を選ぶ。どちらもエディタ領域の背景の上に追加するため、最終的な不透明度は設定値より高くなり得る。
 
 選択中・非選択のタブは独立した表示面として、通常版の `tab.activeBackground` / `tab.inactiveBackground` の色をそれぞれ50%不透明で維持する。塗りの色は VS Code の公式テーマ色を使用する。Connected タブでは通常のテーマ色だけでは内部の背景変数が設定されず、透明な下地へ戻るため、透過 CSS で `--vscode-tab-activeBackground` / `--vscode-tab-inactiveBackground` を `--modern-ui-editor-tab-custom-*-background` へ渡す。`.tab-fill` 自体の背景は上書きせず、VS Code の描画規則を維持する。エディタ領域の背景の上に追加描画されるので、最終的な不透明度はタブ背景色単独の値とは異なる。
 
