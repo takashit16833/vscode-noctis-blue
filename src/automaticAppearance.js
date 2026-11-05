@@ -6,7 +6,6 @@ const { currentWorkspaceId } = require('./workbench/workspace-id');
 const { readSettings, generateCss: generateWallpaperCss } = require('./workbench/wallpaper');
 
 const STATE_KEY = 'noctisBlue.automaticAppearanceEnabled';
-const MIGRATION_KEY = 'noctisBlue.workbenchMigrationChecked';
 const TRANSPARENT_THEME = 'Noctis Blue Transparent';
 const LEGACY_WALLPAPER_ID = 'takashit16833.vscode-wallpaper';
 const LAYER_ID = 'takashit16833.noctis-blue';
@@ -65,14 +64,12 @@ async function enableAutomaticAppearance(vscode, context) {
   const { wallpaper, workspaceId, layers } = await styles(vscode);
   await automatic.enable(vscode.env.appRoot, wallpaper, workspaceId, layers);
   await context.globalState.update(STATE_KEY, true);
-  await context.globalState.update(MIGRATION_KEY, true);
   return true;
 }
 
 async function disableAutomaticAppearance(vscode, context) {
   ensureNoLegacyExtension(vscode);
   await automatic.disable(vscode.env.appRoot);
-  await context.globalState.update(MIGRATION_KEY, true);
   await context.globalState.update(STATE_KEY, false);
   return true;
 }
@@ -90,13 +87,12 @@ async function repairAutomaticAppearance(vscode, context) {
   await automatic.repairStale(vscode.env.appRoot);
   await automatic.enable(vscode.env.appRoot, wallpaper, workspaceId, layers);
   await context.globalState.update(STATE_KEY, true);
-  await context.globalState.update(MIGRATION_KEY, true);
   return true;
 }
 
 module.exports = {
-  STATE_KEY, MIGRATION_KEY, TRANSPARENT_THEME, LEGACY_WALLPAPER_ID, LAYER_ID,
+  STATE_KEY, TRANSPARENT_THEME, LEGACY_WALLPAPER_ID, LAYER_ID,
   currentTheme, isTransparentTheme, currentCss, currentWallpaperCss,
-  styles, ensureNoLegacyExtension, adoptInstalledWallpaper, syncAutomaticAppearance,
+  styles, ensureNoLegacyExtension, syncAutomaticAppearance,
   enableAutomaticAppearance, disableAutomaticAppearance, repairAutomaticAppearance
 };
