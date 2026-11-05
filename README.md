@@ -105,6 +105,8 @@ Noctis Blue の通常本文色は従来どおり `#5EAFFF` を使う。パレッ
 **Noctis Blue: Enable Markdown Editor Appearance** を一度実行して確認ダイアログを承認すると、次を自動適用する。
 
 - 見出し `.md-heading`: Emacs `fg-pale` と同じ `#A6CAFF`
+- H1/H2: 左外側 `-24px` に `::before` の青い縦線を表示
+- H2: 標準の下線を非表示
 - `pre.md-code-block`: 枠線なし
 - 引用: コードブロックと同じ `textCodeBlock.background`
 - インラインコード: 本文色 `#5EAFFF` + コードブロックと同じ `textCodeBlock.background`
