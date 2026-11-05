@@ -271,8 +271,10 @@ async function disableUnlocked(appRoot) {
   }
   await atomicWrite(info.files.html, info.backup, info.stat.mode);
   for (const name of names) await fs.unlink(path.join(info.files.dir, name));
-  await fs.unlink(info.files.loader);
+  // Keep the verified loader until the backup has been removed, so a failed
+  // backup deletion leaves enough evidence for a safe cleanup retry.
   await fs.unlink(info.files.backup);
+  await fs.unlink(info.files.loader);
   return { installed: false, changed: true };
 }
 
