@@ -131,6 +131,9 @@ function buildTheme(p,transparent){
       "list.hoverBackground":[p.hover,"A6"],
       "modernTab.hoverBackground":[p.hover,"A6"],
       "tab.hoverBackground":[p.focus,"A6"],
+      // Retain the theme's active/inactive tab distinction over the editor base.
+      "tab.activeBackground":[p.background,"80"],
+      "tab.inactiveBackground":[p.backgroundDeep,"80"],
       "editorSuggestWidget.background":[p.panel,"A6"],
       "editorSuggestWidget.selectedBackground":[p.focus,"B3"],
       // stickyScroll.css paints the hovered row separately from the blurred region.
