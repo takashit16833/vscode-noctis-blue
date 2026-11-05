@@ -167,3 +167,13 @@ test('既存 CSS 専用の更新は初回適用せず管理ブロックだけを
   assert.match(await fs.readFile(f.filename, 'utf8'), /\.new\{\}/);
   assert.doesNotMatch(await fs.readFile(f.filename, 'utf8'), /\.old\{\}/);
 });
+
+test('既存 CSS 専用更新は対象ファイルがない場合にも何も作成しない', async t => {
+  const f = await fixture(t);
+  await fs.unlink(f.filename);
+  assert.deepEqual(await updateExistingMarkdownEditorCss(f.filename, '.new{}'), {
+    changed: false, patched: false
+  });
+  await assert.rejects(fs.stat(f.filename + '.noctis-blue.lock'), { code: 'ENOENT' });
+  await assert.rejects(fs.stat(f.filename + BACKUP_SUFFIX), { code: 'ENOENT' });
+});

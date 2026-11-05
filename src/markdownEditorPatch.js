@@ -202,6 +202,8 @@ async function applyMarkdownEditorCss(filename, css, io = fs) {
 // For a one-time legacy migration, reuse the same lock and validation but
 // never create a managed block on a file that was not already patched.
 async function updateExistingMarkdownEditorCss(filename, css, io = fs) {
+  // Missing targets cannot be legacy managed installations; do not create a lock.
+  if (!await regularFile(filename, io)) return { changed: false, patched: false };
   return withLocalLock(filename, io, async () => {
     if (!markerState(await io.readFile(filename, 'utf8')).patched) {
       return { changed: false, patched: false };
