@@ -48,6 +48,9 @@
 - `markdown.previewStyles` / `markdown.previewScripts` / `markdown.markdownItPlugins` は通常 Preview 用である。
 - `markdown.codeBlockEditorProviders` は fenced code block 用で、親 Webview の CSS を変更できない。
 - 別拡張から組み込み Markdown Editor の `WebviewPanel` を取得・変更する公開 API はない。
+- 本文・見出しは標準テーマ色 `editor.foreground` を通じて調整し、Noctis Blue では `palette.pale`（Emacs 版 `fg-pale`）を使う。
+- コードブロック背景は標準テーマ色 `textCodeBlock.background` を使う。基準色は Emacs 版 `org-block-bg` と揃え、Transparent 版ではアルファ値だけを下げる。
+- コードブロック枠線は Markdown Editor 側が汎用 `widget.border` を使っており、Markdown 専用の公開テーマ色はない。枠線だけのために `widget.border` を透明化して他UIへ影響させない。
 - したがって現行公開 API だけでは編集中ブロックの CSS 常時自動適用は行わない。
 - VS Code 本体改変や独自 Markdown Editor の再実装は採用しない。
 - `markdown.editor.highlightActiveBlock=false` で強調表示自体を消さない。
