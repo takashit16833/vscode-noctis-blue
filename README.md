@@ -82,8 +82,9 @@ Dev Container ではリモートサーバー上の CSS を VS Code のファイ�
 - H1/H2: 左外側 `-14px` に `::before` の青い縦線を表示し、文字行の中心に揃える
 - H2: 標準の下線を非表示
 - `pre.md-code-block`: 枠線なし
-- 引用: コードブロックと同じ `textCodeBlock.background`
-- インラインコード: 本文色 `#5EAFFF` + コードブロックと同じ `textCodeBlock.background`
+- 引用: Obsidian と同じ青系の背景 `#001947`、文字 `#4C9EEB`、枠 `#5EAFFF`
+- インラインコード: 文字 `#7CBEFF`、背景 `#052A59`、上下左右の余白を調整
+- 引用・インラインコードの背景は Transparent 版で45%不透明（Obsidian の背景画像表示に合わせる）
 - `text` / `plaintext` コードブロック: 通常本文と同じ `#5EAFFF`
 - 通常リンク: Emacs版と同じ `fg-muted = #316CBD`、太字、下線
 - 表ヘッダー: 先頭行のセルを `#316CBD` + 太字
