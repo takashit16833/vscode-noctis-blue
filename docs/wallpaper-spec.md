@@ -56,6 +56,12 @@ Source Control のコミットメッセージ欄のように、
 外側と内部 Monaco Editor が同じ `input.background` を描く場所では、
 外側を残して内側の重複背景だけを透明化する。
 
+## 状態ごとのタイトルバー背景
+
+VS Code はフォーカスを失ったタイトルバーに `.part.titlebar.inactive` を付与する。通常版には `titleBar.activeBackground` と `titleBar.inactiveBackground` が別々に定義されているため、Transparent 版の独自 CSS でもその2色を同じ `chrome` 不透明度で使い分ける。状態を監視する JavaScript や追加の設定値は必要ない。
+
+ステータスバーは VS Code がフォルダーの有無やデバッグ時の上書きをもとに要素の `style.backgroundColor` を設定する。現状の単一の CSS ルールだけでは状態を区別できないため、推測したクラスや色判定のセレクタは増やさず、表示の実測後に別途判断する。
+
 ## 乗算と領域透過を分ける
 
 背景画像の tint と乗算は `src/workbench/wallpaper.js` の処理である。
