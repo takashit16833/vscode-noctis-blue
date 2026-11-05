@@ -125,6 +125,17 @@ function buildClearBackgroundRules() {
   ];
 }
 
+function buildConnectedTabRules() {
+  // Connected tabs use custom background variables even when the legacy
+  // theme colors are defined. Reuse those colors without repainting .tab-fill.
+  // Keep lower specificity than explicit VS Code color customizations.
+  return [
+    ROOT + '.modern-ui-connected-editor-tabs {' +
+      ' --modern-ui-editor-tab-custom-active-background: var(--vscode-tab-activeBackground);' +
+      ' --modern-ui-editor-tab-custom-inactive-background: var(--vscode-tab-inactiveBackground); }'
+  ];
+}
+
 function buildStickyRules() {
   return [
     ROOT + ' .part.editor .monaco-editor .sticky-widget:not(.peek)' +
@@ -197,6 +208,7 @@ function generateCss(input = {}) {
   const lines = ['/* Noctis Blue workbench appearance: no wallpaper image or tint. */'];
   lines.push(...buildSurfaceRules(op));
   lines.push(...buildClearBackgroundRules());
+  lines.push(...buildConnectedTabRules());
   lines.push(...buildStickyRules());
   lines.push(...buildSuggestRules());
   lines.push(...buildGapRules(op));
@@ -229,6 +241,7 @@ module.exports = {
   normalizeOpacity,
   buildSurfaceRules,
   buildClearBackgroundRules,
+  buildConnectedTabRules,
   buildStickyRules,
   buildSuggestRules,
   buildGapRules,
