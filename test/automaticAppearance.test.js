@@ -17,9 +17,15 @@ function fixture(options = {}) {
       getConfiguration(section) {
         if (section === 'workbench') return { get: () => options.theme || 'Noctis Blue Transparent' };
         if (section === 'noctisBlue') return { get: () => ({ editor: 0.91 }) };
-        if (section === 'noctisBlue.wallpaper') return { get: (key, fallback) => ({
-          enabled: true, image: 'https://example.org/blue.png'
-        })[key] ?? fallback };
+        if (section === 'noctisBlue.wallpaper') return {
+          inspect: key => options.modernSettings ? { globalValue: options.modernSettings[key] } : undefined,
+          get: (key, fallback) => options.modernSettings?.[key] ?? ({
+            enabled: true, image: 'https://example.org/blue.png'
+          })[key] ?? fallback
+        };
+        if (section === 'vscodeWallpaper') return {
+          get: (key, fallback) => options.legacySettings?.[key] ?? fallback
+        };
         throw new Error('unexpected config: ' + section);
       }
     },
@@ -52,6 +58,19 @@ test('不透明テーマでは壁紙と透過を別に扱い透過 CSS は生成
 test('リモートワークスペースの URI を Mac の画像パスとして扱わない', () => {
   const f = fixture();
   assert.match(currentWallpaperCss(f.vscode), /https:\/\/example\.org\/blue\.png/);
+});
+
+test('移行前の wallpaper 設定を読み、移行後は新しい設定を優先する', () => {
+  const old = fixture({ legacySettings: {
+    enabled: true, image: 'https://example.org/old.png'
+  } });
+  assert.match(currentWallpaperCss(old.vscode), /old\\.png/);
+  const modern = fixture({
+    legacySettings: { enabled: true, image: 'https://example.org/old.png' },
+    modernSettings: { enabled: true, image: 'https://example.org/new.png' }
+  });
+  assert.match(currentWallpaperCss(modern.vscode), /new\\.png/);
+  assert.doesNotMatch(currentWallpaperCss(modern.vscode), /old\\.png/);
 });
 
 test('旧拡張のインストール中は二重に workbench を管理しない', () => {
