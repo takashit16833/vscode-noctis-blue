@@ -29,7 +29,10 @@ function markdownEditorCssPath(vscode) {
 }
 
 async function cssTarget(vscode) {
-  if (vscode.env?.remoteName) return remoteMarkdownEditorTarget(vscode);
+  if (vscode.env?.remoteName ||
+      vscode.workspace.workspaceFolders?.some(folder => folder.uri.scheme === 'vscode-remote')) {
+    return remoteMarkdownEditorTarget(vscode);
+  }
   return { filename: markdownEditorCssPath(vscode) };
 }
 
