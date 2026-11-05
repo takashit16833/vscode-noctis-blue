@@ -70,6 +70,21 @@ test('minimap paints only its own background, without changing canvas or slider'
   }
 });
 
+test('Connected tab backgrounds reuse theme colors without painting tab fill directly', () => {
+  const css = generateCss();
+  assert.ok(css.includes('.monaco-workbench.modern-ui-connected-editor-tabs {'));
+  assert.ok(css.includes(
+    '--modern-ui-editor-tab-custom-active-background: var(--vscode-tab-activeBackground);'
+  ));
+  assert.ok(css.includes(
+    '--modern-ui-editor-tab-custom-inactive-background: var(--vscode-tab-inactiveBackground);'
+  ));
+  assert.ok(!css.includes('.tab-fill {'));
+  assert.ok(!css.includes(
+    '--modern-ui-editor-tab-custom-active-background: var(--vscode-tab-activeBackground) !important'
+  ));
+});
+
 test('SCM input keeps its outer blue surface but clears duplicated inner Monaco background', () => {
   const css = generateCss({ panel: 0.5 });
   assert.match(css, /\.scm-view \.scm-editor-container :is\(\.monaco-editor, \.monaco-editor-background, \.margin\)/);
