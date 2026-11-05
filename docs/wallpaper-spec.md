@@ -59,14 +59,14 @@ Source Control のコミットメッセージ欄のように、
 
 ## 適用経路を一つにする
 
-Noctis Blue だけが `workbench.html` の読み込み口を管理する。外部の Wallpaper 拡張には依存しない。
+Noctis Blue が `workbench.html` の読み込み口を一元管理する。
 
 `src/automaticAppearance.js` が背景画像 CSS と透過 CSS を組み立て、
 `src/workbench/auto-apply.js` が安全検査した `workbench.html` に 1 つのローダーを配置する。
 ローダーは画像 CSS を先に、透過 CSS を後に読み込む。
 
-旧 `vscode-wallpaper` の管理済み HTML / CSS / ローダー名は移行の互換性のため維持する。
-旧拡張と新拡張が同時に書き換えることは禁止し、旧拡張が残っていたら動作を止める。複数ウィンドウ間ではインストール先のロックを使用する。解除中に HTML 復元後の後片付けで失敗した場合は、管理済みローダーなどの所有を再確認してから再試行する。
+管理 CSS とローダーは現在 `vscode-wallpaper-*.css` / `vscode-wallpaper-layers-*.css` / `vscode-wallpaper-loader.js` という名前で読み書きしている。これらは現行の実ファイル名であり、変更する際は読み込み先とバックアップの対応を含めて安全に切り替える。
+複数ウィンドウ間ではインストール先のロックで書き換えを直列化する。解除中に HTML 復元後の後片付けで失敗した場合は、管理済みローダーなどの所有を再確認してから再試行する。
 
 リモート接続中も壁紙の処理はローカル UI host で実行する。
 リモート内蔵 Markdown Editor は `workspace.fs` による個別の経路を使う。
