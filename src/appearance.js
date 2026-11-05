@@ -5,7 +5,7 @@
 const theme = require('../themes/noctis-blue.json');
 const manifest = require('../package.json');
 
-const OPACITY_KEYS = ['editor', 'minimap', 'tabs', 'sidebar', 'panel', 'auxiliaryBar', 'chrome', 'gap'];
+const OPACITY_KEYS = ['editor', 'minimap', 'tabs', 'breadcrumbs', 'sidebar', 'panel', 'auxiliaryBar', 'chrome', 'gap'];
 const ROOT = '.monaco-workbench';
 
 function normalizeOpacity(value = {}) {
@@ -129,13 +129,15 @@ function buildClearBackgroundRules() {
   ];
 }
 
-function buildTabRules(op) {
-  // Paint the entire tab strip on its outer title only. Its nested
-  // tabs-and-actions-container is cleared above to avoid a second layer.
-  // Keep the individual active/inactive tab fills independently colored.
+function buildEditorHeaderRules(op) {
+  // Tabs and breadcrumbs share .title but have separate containers. Keep the
+  // parent transparent so either background can be adjusted independently.
+  // Internal tab fills and breadcrumb controls retain their own styling.
   return [
-    rule(ROOT + ' .part.editor .editor-group-container > .title.tabs',
-      color('editorGroupHeader.tabsBackground'), op.tabs)
+    rule(ROOT + ' .part.editor .editor-group-container > .title.tabs > .tabs-and-actions-container',
+      color('editorGroupHeader.tabsBackground'), op.tabs),
+    rule(ROOT + ' .part.editor .editor-group-container > .title .breadcrumbs-below-tabs',
+      color('editorGroupHeader.tabsBackground'), op.breadcrumbs)
   ];
 }
 
@@ -222,7 +224,7 @@ function generateCss(input = {}) {
   const lines = ['/* Noctis Blue workbench appearance: no wallpaper image or tint. */'];
   lines.push(...buildSurfaceRules(op));
   lines.push(...buildClearBackgroundRules());
-  lines.push(...buildTabRules(op));
+  lines.push(...buildEditorHeaderRules(op));
   lines.push(...buildConnectedTabRules());
   lines.push(...buildStickyRules());
   lines.push(...buildSuggestRules());
@@ -256,7 +258,7 @@ module.exports = {
   normalizeOpacity,
   buildSurfaceRules,
   buildClearBackgroundRules,
-  buildTabRules,
+  buildEditorHeaderRules,
   buildConnectedTabRules,
   buildStickyRules,
   buildSuggestRules,
