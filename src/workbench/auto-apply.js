@@ -183,7 +183,7 @@ async function updateLoaderIfNeeded(info) {
   return true;
 }
 
-async function enable(appRoot, css, id, layers = {}) {
+async function enableUnlocked(appRoot, css, id, layers = {}) {
   if (typeof css !== 'string') throw new Error('CSS が不正です。');
   const normalizedLayers = normalizeLayers(layers);
   const info = await inspect(appRoot);
@@ -192,7 +192,7 @@ async function enable(appRoot, css, id, layers = {}) {
   const previousWorkspaceCss = await readOwnedCss(stylePath, CSS_HEADER);
   const previousLayersCss = await readOwnedCss(layersPath, LAYERS_CSS_HEADER);
   if (info.installed) {
-    await sync(appRoot, css, id, normalizedLayers);
+    await syncUnlocked(appRoot, css, id, normalizedLayers);
     return { installed: true, newlyInstalled: false };
   }
 
@@ -226,7 +226,7 @@ async function enable(appRoot, css, id, layers = {}) {
   return { installed: true, newlyInstalled: true };
 }
 
-async function sync(appRoot, css, id, layers = {}) {
+async function syncUnlocked(appRoot, css, id, layers = {}) {
   if (typeof css !== 'string') throw new Error('CSS が不正です。');
   const normalizedLayers = normalizeLayers(layers);
   const info = await inspect(appRoot);
@@ -237,7 +237,7 @@ async function sync(appRoot, css, id, layers = {}) {
   return { installed: true, changed: cssChanged || layersChanged || loaderChanged };
 }
 
-async function disable(appRoot) {
+async function disableUnlocked(appRoot) {
   const info = await inspect(appRoot);
   if (!info.installed) return { installed: false, changed: false };
 
@@ -257,7 +257,7 @@ async function disable(appRoot) {
 // VS Code updates can replace workbench.html while leaving our backup/loader/CSS.
 // Repair only removes files that can still be proven to be managed by this extension.
 // The current workbench.html is never changed here.
-async function repairStale(appRoot) {
+async function repairStaleUnlocked(appRoot) {
   const files = pathsFor(appRoot);
   if (!await regularOrAbsent(files.html)) {
     throw new Error('VS Code の workbench.html が見つかりません: ' + files.html);
@@ -292,6 +292,48 @@ async function repairStale(appRoot) {
   if (loaderStat) await fs.unlink(files.loader);
   if (backupStat) await fs.unlink(files.backup);
   return { changed: true, installed: false };
+}
+
+// A lock is shared by all extension hosts touching the same VS Code install.
+// Never steal a stale lock automatically or unlink a lock another process owns.
+async function withWorkbenchLock(appRoot, action) {
+  const files = pathsFor(appRoot);
+  const filename = path.join(files.dir, '.noctis-blue-workbench.lock');
+  let handle;
+  try {
+    handle = await fs.open(filename, 'wx', 0o600);
+  } catch (error) {
+    if (error.code === 'EEXIST') {
+      throw new Error('別の Noctis Blue ウィンドウが背景の管理ファイルを操作中です。操作終了後に再実行してください。');
+    }
+    throw error;
+  }
+  try {
+    return await action();
+  } finally {
+    const ownStat = await handle.stat();
+    await handle.close();
+    const current = await fs.lstat(filename).catch(error => {
+      if (error.code === 'ENOENT') return null;
+      throw error;
+    });
+    if (current && current.dev === ownStat.dev && current.ino === ownStat.ino) {
+      await fs.unlink(filename);
+    }
+  }
+}
+
+function enable(appRoot, css, id, layers) {
+  return withWorkbenchLock(appRoot, () => enableUnlocked(appRoot, css, id, layers));
+}
+function sync(appRoot, css, id, layers) {
+  return withWorkbenchLock(appRoot, () => syncUnlocked(appRoot, css, id, layers));
+}
+function disable(appRoot) {
+  return withWorkbenchLock(appRoot, () => disableUnlocked(appRoot));
+}
+function repairStale(appRoot) {
+  return withWorkbenchLock(appRoot, () => repairStaleUnlocked(appRoot));
 }
 
 module.exports = {
