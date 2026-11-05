@@ -26,6 +26,30 @@ test('markdownAppearance resolves the packaged runtime palette', () => {
   assert.doesNotThrow(() => require('../src/markdownAppearance'));
 });
 
+test('開発用の診断コマンドはコマンドパレットに表示しない', () => {
+  const manifest = require('../package.json');
+  const hidden = manifest.contributes.menus.commandPalette
+    .filter(entry => entry.when === 'false')
+    .map(entry => entry.command).sort();
+  assert.deepEqual(hidden, [
+    'noctisBlue.showCombinedTransparencyTest',
+    'noctisBlue.showMarkdownActiveBlockTest',
+    'noctisBlue.showOpacityScript'
+  ].sort());
+  const declared = new Set(manifest.contributes.commands.map(entry => entry.command));
+  for (const id of hidden) {
+    assert.ok(declared.has(id), '隠すコマンドも登録を維持する: ' + id);
+  }
+  for (const id of [
+    'noctisBlue.enableAutomaticAppearance',
+    'noctisBlue.disableAutomaticAppearance',
+    'noctisBlue.enableMarkdownEditorAppearance',
+    'noctisBlue.disableMarkdownEditorAppearance'
+  ]) {
+    assert.ok(!hidden.includes(id), '利用者向けコマンドは表示する: ' + id);
+  }
+});
+
 test('Noctis Blue prefers the workspace host and falls back to the UI host', () => {
   const manifest = require('../package.json');
   assert.deepEqual(manifest.extensionKind, ['workspace', 'ui']);

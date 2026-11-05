@@ -2,7 +2,7 @@
   "name": "noctis-blue",
   "displayName": "Noctis Blue",
   "description": "A blue VS Code theme with customizable translucent surfaces.",
-  "version": "0.11.1",
+  "version": "0.11.2",
   "publisher": "takashit16833",
   "private": true,
   "engines": {
@@ -71,6 +71,22 @@
         "title": "Noctis Blue: Disable Markdown Editor Appearance"
       }
     ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "noctisBlue.showCombinedTransparencyTest",
+          "when": "false"
+        },
+        {
+          "command": "noctisBlue.showOpacityScript",
+          "when": "false"
+        },
+        {
+          "command": "noctisBlue.showMarkdownActiveBlockTest",
+          "when": "false"
+        }
+      ]
+    },
     "configuration": {
       "type": "object",
       "title": "Noctis Blue",

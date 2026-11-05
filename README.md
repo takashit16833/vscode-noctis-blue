@@ -129,13 +129,23 @@ Noctis Blue の通常本文色は従来どおり `#5EAFFF` を使う。パレッ
 
 詳細は [docs/markdown-editor.md](docs/markdown-editor.md)。
 
-## 開発用診断コマンド
+## コマンドの使い分け
 
-- **Noctis Blue: Show Combined Transparency Test**
-- **Noctis Blue: Show Temporary Opacity Script**
-- **Noctis Blue: Show Markdown Active Block Test**
+コマンドパレットには、利用者向けの次の4つだけを表示する。
 
-これらは正式な自動適用経路ではなく、原因切り分け用である。
+- **Noctis Blue: Enable Automatic Appearance** — 透過・ぼかしの自動適用を有効にする。Wallpaper が必要。
+- **Noctis Blue: Disable Automatic Appearance** — 透過・ぼかしの自動適用を解除する。
+- **Noctis Blue: Enable Markdown Editor Appearance** — 組み込み Markdown Editor の装飾を有効にする。組み込み CSS を変更するため、権限が必要。
+- **Noctis Blue: Disable Markdown Editor Appearance** — 組み込み Markdown Editor の装飾を解除する。
+
+開発・原因切り分け用の以下3つは、コマンドパレットに表示しない。
+コマンド自体は廃止せず、拡張 API 等から呼び出せる。
+
+- `noctisBlue.showCombinedTransparencyTest`
+- `noctisBlue.showOpacityScript`
+- `noctisBlue.showMarkdownActiveBlockTest`
+
+日常操作で診断コマンドを実行する必要はない。
 
 ## 開発
 
