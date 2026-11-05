@@ -98,7 +98,7 @@
 ## 統合テストとリリース
 
 - `npm run build && npm test`。移植した Wallpaper の画像・画面切替・ローダー・作業領域 ID・バックアップ安全性テストを維持する。
-- 単一拡張での Mac 実機背景、Dev Container 内の Markdown Editor、旧管理ファイルの引き継ぎを確認してから通常版へ反映する。
+- Mac 実機背景、Dev Container の Markdown Editor、旧管理ファイルの移行を検証する。実機を利用できない場合は、未検証項目と確認方法を明記し、テスト成功を実機成功と混同しない。
 - dotfiles の設定の正本は `takashit16833/dotfiles` の `.config/vscode/settings.json`。初期導入と `AGENTS.md` も同時変更する。
 - 独立した `vscode-wallpaper` リポジトリは履歴・復旧のため保管し、新規の実装先にはしない。
 - 現時点で確認できない環境依存の項目は、必ず未検証と明記する。
