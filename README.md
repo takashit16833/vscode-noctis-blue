@@ -104,13 +104,8 @@ Noctis Blue の通常本文色は従来どおり `#5EAFFF` を使う。パレッ
 
 **Noctis Blue: Enable Markdown Editor Appearance** を一度実行して確認ダイアログを承認すると、次を自動適用する。
 
-- 見出し `.md-heading`: Emacs `fg-pale` と同じ `#A6CAFF`、下線は `fg-muted = #316CBD`
+- 見出し `.md-heading`: Emacs `fg-pale` と同じ `#A6CAFF`
 - `pre.md-code-block`: 枠線なし
-- 引用: 背景を透明化し、左線などの構造は維持
-- インラインコード: 本文と同じ青文字 + コードブロックと同じ背景
-- リンク: Emacs `markdown-ts-link` / `org-link` と同じ `#316CBD`、太字、下線
-- 表ヘッダー: `#316CBD` の太字
-- 表罫線: `#316CBD`
 - 編集中ブロック: 元の `--md-block-active-background` を維持したまま指定不透明度へ調整
 
 ```jsonc
