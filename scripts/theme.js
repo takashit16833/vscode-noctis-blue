@@ -9,7 +9,7 @@ function buildTheme(p,transparent){
   const colors={
     "foreground":p.dim,"descriptionForeground":p.foreground,"focusBorder":p.foreground,"errorForeground":p.cursor,
     "widget.border":p.border,"selection.background":withAlpha(p.selectionUi,"B2"),
-    "editor.foreground":p.foreground,"editorCursor.foreground":p.cursor,"editorCursor.background":p.background,
+    "editor.foreground":p.pale,"textCodeBlock.background":p.markdownCodeBlockBackground,"editorCursor.foreground":p.cursor,"editorCursor.background":p.background,
     "editor.lineHighlightBackground":p.line,"editor.lineHighlightBorder":p.border,"editor.selectionBackground":p.selection,
     "editor.inactiveSelectionBackground":withAlpha(p.selection,"88"),"editor.selectionHighlightBackground":withAlpha(p.focus,"50"),
     "editor.wordHighlightBackground":p.match,"editor.wordHighlightStrongBackground":withAlpha(p.focus,"80"),
@@ -134,7 +134,9 @@ function buildTheme(p,transparent){
       "editorSuggestWidget.background":[p.panel,"A6"],
       "editorSuggestWidget.selectedBackground":[p.focus,"B3"],
       // stickyScroll.css paints the hovered row separately from the blurred region.
-      "editorStickyScrollHover.background":[p.focus,"A6"]
+      "editorStickyScrollHover.background":[p.focus,"A6"],
+      // The rich Markdown editor maps fenced blocks to textCodeBlock.background.
+      "textCodeBlock.background":[p.markdownCodeBlockBackground,"BF"]
     };
     for (const [key,[base,alpha]] of Object.entries(translucentDetails)) colors[key]=base+alpha;
   }

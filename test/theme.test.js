@@ -44,7 +44,8 @@ test('transparent variant changes only workbench surfaces and declared transluce
     'tab.hoverBackground': withAlpha(palette.focus, 'A6'),
     'editorSuggestWidget.background': withAlpha(palette.panel, 'A6'),
     'editorSuggestWidget.selectedBackground': withAlpha(palette.focus, 'B3'),
-    'editorStickyScrollHover.background': withAlpha(palette.focus, 'A6')
+    'editorStickyScrollHover.background': withAlpha(palette.focus, 'A6'),
+    'textCodeBlock.background': withAlpha(palette.markdownCodeBlockBackground, 'BF')
   };
 
   const changed = [...new Set([
@@ -70,6 +71,14 @@ test('transparent variant changes only workbench surfaces and declared transluce
   assert.equal(opaque.colors['editor.selectionBackground'], palette.selection);
   assert.equal(opaque.colors['input.background'], palette.backgroundDeep);
   assert.equal(opaque.colors['agentsChatInput.background'], undefined);
+});
+
+test('Markdown editor uses fg-pale for document text and Emacs-style block background', () => {
+  assert.equal(opaque.colors['editor.foreground'], palette.pale);
+  assert.equal(transparent.colors['editor.foreground'], palette.pale);
+  assert.equal(opaque.colors['textCodeBlock.background'], palette.markdownCodeBlockBackground);
+  assert.equal(transparent.colors['textCodeBlock.background'],
+    withAlpha(palette.markdownCodeBlockBackground, 'BF'));
 });
 
 test('colors are valid and cursor / errors use palette pink', () => {
