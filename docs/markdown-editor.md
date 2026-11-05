@@ -38,81 +38,36 @@ VS Code の
 
 ## 適用する CSS
 
-実機で確認済みの DOM に対して次を適用する。
+生成元は `src/markdownAppearance.js` の `generateMarkdownCss` である。
+ここに CSS 全文を重複掲載せず、意図と実機確認済みの対象だけを記載する。
 
-```css
-.md-heading {
-  color: #A6CAFF !important;
-}
+- 見出し：H1/H2 の左側に縦線を付け、H2 の下線は非表示にする。H1/H3 以降の下線は維持する。
+- コードブロック：枠線を消し、背景は `textCodeBlock.background` を使用する。
+- 引用とインラインコード：コードブロック背景と一致させる。
+- 通常リンク：`#316CBD`、太字、下線。見出し：`#A6CAFF`。
+- 表：先頭行の `td` は見出しとして強調し、罫線は既存の線種・太さを維持する。
+- 編集中ブロック：`--md-block-active-background` の色を維持し、不透明度だけ変更する。
 
-pre.md-code-block {
-  border: none !important;
-}
+対象 DOM は実機で `BLOCKQUOTE.md-block.md-blockquote`、
+`PRE.md-code-block > CODE`、通常リンクの `A`、表の `TD` を確認済みである。
 
-blockquote.md-blockquote {
-  background: var(--vscode-textCodeBlock-background, #0A1A36) !important;
-}
-
-.md-document code:not(pre code) {
-  color: var(--vscode-editor-foreground, #5EAFFF) !important;
-  background: var(--vscode-textCodeBlock-background, #0A1A36) !important;
-}
-
-.md-document a {
-  color: #316CBD !important;
-  font-weight: 700 !important;
-  text-decoration: underline !important;
-  text-decoration-color: #316CBD !important;
-}
-
-.md-table tr:first-child > td {
-  color: #316CBD !important;
-  font-weight: 700 !important;
-}
-
-pre.md-code-block > code.language-text,
-pre.md-code-block > code.language-plaintext {
-  color: var(--vscode-editor-foreground, #5EAFFF) !important;
-}
-
-.md-table td {
-  border-color: var(--vscode-widget-border, #153A75) !important;
-}
-```
-
-見出し下線は Markdown Editor 標準の色・太さを維持する。
-
-コードブロック背景は公開テーマ色 `textCodeBlock.background` で管理し、
-Emacs 版の `org-block-bg` と同じ `#0A1A36` を使う。
-インラインコードも同じテーマ色を参照するため、Transparent 版ではコードブロックと同じ半透明背景になる。
-`text` / `plaintext` の fenced code は構文色を使わず、通常本文と同じ `editor.foreground` を使う。
-
-引用は実機で `BLOCKQUOTE.md-block.md-blockquote` と確認済みである。
-背景はコードブロックと同じ `textCodeBlock.background` に統一する。
-
-通常リンクは実機でクラスなしの `A` 要素として確認済みであり、
-Emacs版の `fg-muted = #316CBD`、太字、下線に揃える。
-
-表は実機で先頭行の `TD` が見出し、通常セルも `TD` と確認済みである。
-見出しは `#316CBD` + 太字、罫線は既存の太さ・線種を維持して `widget.border`（現在 `#153A75`）を使う。
-
-編集中ブロックは `--md-block-active-background` の元色を保持し、
-`noctisBlue.markdownActiveBlockOpacity` で背景と影のアルファ値だけを調整する。
+**共有 CSS はウィンドウのテーマ切替で書き換えない。**
+すべての独自規則に `body[data-vscode-theme-id]` の Noctis Blue 2テーマ条件を付ける。
+テーマ識別子は `package.json` の `themes[].id` と一致させ、Webview の実機でも確認する。
+この仕組みは VS Code の公式 Webview テーマ属性に基づく。
 
 ## 安全策
 
 `src/markdownEditorPatch.js` が変更を管理する。
 
-- ローカル表示の対象パスは組み込み `vscode.markdown-language-features` の `extensionUri` から解決する。
-- Remote/Dev Container では UI host から直接ローカル `fs` でリモート CSS を開かない。`src/markdownEditorRemote.js` がローカル VS Code の commit を検査し、既知のサーバー配置内で実在するファイルだけを `workspace.fs` 経由で扱う。発見できなければ中止する。
-- 初回適用時に元 `editor.css` を
-  `editor.css.noctis-blue.backup` へ完全保存する。
-- Noctis Blue の CSS は開始・終了マーカーで囲んでファイル末尾へ追記する。
-- 設定変更時は元CSSとバックアップが一致することを確認して管理ブロックだけ更新する。
-- 解除時は元CSS部分がバックアップと一致することを確認して完全復元する。
-- 管理マーカー破損、バックアップ欠落、管理外変更を検出した場合は安全側で中止する。
-- VS Code 更新で `editor.css` 自体が新しい未加工ファイルへ置き換わった場合は、
-  古いバックアップを破棄し、新しいファイルをバックアップして再適用する。
+- ローカル CSS は組み込み拡張の `extensionUri` から解決する。
+- Remote/Dev Container では `src/markdownEditorRemote.js` が観測済みパスと既知のサーバー配置を `workspace.fs` で調べる。複数あるときは書き込まない。
+- 初回適用は `editor.css.noctis-blue.backup` を排他的に作成する。既存バックアップがある場合、現在の CSS と同一内容でも由来不明のため触らず停止する。
+- 一時ファイルは操作ごとに乱数名を付け、実際に作成したファイルだけ後始末する。
+- 元 CSS を検証できない、マーカーが壊れている、バックアップが欠落した場合は変更しない。
+- 解除は元 CSS の内容とバックアップの対応を確認してから復元する。
+- `workspace.fs.writeFile` は排他的な新規作成に対応しない。リモートでの一時ファイル作成は乱数名と事前の存在検査を使うが、他プロセスとの競合を完全に排除できるわけではない。
+- `workspace.fs.copy(overwrite: false)` を使い、リモートで既存バックアップを上書きしない。
 
 ## Dev Container の権限と制約
 
@@ -128,34 +83,24 @@ VS Code Server の配置が異なれば、対応方法を調査する。
 
 ## 有効化と解除
 
-有効化:
+`Noctis Blue: Enable Markdown Editor Appearance` は実行するたびに
+組み込み CSS を変更する説明を表示し、利用者の確認後に適用する。
 
-```text
-Noctis Blue: Enable Markdown Editor Appearance
-```
+有効化状態は `noctisBlue.markdownEditorAppearanceEnabledTargets` で
+ローカル・リモートの接続先別に保存する。以前の単一真偽値を
+新しい Dev Container の許可には流用せず、必要に応じて明示的に再有効化する。
 
-初回だけ、組み込み Markdown 拡張の CSS を変更することを説明する
-モーダル確認を表示する。
+`Noctis Blue: Disable Markdown Editor Appearance` は対象の CSS をバックアップから復元する。
+他のウィンドウが別テーマへ切り替わっただけでは共有 CSS を解除しない。
 
-解除:
-
-```text
-Noctis Blue: Disable Markdown Editor Appearance
-```
-
-管理ブロックを削除するのではなく、保存した元 `editor.css` を完全復元する。
-
-有効状態は Noctis Blue の `globalState` に保存する。
-Noctis Blue / Noctis Blue Transparent のときだけ管理 CSS を適用し、
-他テーマでは一時的に元CSSへ戻す。Noctis Blue に戻すと再適用する。
+`noctisBlue.markdownActiveBlockOpacity` は VS Code 全体で共有する設定
+(`scope: application`) であり、ウィンドウ別には設定できない。
 
 ## VS Code 更新
 
-VS Code 更新で組み込み Markdown 拡張が更新されると、
-`editor.css` も置き換わる可能性がある。
-
-有効状態が保存されていれば次回起動時に新しい `editor.css` を検出し、
-その新しいファイルを元として再適用する。
+VS Code 更新によって `editor.css` が新しい未加工ファイルへ交換され、
+旧バックアップだけが残った場合は、そのバックアップの由来を確実に証明できないため、
+**自動で削除・置換・再適用しない**。状況と対象ファイルを実測してから対処する。
 
 ## アンインストール
 
@@ -166,7 +111,7 @@ Noctis Blue 自体が削除された後は管理コードを実行できない�
 Noctis Blue: Disable Markdown Editor Appearance
 ```
 
-を実行して元CSSへ戻す。
+を実行して元 CSS へ戻す。加えて `Noctis Blue: Disable Automatic Appearance` で workbench の読み込みも解除する。
 
 ## 参照
 
