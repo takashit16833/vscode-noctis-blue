@@ -106,6 +106,9 @@ Noctis Blue の通常本文色は従来どおり `#5EAFFF` を使う。パレッ
 
 - 見出し `.md-heading`: Emacs `fg-pale` と同じ `#A6CAFF`
 - `pre.md-code-block`: 枠線なし
+- 引用: VS Code 標準の `textBlockQuote.background` の色を維持し、背景だけ65%不透明
+- インラインコード: 本文色 `#5EAFFF` + コードブロックと同じ `textCodeBlock.background`
+- 通常リンク: Emacs版と同じ `fg-muted = #316CBD`、太字、下線
 - 編集中ブロック: 元の `--md-block-active-background` を維持したまま指定不透明度へ調整
 
 ```jsonc
