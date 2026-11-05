@@ -102,6 +102,7 @@
           "scope": "window",
           "default": {
             "editor": 0.91,
+            "minimap": 0.5,
             "sidebar": 0.93,
             "panel": 0.94,
             "auxiliaryBar": 0.86,
@@ -115,6 +116,12 @@
               "minimum": 0,
               "maximum": 1,
               "description": "中央のエディタ領域（内蔵Markdown Editorの外側を含む）の背景色の不透明度。"
+            },
+            "minimap": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "ミニマップの背景色の不透明度。エディタ領域の背景上に重ねるため、画面上の最終的な不透明度とは異なります。"
             },
             "sidebar": {
               "type": "number",
