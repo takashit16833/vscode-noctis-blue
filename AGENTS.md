@@ -42,10 +42,10 @@
 ## 領域別透過
 
 - `noctisBlue.opacity` は背景色の不透明度（0〜1）。
-- 対象は `editor` / `minimap` / `tabs` / `sidebar` / `panel` / `auxiliaryBar` / `chrome` / `gap`。
+- 対象は `editor` / `minimap` / `tabs` / `breadcrumbs` / `sidebar` / `panel` / `auxiliaryBar` / `chrome` / `gap`。
 - 背景色は通常版テーマから取得し、別設定として重複管理しない。
 - ミニマップは通常版 `minimap.background` を基準にし、透過版の Canvas 背景は透明のまま保持する。ミニマップ自身の半透明背景だけを CSS で描き、文字・スクロール位置の表示を薄くしない。エディタ背景の上に重なる追加背景なので、最終的な不透明度と `minimap` の設定値を混同しない。
-- タブ領域の背景は、通常版の `editorGroupHeader.tabsBackground` を使い、`.part.editor .editor-group-container > .title.tabs` の一層だけに `tabs` の不透明度を設定する。内部のタブ一覧・操作領域を二重に塗らない。エディタ背景上での追加背景なので、単独のアルファ値と最終表示の不透明度を区別する。
+- `tabs` と `breadcrumbs` は親要素 `.title.tabs` の背景ではなく、別々の子要素（`.tabs-and-actions-container` と `.breadcrumbs-below-tabs`）をそれぞれ一度だけ描く。同じ通常版 `editorGroupHeader.tabsBackground` を参照し、色を二重管理しない。内部のタブ一覧とパンくずリストの部品に背景を重ねない。エディタ背景上の追加背景なので、単独のアルファ値と最終表示の不透明度を区別する。
 - Transparent 版のタブでは、通常版の `tab.activeBackground` / `tab.inactiveBackground` の色を半透明で維持する。Modern UI でも VS Code 標準の色指定を使い、`.tab-fill` を一律に透明化する独自 CSS を追加しない。Connected タブは通常テーマ色を独自背景変数に反映しないため、`src/appearance.js` で `--vscode-tab-activeBackground` / `--vscode-tab-inactiveBackground` を `--modern-ui-editor-tab-custom-*-background` へ橋渡しする。利用者が明示指定した色を優先できるよう、VS Code の色カスタマイズ規則より詳細度を上げない。タブはエディタ背景の上に追加描画されるので、設定したアルファ値と最終的な不透明度を混同しない。
 - ウィンドウが非アクティブのとき、VS Code は `.part.titlebar.inactive` を付与する。CSS では `titleBar.inactiveBackground` と `chrome` の不透明度を使い、アクティブ時の色で上書きしない。状態監視のタイマーは追加しない。
 - ステータスバーの状態別背景は VS Code がインラインの色として選ぶので、未確認の状態クラスを推測して CSS に追加しない。
