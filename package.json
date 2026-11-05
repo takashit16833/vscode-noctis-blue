@@ -2,7 +2,7 @@
   "name": "noctis-blue",
   "displayName": "Noctis Blue",
   "description": "A blue VS Code theme with customizable translucent surfaces.",
-  "version": "0.10.8",
+  "version": "0.10.9",
   "publisher": "takashit16833",
   "private": true,
   "engines": {
@@ -148,5 +148,8 @@
     "onCommand:noctisBlue.disableAutomaticAppearance",
     "onCommand:noctisBlue.enableMarkdownEditorAppearance",
     "onCommand:noctisBlue.disableMarkdownEditorAppearance"
+  ],
+  "extensionKind": [
+    "ui"
   ]
 }
