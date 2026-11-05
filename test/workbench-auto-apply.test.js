@@ -203,6 +203,40 @@ test('解除中の削除失敗後は HTML が復元され、次の解除で安�
   }
 });
 
+test('更新前のバックアップ内容が書き換わったら修復で削除しない', async t => {
+  const { root, files } = await fixture(t);
+  await enable(root, 'body{}', 'project', { 'noctis-blue': '.n{}' });
+  await fs.writeFile(files.html, original.replace('</body>', '<main>updated</main></body>'));
+  const replacedBackup = original.replace('</body>', '<!-- different --></body>');
+  await fs.writeFile(files.backup, replacedBackup);
+  await assert.rejects(repairStale(root), /バックアップの所有/);
+  assert.equal(await fs.readFile(files.backup, 'utf8'), replacedBackup);
+  assert.equal((await fs.readFile(files.html, 'utf8')).includes('<main>updated</main>'), true);
+});
+
+test('HTML 復元後のバックアップ削除失敗は次の解除で再試行できる', async t => {
+  const { root, files } = await fixture(t);
+  await enable(root, 'body{}', 'project');
+  const originalUnlink = fs.unlink;
+  let failedOnce = false;
+  t.mock.method(fs, 'unlink', async filename => {
+    if (!failedOnce && filename === files.backup) {
+      failedOnce = true;
+      throw new Error('simulated backup unlink failure');
+    }
+    return originalUnlink(filename);
+  });
+  await assert.rejects(disable(root), /simulated backup unlink failure/);
+  t.mock.restoreAll();
+  assert.equal(await fs.readFile(files.html, 'utf8'), original);
+  assert.equal(await fs.readFile(files.backup, 'utf8'), original);
+  assert.equal(await fs.readFile(files.loader, 'utf8'),
+    await fs.readFile(path.join(__dirname, '..', 'src', 'workbench', 'renderer-loader.js'), 'utf8'));
+  assert.deepEqual(await disable(root), { installed: false, changed: true });
+  await assert.rejects(fs.stat(files.backup), { code: 'ENOENT' });
+  await assert.rejects(fs.stat(files.loader), { code: 'ENOENT' });
+});
+
 test('無関係の HTML バックアップだけがある場合は修復で消さない', async t => {
   const { root, files } = await fixture(t);
   await fs.writeFile(files.backup, '<html>unrelated</html>');
