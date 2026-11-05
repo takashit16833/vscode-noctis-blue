@@ -50,6 +50,8 @@ test('transparent variant changes only workbench surfaces and declared transluce
     'list.hoverBackground': withAlpha(palette.hover, 'A6'),
     'modernTab.hoverBackground': withAlpha(palette.hover, 'A6'),
     'tab.hoverBackground': withAlpha(palette.focus, 'A6'),
+    'tab.activeBackground': withAlpha(palette.background, '80'),
+    'tab.inactiveBackground': withAlpha(palette.backgroundDeep, '80'),
     'editorSuggestWidget.background': withAlpha(palette.panel, 'A6'),
     'editorSuggestWidget.selectedBackground': withAlpha(palette.focus, 'B3'),
     'editorStickyScrollHover.background': withAlpha(palette.focus, 'A6'),
@@ -79,6 +81,15 @@ test('transparent variant changes only workbench surfaces and declared transluce
   assert.equal(opaque.colors['editor.selectionBackground'], palette.selection);
   assert.equal(opaque.colors['input.background'], palette.backgroundDeep);
   assert.equal(opaque.colors['agentsChatInput.background'], undefined);
+});
+
+test('tab background colors stay distinct without bypassing modern tab fallbacks', () => {
+  assert.equal(opaque.colors['tab.activeBackground'], palette.background);
+  assert.equal(opaque.colors['tab.inactiveBackground'], palette.backgroundDeep);
+  assert.equal(transparent.colors['tab.activeBackground'], palette.background + '80');
+  assert.equal(transparent.colors['tab.inactiveBackground'], palette.backgroundDeep + '80');
+  assert.equal(transparent.colors['modernEditorTab.activeBackground'], undefined);
+  assert.equal(transparent.colors['modernEditorTab.inactiveBackground'], undefined);
 });
 
 test('palette white aliases fg-pale while editor text keeps the base blue', () => {
