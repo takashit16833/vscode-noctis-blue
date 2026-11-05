@@ -145,6 +145,16 @@ async function inspect(appRoot) {
   return { installed: false, files, stat, html };
 }
 
+async function ensureHtmlUnchanged(info) {
+  // The VS Code updater does not share our extension's workbench lock.
+  const stat = await regularOrAbsent(info.files.html);
+  const html = await fs.readFile(info.files.html, 'utf8');
+  if (!stat || html !== info.html ||
+      stat.dev !== info.stat.dev || stat.ino !== info.stat.ino) {
+    throw new Error('検証後に VS Code 本体の HTML が変更されました。書き換えません。');
+  }
+}
+
 async function atomicWrite(filename, content, mode) {
   const temp = filename + '.tmp-' + crypto.randomUUID();
   let created = false;
@@ -206,6 +216,7 @@ async function enableUnlocked(appRoot, css, id, layers = {}) {
     createdLoader = true;
     await writeWorkspaceCss(info.files, css, id);
     await writeWorkspaceLayers(info.files, normalizedLayers, id, info.html);
+    await ensureHtmlUnchanged(info);
     await atomicWrite(info.files.html, patched, info.stat.mode);
   } catch (error) {
     const current = await fs.readFile(info.files.html, 'utf8').catch(() => null);
@@ -261,14 +272,7 @@ async function disableUnlocked(appRoot) {
     const header = name.startsWith('noctis-blue-layers-') ? LAYERS_CSS_HEADER : CSS_HEADER;
     await readOwnedCss(path.join(info.files.dir, name), header);
   }
-  // The VS Code updater does not participate in our lock. Refuse to restore
-  // over an HTML that was replaced after inspect() validated it.
-  const currentStat = await regularOrAbsent(info.files.html);
-  const currentHtml = await fs.readFile(info.files.html, 'utf8');
-  if (!currentStat || currentHtml !== info.html ||
-      currentStat.dev !== info.stat.dev || currentStat.ino !== info.stat.ino) {
-    throw new Error('検証後に VS Code 本体の HTML が変更されました。復元しません。');
-  }
+  await ensureHtmlUnchanged(info);
   await atomicWrite(info.files.html, info.backup, info.stat.mode);
   for (const name of names) await fs.unlink(path.join(info.files.dir, name));
   // Keep the verified loader until the backup has been removed, so a failed
