@@ -13,7 +13,7 @@
 ### `src/appearance.js` と配色テーマ
 
 - 通常版と透過版の配色を管理する。
-- editor / sidebar / panel / auxiliaryBar / chrome / gap の背景色と不透明度を管理する。
+- editor / minimap / sidebar / panel / auxiliaryBar / chrome / gap の背景色と不透明度を管理する。
 - 同じ領域の重複下地を透明化する。
 - Sticky Scroll や補完候補など、前面の文字を薄くせず背後だけをぼかす。
 - 背景画像のパス、乗算、画像切り替えは `src/workbench/wallpaper.js` に任せる。
@@ -22,9 +22,10 @@
 
 `noctisBlue.opacity` は背景色の不透明度であり、文字や要素全体の不透明度ではない。
 
-対象は次の6領域である。
+対象は次の7領域である。
 
 - `editor`
+- `minimap`
 - `sidebar`
 - `panel`
 - `auxiliaryBar`
@@ -32,6 +33,8 @@
 - `gap`
 
 背景色は Noctis Blue の通常版テーマから取得し、同じ色を利用者設定へ重複させない。
+
+`minimap` はエディタ内部の独立した表示面であり、通常版の `minimap.background` を一度だけ背景として追加する。VS Code がミニマップの Canvas に使う透過版テーマ色は透明のままにして、Canvas 側と CSS 側で背景色を二重に描かない。ただしエディタ領域の背景の上に重なるため、最終的な不透明度は `minimap` の設定値より高くなる。
 
 ## 背景色は一度だけ描く
 
