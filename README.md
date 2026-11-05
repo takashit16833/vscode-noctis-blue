@@ -2,8 +2,7 @@
 
 Emacs版 [Retro Hacker Blue](https://github.com/takashit16833/emacs-retro-hacker-blue-theme) の配色を基準にした VS Code 用テーマである。
 
-通常版と透過版で配色を共有し、背景画像は
-[vscode-wallpaper](https://github.com/takashit16833/vscode-wallpaper) に分離する。
+通常版と透過版で配色を共有し、背景画像・透過・ぼかしも同じ拡張に含める。
 
 ## テーマ
 
@@ -13,56 +12,35 @@ Emacs版 [Retro Hacker Blue](https://github.com/takashit16833/emacs-retro-hacker
 - JSON / JSONC / JSON Lines のプロパティ名は基本文字色 `#5EAFFF` に揃える。
 - `themes/*.json` は `npm run build` で生成する。
 
-## 責務
+## 構成
 
-### Noctis Blue
+利用者が導入する拡張機能は **Noctis Blue ひとつ**。
+内部では配色、壁紙、透過・ぼかし、Markdown Editor の処理を分けて保守する。
 
-- UI の配色
-- editor / sidebar / panel / auxiliaryBar / chrome / gap の背景不透明度
-- 重複する内部背景の透明化
-- Sticky Scroll と補完候補の背景ぼかし
+## インストール・旧 Wallpaper からの移行
 
-### vscode-wallpaper
-
-- 背景画像
-- tint と画像の乗算
-- 画面条件による画像切り替え
-- workbench CSS の共通ローダー
-
-同じ表示処理を両方へ重複実装しない。
-
-## インストール
-
-先に VS Code Wallpaper v0.11.1 以降をローカル側へインストールする。
+Mac 側で実行する。
 
 ```bash
-cd ~/vscode-wallpaper
-git switch main
-git pull --ff-only
-bash ./install.sh
-
 cd ~/vscode-noctis-blue
 git switch main
 git pull --ff-only
 bash ./install.sh
 ```
 
-Noctis Blue の `install.sh` はテスト、VSIX 作成、インストールまで行う。
-Dev Container では Noctis Blue をリモート側にも同じ VSIX からインストールする。Wallpaper はローカル側だけに置く。
-Noctis Blue 自身は `workbench.html` を変更しない。Markdown Editor の非公開CSS調整は、利用者が明示的に有効化した場合だけ組み込み Markdown 拡張の `editor.css` へ管理ブロックを追記する。
+`install.sh` はテスト・VSIX 作成・ローカル VS Code への導入を行い、旧 Wallpaper 拡張はインストールに成功した後でアンインストールする。
+既存の workbench 管理ファイルは、検証してから Noctis Blue が引き継ぐ。VS Code 本体を無断で修正しない。
 
 ## 基本設定
 
 ```jsonc
 {
   "workbench.colorTheme": "Noctis Blue Transparent",
-
-  "vscodeWallpaper.enabled": true,
-  "vscodeWallpaper.image": "/path/to/wallpaper.png",
-  "vscodeWallpaper.alternateImage": "/path/to/alternate.png",
-  "vscodeWallpaper.switchMode": "orientation",
-  "vscodeWallpaper.tint": "#FFFFFF",
-
+  "noctisBlue.wallpaper.enabled": true,
+  "noctisBlue.wallpaper.image": "/path/to/wide.png",
+  "noctisBlue.wallpaper.alternateImage": "/path/to/tall.png",
+  "noctisBlue.wallpaper.switchMode": "orientation",
+  "noctisBlue.wallpaper.tint": "#FFFFFF",
   "noctisBlue.opacity": {
     "editor": 0.91,
     "sidebar": 0.93,
@@ -74,28 +52,19 @@ Noctis Blue 自身は `workbench.html` を変更しない。Markdown Editor の�
 }
 ```
 
-`noctisBlue.opacity` は背景色の不透明度である。
-`0` は完全透明、`1` は不透明。文字やアイコン全体の `opacity` は変更しない。
+従来の `vscodeWallpaper.*` を使った設定は移行中の互換性のため読み取り可能。
+新しく記述する際は `noctisBlue.wallpaper.*` だけを使う。
 
 ## 自動適用
 
-Noctis Blue v0.11.1 以降は VS Code Wallpaper v0.11.1 の内部コマンド橋渡しを使い、Remote/Dev Container からでもローカル側の CSS レイヤーを更新する。
-リモート側で動作する Noctis Blue の存在をローカル側で確認できるよう、登録済みのコマンド ID も CSS レイヤーと一緒に通知する。これにより提供元を誤ってアンインストール済みと判断しない。
+初回は **Noctis Blue: Enable Automatic Appearance** を実行して本体変更への同意を確認する。
+その後は `Developer: Reload Window` で反映する。
 
-1. `Noctis Blue Transparent` を選ぶ。
-2. **Noctis Blue: Enable Automatic Appearance** を実行する。
-3. VS Code Wallpaper が表示する本体変更の説明を確認し、許可する。
-4. **Developer: Reload Window** を実行する。
+設定変更は生成 CSS だけを更新し、勝手にウィンドウを再読み込みしない。
+通常の Noctis Blue に切り替えると透過 CSS がなくなり、背景画像の有効設定は維持する。
 
-設定変更やテーマ切り替えでは次回読み込み用 CSS だけを更新する。
-勝手な再読み込みや Reload Window を促す通知は行わない。
-
-通常版 `Noctis Blue` や他テーマへ切り替えると Noctis Blue の CSS レイヤーは外れる。
-再び `Noctis Blue Transparent` へ戻した場合は、次回の Reload Window で透過表示へ戻る。
-
-**Noctis Blue: Disable Automatic Appearance** は Noctis Blue の CSS レイヤーだけを解除し、VS Code Wallpaper の背景画像設定や自動ローダー自体は無効化しない。レイヤー削除に失敗した場合は無効状態を保存せず、次回も同期・再試行できる状態を維持する。
-
-Noctis Blue が無効化・アンインストールされた場合は、Wallpaper API v3 に登録した提供元情報を使って孤児レイヤーを整理する。
+**Noctis Blue: Disable Automatic Appearance** は背景画像と透過の自動適用をまとめて解除する。
+**Noctis Blue: Repair Background Loader** は VS Code 更新後の修復用。
 
 ## 内蔵 Markdown Editor
 
@@ -106,6 +75,7 @@ Noctis Blue の通常本文色は従来どおり `#5EAFFF` を使う。パレッ
 公開 API だけでは Webview 本体へ任意 CSS を追加できないため、Noctis Blue は明示的に有効化した場合だけ、VS Code 組み込み Markdown 拡張の `markdown-editor-out/editor.css` 末尾へ管理ブロックを追記する。
 
 **Noctis Blue: Enable Markdown Editor Appearance** を一度実行して確認ダイアログを承認すると、次を自動適用する。
+Dev Container ではリモートサーバー上の CSS を VS Code のファイル操作 API で探し、対象を確認してから変更する。書き込み権限がない場合はエラーになり、権限は自動変更しない。実機での再検証が必要。
 
 - 見出し `.md-heading`: Emacs `fg-pale` と同じ `#A6CAFF`
 - H1/H2: 左外側 `-14px` に `::before` の青い縦線を表示し、文字行の中心に揃える
@@ -131,12 +101,13 @@ Noctis Blue の通常本文色は従来どおり `#5EAFFF` を使う。パレッ
 
 ## コマンドの使い分け
 
-コマンドパレットには、利用者向けの次の4つだけを表示する。
+コマンドパレットには、利用者向けの次の5つを表示する。
 
-- **Noctis Blue: Enable Automatic Appearance** — 透過・ぼかしの自動適用を有効にする。Wallpaper が必要。
-- **Noctis Blue: Disable Automatic Appearance** — 透過・ぼかしの自動適用を解除する。
+- **Noctis Blue: Enable Automatic Appearance** — 壁紙・透過・ぼかしをまとめて有効にする。
+- **Noctis Blue: Disable Automatic Appearance** — 壁紙・透過・ぼかしの自動適用を解除する。
 - **Noctis Blue: Enable Markdown Editor Appearance** — 組み込み Markdown Editor の装飾を有効にする。組み込み CSS を変更するため、権限が必要。
 - **Noctis Blue: Disable Markdown Editor Appearance** — 組み込み Markdown Editor の装飾を解除する。
+- **Noctis Blue: Repair Background Loader** — VS Code 更新後の修復用（通常操作では不要）。
 
 開発・原因切り分け用の以下3つは、コマンドパレットに表示しない。
 コマンド自体は廃止せず、拡張 API 等から呼び出せる。

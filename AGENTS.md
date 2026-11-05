@@ -2,15 +2,16 @@
 
 ## 役割分担
 
-- Noctis Blue は配色・背景透過・ぼかしの正本。
-- 背景画像、乗算、画像切り替え、workbench CSS の共通ローダーは `vscode-wallpaper` が担当する。
+- Noctis Blue は配色・背景画像・画像切り替え・背景透過・ぼかしの唯一の拡張とする。
+- 役割の分離は拡張機能単位ではなく、内部のモジュールで行う。背景画像用の別拡張を再導入しない。
 - `palette/colors.json` を配色の唯一の管理元とする。実行時コードから参照するため VSIX に必ず含め、`.vscodeignore` で除外しない。
 - JSON / JSONC / JSON Lines のプロパティ名は `support.type.property-name.json*` を `palette.foreground` に揃える。グローバルな semantic token の `property` 色は変更しない。
 - `themes/*.json` は生成物。変更後は `npm run build && npm test` を実行する。
 - VS Code 標準のテーマ機能・公開 API を最優先する。
-- Apc へ依存せず、Noctis Blue 独自の `workbench.html` 改変は行わない。内蔵 Markdown Editor だけは公開 API で届かない要素に限り、組み込み Markdown 拡張の `markdown-editor-out/editor.css` 末尾へ管理ブロックを追記する。
-- wallpaper と同じ表示処理を二重実装しない。
-- Noctis Blue は `extensionKind: ["workspace", "ui"]` とし、Remote/Dev Container では workspace host を優先する。Markdown Editor の `editor.css` はその host 側で管理し、Wallpaper 連携は `_vscodeWallpaper.*` の内部コマンド経由でローカル UI host へ渡す。
+- Apc へ依存しない。公開 API だけでは不可能な workbench 背景 CSS は、利用者の明示許可後に `src/workbench/auto-apply.js` だけが安全に導入する。
+- VS Code の組み込み Markdown Editor だけは別の管理対象である。CSS 追記は明示許可が必要で、元ファイルとバックアップを検証する。
+- Noctis Blue は `extensionKind: ["ui", "workspace"]` とし、Mac 側 UI host を優先する。workbench とローカル背景画像をコンテナ側から変更しない。
+- リモート Markdown Editor CSS は、ローカルの `fs` ではなく `src/markdownEditorRemote.js` の VS Code `workspace.fs` を使う。既知の候補を `stat` して現在の VS Code commit と一致するファイルだけを扱い、発見できなければ止める。
 
 ## 情報の置き場所
 
@@ -19,18 +20,23 @@
 - 実機確認の途中経過、未確認一覧、次の作業を長期資料へ蓄積しない。
 - 実測から恒久的な設計判断が得られた場合だけ、その判断と根拠を設計資料へ残す。
 
-## ワークベンチ自動適用
+## ワークベンチと画像の自動適用
 
-- v0.7.0 以降は `vscode-wallpaper` v0.10.0 以降の CSS レイヤー API v3 を使う。
-- Noctis Blue のレイヤー ID は `takashit16833.noctis-blue`。API v3 では同じ ID を `ownerExtensionId` として登録し、拡張無効化・削除時の孤児レイヤー整理に使う。
-- Remote/Dev Container 側では Wallpaper bridge v2（v0.11.1 以降）を使い、`ownerCommandId: 'noctisBlue.enableAutomaticAppearance'` も渡す。このコマンドは `contributes.commands` に登録済みであり、UI host がリモート拡張の在籍確認に利用する。
-- `Noctis Blue Transparent` のときだけ Noctis の CSS レイヤーを登録する。
-- 通常版 `Noctis Blue` および他テーマでは Noctis のレイヤーを削除する。
-- wallpaper 側は常に背景画像・乗算・画像切り替えだけを生成するため、表示面所有権のフラグは使わない。
-- 自動適用の有効状態は Noctis Blue 側の `globalState` に保存する。解除時は Wallpaper のレイヤー削除が成功してから `false` を保存し、失敗時に状態を先行変更しない。
-- 設定・テーマ変更時は次回再読み込み用 CSS だけを更新する。
-- タイマー監視・勝手な再読み込み・Reload Window を促す通知を追加しない。
-- 実画面への反映時期は利用者が `Developer: Reload Window` を選ぶ。
+- `src/workbench/wallpaper.js`: 背景画像パス、画像切替、乗算 CSS の正本。透過の CSS をここへ混ぜない。
+- `src/appearance.js`: エディタ・パネル・補完・Sticky Scroll などの透過とぼかしの正本。
+- `src/automaticAppearance.js`: 設定を読み、上記2つの CSS を組み合わせ、保存状態と安全な適用を制御する。
+- `src/workbench/auto-apply.js`: workbench.html の導入・検証・同期・解除・修復だけを担当。バックアップと旧ローダー互換性を維持する。
+- `src/workbench/renderer-loader.js`: CSS を起動時に読み込む。タイマーやポーリングを増やさない。
+- `src/workbench/workspace-id.js`: VS Code renderer 側と同一の作業領域 ID を生成する。
+- 旧 Wallpaper の管理済み `workbench.html`・`vscode-wallpaper-*.css`・`vscode-wallpaper-layers-*.css` を検査後に引き継ぐ。ファイル名は下位互換性のため維持し、安易に一括改名しない。
+- 旧拡張 `takashit16833.vscode-wallpaper` がインストールされている間は、CSS の二重書き込みを防ぐため管理を拒否する。
+- 旧 `vscodeWallpaper.*` 設定は `noctisBlue.wallpaper.*` へ移行する。移行途中は新設定に明示値がない場合のみ旧設定を読み取る。旧設定の新規追加は禁止。
+- `Noctis Blue Transparent` のときだけ領域透過 CSS を追加する。背景画像自体は `noctisBlue.wallpaper.enabled` で制御する。
+- 自動適用の保存状態は `noctisBlue.automaticAppearanceEnabled` (`globalState`) を継続利用し、移行でリセットしない。
+- ユーザーの明示的な同意なしに workbench.html を初回変更しない。設定変更時は管理 CSS だけ更新する。
+- `Developer: Reload Window` はユーザーが選ぶ。勝手に実行せず、タイマー・通知の連発をしない。
+- VS Code の整合性警告は隠さない。所有不明の HTML / loader / CSS は上書きも削除もしない。
+- 旧2拡張の内部コマンド橋渡しと提供元の孤児レイヤー整理は統合後は不要。再導入しない。
 
 ## 領域別透過
 
@@ -78,7 +84,24 @@
 - `Noctis Blue: Show Markdown Active Block Test`
 
 上記は正式な適用経路ではない。
-通常のワークベンチ表示は wallpaper の共通ローダー経由の Noctis CSS レイヤーで確認する。
+通常のワークベンチ表示は Noctis Blue 内部の共通ローダー経由の CSS で確認する。
+
+## リモート Markdown Editor と権限
+
+- 統合で Noctis Blue の拡張実行場所を Mac 側 UI host へ変更した。VS Code Server 側の内蔵 Markdown Editor CSS は別の場所にある。
+- `src/markdownEditorRemote.js` はローカル `product.json` から VS Code commit を取得し、既知の Dev Container / Remote server ディレクトリの **存在を確認したファイル** のみを `vscode.workspace.fs` で扱う。パスの推測による書き込みは行わない。
+- `src/markdownEditorPatch.js` は共通の安全な CSS バックアップ・検証・復元ロジックとする。ローカル `node:fs` とリモート `workspace.fs` はファイル操作の実装だけを分ける。
+- `workspace.fs` に `chmod` はない。自動 `chown` / `sudo` / 権限緩和を追加しない。コンテナの root 所有ディレクトリへの書き込み失敗は **未解決の運用問題** として、実機で検証する。権限がない場合はエラーで停止し、状態の変更・バックアップ破壊を避ける。
+- VS Code 更新・違う remote server 布置は実機の場所と権限を調査してから候補を増やす。検証していない環境に動くと断定しない。
+- 内蔵 Markdown Editor は組み込み Webview。標準 Markdown Preview や外部 Live Preview と混同しない。
+
+## 統合テストとリリース
+
+- `npm run build && npm test`。移植した Wallpaper の画像・画面切替・ローダー・作業領域 ID・バックアップ安全性テストを維持する。
+- 単一拡張での Mac 実機背景、Dev Container 内の Markdown Editor、旧管理ファイルの引き継ぎを確認してから通常版へ反映する。
+- dotfiles の設定の正本は `takashit16833/dotfiles` の `.config/vscode/settings.json`。初期導入と `AGENTS.md` も同時変更する。
+- 独立した `vscode-wallpaper` リポジトリは履歴・復旧のため保管し、新規の実装先にはしない。
+- 現時点で確認できない環境依存の項目は、必ず未検証と明記する。
 
 ## 実測ルール
 
