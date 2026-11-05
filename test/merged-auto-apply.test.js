@@ -182,7 +182,7 @@ test('修復は管理外 loader や CSS を削除しない', async t => {
 
   await fs.unlink(files.loader);
   await fs.writeFile(workspaceStylePath(files, 'project'), '/* edited by user */\nbody{}');
-  await assert.rejects(repairStale(root), /管理外の CSS/);
+  await assert.rejects(repairStale(root), /所有を確認できません/);
   assert.match(await fs.readFile(workspaceStylePath(files, 'project'), 'utf8'), /edited by user/);
 });
 
