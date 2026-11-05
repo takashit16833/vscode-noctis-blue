@@ -1,8 +1,7 @@
 'use strict';
 
-// The rich Markdown editor is an independent webview. The active block uses
-// its own CSS color variable, which is not a VS Code theme color ID.
-// Never replace that color: only mix it with transparency.
+// The rich Markdown editor is an independent webview. Keep all Markdown-only
+// overrides here so they cannot leak into the VS Code workbench.
 const palette = require('../palette/colors.json');
 
 const CSS_VARIABLE = 'var(--md-block-active-background, #f8f8f8)';
@@ -18,21 +17,65 @@ function validateOpacity(value) {
 
 function generateMarkdownCss(opacity) {
   const percent = Math.round(validateOpacity(opacity) * 10000) / 100;
-  const background = 'color-mix(in srgb, ' + CSS_VARIABLE + ' ' + percent + '%, transparent)';
+  const activeBackground =
+    'color-mix(in srgb, ' + CSS_VARIABLE + ' ' + percent + '%, transparent)';
+  const codeBackground =
+    'var(--vscode-textCodeBlock-background, ' + palette.markdownCodeBlockBackground + ')';
+  const editorForeground =
+    'var(--vscode-editor-foreground, ' + palette.foreground + ')';
+
   return [
     '/* Noctis Blue Markdown Editor appearance. */',
     '.md-heading {',
     '  color: ' + palette.pale + ' !important;',
+    '  border-bottom-color: ' + palette.muted + ' !important;',
     '}',
     '',
     'pre.md-code-block {',
     '  border: none !important;',
     '}',
     '',
+    '/* Match Emacs markdown-ts-mode inline-code colors. */',
+    '.md-inline-code {',
+    '  color: ' + editorForeground + ' !important;',
+    '  background: ' + codeBackground + ' !important;',
+    '}',
+    '',
+    '/* Blockquotes keep their structure but do not paint an opaque panel. */',
+    '.md-blockquote,',
+    'blockquote.md-blockquote {',
+    '  background: transparent !important;',
+    '}',
+    '',
+    '/* Emacs markdown-ts-link / org-link: muted blue, bold, underline. */',
+    '.md-link,',
+    '.md-editor a {',
+    '  color: ' + palette.muted + ' !important;',
+    '  font-weight: 700 !important;',
+    '  text-decoration: underline !important;',
+    '  text-decoration-color: ' + palette.muted + ' !important;',
+    '}',
+    '',
+    '/* Emacs table header and borders both use fg-muted. */',
+    '.md-table th,',
+    '.md-editor table th {',
+    '  color: ' + palette.muted + ' !important;',
+    '  font-weight: 700 !important;',
+    '}',
+    '',
+    '.md-table,',
+    '.md-table th,',
+    '.md-table td,',
+    '.md-editor table,',
+    '.md-editor table th,',
+    '.md-editor table td {',
+    '  border-color: ' + palette.muted + ' !important;',
+    '}',
+    '',
     '/* Keep the active-block highlight; change only alpha. */',
     SELECTOR + ' {',
-    '  background: ' + background + ' !important;',
-    '  box-shadow: 0 0 0 8px ' + background + ' !important;',
+    '  background: ' + activeBackground + ' !important;',
+    '  box-shadow: 0 0 0 8px ' + activeBackground + ' !important;',
     '}',
     ''
   ].join('\n');
@@ -59,7 +102,7 @@ function generateTemporaryMarkdownScript(opacity) {
     '  style.textContent = ' + JSON.stringify(css) + ';',
     '  document.head.appendChild(style);',
     '  console.info("Noctis Blue: 元の背景色:", sourceColor);',
-    '  return "Noctis Blue: 背景色を保った半透明表示を適用しました";',
+    '  return "Noctis Blue: Markdown表示調整を一時適用しました";',
     '})();',
     ''
   ].join('\n');
