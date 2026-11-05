@@ -4,7 +4,7 @@
 
 - Noctis Blue は配色・背景透過・ぼかしの正本。
 - 背景画像、乗算、画像切り替え、workbench CSS の共通ローダーは `vscode-wallpaper` が担当する。
-- `palette/colors.json` を配色の唯一の管理元とする。
+- `palette/colors.json` を配色の唯一の管理元とする。実行時コードから参照するため VSIX に必ず含め、`.vscodeignore` で除外しない。
 - `themes/*.json` は生成物。変更後は `npm run build && npm test` を実行する。
 - VS Code 標準のテーマ機能・公開 API を最優先する。
 - Apc へ依存せず、Noctis Blue 独自の `workbench.html` 改変は行わない。内蔵 Markdown Editor だけは公開 API で届かない要素に限り、組み込み Markdown 拡張の `markdown-editor-out/editor.css` 末尾へ管理ブロックを追記する。
