@@ -177,7 +177,7 @@ test('VS Code 更新後に残った管理ファイルだけを安全に修復で
 test('修復は管理外 loader や CSS を削除しない', async t => {
   const { root, files } = await fixture(t);
   await fs.writeFile(files.loader, 'unrelated loader');
-  await assert.rejects(repairStale(root), /読み込みスクリプト/);
+  await assert.rejects(repairStale(root), /所有を確認できません/);
   assert.equal(await fs.readFile(files.loader, 'utf8'), 'unrelated loader');
 
   await fs.unlink(files.loader);
@@ -191,4 +191,58 @@ test('現在の自動適用が有効なら repairStale は何も削除しない'
   await enable(root, 'body{}', 'project');
   assert.deepEqual(await repairStale(root), { changed: false, installed: true });
   assert.equal((await inspect(root)).installed, true);
+});
+
+test('解除中の削除失敗後は HTML が復元され、次の解除で安全に清掃を完了する', async t => {
+  const { root, files } = await fixture(t);
+  await enable(root, 'body{}', 'project', { 'takashit16833.noctis-blue': '.n{}' });
+  const originalUnlink = fs.unlink;
+  let failedOnce = false;
+  t.mock.method(fs, 'unlink', async filename => {
+    if (!failedOnce && String(filename).endsWith('vscode-wallpaper-project.css')) {
+      failedOnce = true;
+      throw new Error('simulated I/O failure');
+    }
+    return originalUnlink(filename);
+  });
+  await assert.rejects(disable(root), /simulated I\/O failure/);
+  t.mock.restoreAll();
+  assert.equal(await fs.readFile(files.html, 'utf8'), original);
+  assert.equal((await disable(root)).changed, true);
+  assert.equal((await inspect(root)).installed, false);
+  for (const filename of [files.backup, files.loader,
+    workspaceStylePath(files, 'project'), workspaceLayersPath(files, 'project')]) {
+    await assert.rejects(fs.stat(filename), { code: 'ENOENT' });
+  }
+});
+
+test('無関係の HTML バックアップだけがある場合は修復で消さない', async t => {
+  const { root, files } = await fixture(t);
+  await fs.writeFile(files.backup, '<html>unrelated</html>');
+  await assert.rejects(repairStale(root), /バックアップ|所有/);
+  assert.equal(await fs.readFile(files.backup, 'utf8'), '<html>unrelated</html>');
+});
+
+test('別ウィンドウが管理中ならロックを奪わずファイルを変更しない', async t => {
+  const { root, files } = await fixture(t);
+  const lock = path.join(files.dir, '.noctis-blue-workbench.lock');
+  await fs.writeFile(lock, 'another process');
+  await assert.rejects(enable(root, 'body{}', 'project'), /操作中/);
+  assert.equal(await fs.readFile(lock, 'utf8'), 'another process');
+  assert.equal(await fs.readFile(files.html, 'utf8'), original);
+});
+
+test('初回導入中に別の loader が現れても巻き戻しで消さない', async t => {
+  const { root, files } = await fixture(t);
+  const originalWrite = fs.writeFile;
+  t.mock.method(fs, 'writeFile', async (filename, data, options) => {
+    if (filename === files.backup) {
+      await originalWrite(files.loader, 'unrelated loader');
+    }
+    return originalWrite(filename, data, options);
+  });
+  await assert.rejects(enable(root, 'body{}', 'project'), /既存の壁紙スクリプト/);
+  t.mock.restoreAll();
+  assert.equal(await fs.readFile(files.loader, 'utf8'), 'unrelated loader');
+  assert.equal(await fs.readFile(files.html, 'utf8'), original);
 });
