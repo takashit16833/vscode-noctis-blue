@@ -19,11 +19,6 @@ function generateMarkdownCss(opacity) {
   const percent = Math.round(validateOpacity(opacity) * 10000) / 100;
   const activeBackground =
     'color-mix(in srgb, ' + CSS_VARIABLE + ' ' + percent + '%, transparent)';
-  const codeBackground =
-    'var(--vscode-textCodeBlock-background, ' + palette.markdownCodeBlockBackground + ')';
-  const editorForeground =
-    'var(--vscode-editor-foreground, ' + palette.foreground + ')';
-
   return [
     '/* Noctis Blue Markdown Editor appearance. */',
     '.md-heading {',
@@ -32,43 +27,6 @@ function generateMarkdownCss(opacity) {
     '',
     'pre.md-code-block {',
     '  border: none !important;',
-    '}',
-    '',
-    '/* Match Emacs markdown-ts-mode inline-code colors. */',
-    '.md-inline-code {',
-    '  color: ' + editorForeground + ' !important;',
-    '  background: ' + codeBackground + ' !important;',
-    '}',
-    '',
-    '/* Blockquotes keep their structure but do not paint an opaque panel. */',
-    '.md-blockquote,',
-    'blockquote.md-blockquote {',
-    '  background: transparent !important;',
-    '}',
-    '',
-    '/* Emacs markdown-ts-link / org-link: muted blue, bold, underline. */',
-    '.md-link,',
-    '.md-editor a {',
-    '  color: ' + palette.muted + ' !important;',
-    '  font-weight: 700 !important;',
-    '  text-decoration: underline !important;',
-    '  text-decoration-color: ' + palette.muted + ' !important;',
-    '}',
-    '',
-    '/* Emacs table header and borders both use fg-muted. */',
-    '.md-table th,',
-    '.md-editor table th {',
-    '  color: ' + palette.muted + ' !important;',
-    '  font-weight: 700 !important;',
-    '}',
-    '',
-    '.md-table,',
-    '.md-table th,',
-    '.md-table td,',
-    '.md-editor table,',
-    '.md-editor table th,',
-    '.md-editor table td {',
-    '  border-color: ' + palette.muted + ' !important;',
     '}',
     '',
     '/* Keep the active-block highlight; change only alpha. */',
