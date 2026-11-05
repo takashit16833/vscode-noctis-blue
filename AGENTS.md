@@ -42,8 +42,9 @@
 ## 領域別透過
 
 - `noctisBlue.opacity` は背景色の不透明度（0〜1）。
-- 対象は `editor` / `sidebar` / `panel` / `auxiliaryBar` / `chrome` / `gap`。
+- 対象は `editor` / `minimap` / `sidebar` / `panel` / `auxiliaryBar` / `chrome` / `gap`。
 - 背景色は通常版テーマから取得し、別設定として重複管理しない。
+- ミニマップは通常版 `minimap.background` を基準にし、透過版の Canvas 背景は透明のまま保持する。ミニマップ自身の半透明背景だけを CSS で描き、文字・スクロール位置の表示を薄くしない。エディタ背景の上に重なる追加背景なので、最終的な不透明度と `minimap` の設定値を混同しない。
 - 文字・アイコン・選択範囲へ要素全体の `opacity` を指定しない。
 - `src/appearance.js` を領域背景・重複下地透明化・ぼかしの CSS 生成元とする。DOM 依存セレクタは editor / panel / sidebar / SCM / Sticky / suggest / gap の機能単位で分け、処理内容ではなく必要理由をコメントする。
 - Source Control メッセージ欄は外側 `.scm-editor` の背景を残し、内部 Monaco の重複背景だけを透明化する。
