@@ -10,8 +10,8 @@
 - VS Code 標準のテーマ機能・公開 API を最優先する。
 - Apc へ依存しない。公開 API だけでは不可能な workbench 背景 CSS は、利用者の明示許可後に `src/workbench/auto-apply.js` だけが安全に導入する。
 - VS Code の組み込み Markdown Editor だけは別の管理対象である。CSS 追記は明示許可が必要で、元ファイルとバックアップを検証する。
-- Noctis Blue は `extensionKind: ["ui", "workspace"]` とし、Mac 側 UI host を優先する。workbench とローカル背景画像をコンテナ側から変更しない。
-- リモート Markdown Editor CSS は、ローカルの `fs` ではなく `src/markdownEditorRemote.js` の VS Code `workspace.fs` を使う。既知の候補を `stat` して現在の VS Code commit と一致するファイルだけを扱い、発見できなければ止める。
+- Noctis Blue は `extensionKind: ["ui"]` とし、Mac 側 UI host のみで実行する。workbench とローカル背景画像をコンテナ側から変更しない。
+- リモート Markdown Editor CSS は、ローカルの `fs` ではなく `src/markdownEditorRemote.js` の `workspace.fs` を使う。実機で観測された `/vscode/extensions/markdown-language-features/markdown-editor-out/editor.css` と既知の VS Code Server 配置を確認し、候補がゼロ件または複数件なら書き込まず停止する。探索結果だけでは Webview が使用中の CSS と同一であることは保証できない。
 
 ## 情報の置き場所
 
@@ -32,10 +32,12 @@
 - 旧拡張 `takashit16833.vscode-wallpaper` がインストールされている間は、CSS の二重書き込みを防ぐため管理を拒否する。
 - 旧 `vscodeWallpaper.*` 設定は `noctisBlue.wallpaper.*` へ移行する。移行途中は新設定に明示値がない場合のみ旧設定を読み取る。旧設定の新規追加は禁止。
 - `Noctis Blue Transparent` のときだけ領域透過 CSS を追加する。背景画像自体は `noctisBlue.wallpaper.enabled` で制御する。
-- 自動適用の保存状態は `noctisBlue.automaticAppearanceEnabled` (`globalState`) を継続利用し、移行でリセットしない。
+- 自動適用の保存状態は `noctisBlue.automaticAppearanceEnabled` (`globalState`) を継続利用する。旧 Wallpaper の有効状態は直接取得できないため、初回に管理済み HTML・バックアップ・ローダーを検査できたときだけ `noctisBlue.workbenchMigrationChecked` を記録して引き継ぐ。解除後に再自動有効化しない。
 - ユーザーの明示的な同意なしに workbench.html を初回変更しない。設定変更時は管理 CSS だけ更新する。
 - `Developer: Reload Window` はユーザーが選ぶ。勝手に実行せず、タイマー・通知の連発をしない。
 - VS Code の整合性警告は隠さない。所有不明の HTML / loader / CSS は上書きも削除もしない。
+- workbench への変更はインストール単位の `.noctis-blue-workbench.lock` で排他制御する。ロックが残っていても勝手に奪わない。解除後の後片付けが失敗した場合、元 HTML とローダーの所有を確認できる限り再実行可能にする。証拠のない単独バックアップは削除しない。
+- 一時ファイルの無条件削除、予測可能な固定一時ファイル名、管理外バックアップの自動削除を禁止する。
 - 旧2拡張の内部コマンド橋渡しと提供元の孤児レイヤー整理は統合後は不要。再導入しない。
 
 ## 領域別透過
@@ -68,13 +70,16 @@
 - 通常リンクは実機でクラスなしの `A` 要素と確認済み。Markdown Editor 文書内だけ `fg-muted = #316CBD`、太字、下線へ揃える。
 - 表は実DOM確認済み。見出しは `#316CBD` + 太字、罫線は太さと線種を変えず `widget.border` を使う。
 - 公開 API で届かない Markdown Editor 固有の CSS は、利用者が明示的に有効化した場合だけ `markdown-editor-out/editor.css` に追記する。
-- 元 `editor.css` は `.noctis-blue.backup` として完全保存し、解除時は内容一致を確認して復元する。
+- 元 `editor.css` は `.noctis-blue.backup` として排他的に保存し、解除時は内容一致を確認して復元する。未加工 CSS の横に既存バックアップがあれば、同一内容でも由来不明として削除・上書きせず停止する。
+- 書き込みは操作ごとにランダムな一時ファイルを使い、作成したものだけ後始末する。リモート `workspace.fs.writeFile` は排他的作成を保証しないため、乱数名の事前存在検査に依存する制限を明記する。
 - 管理ブロック以外の変更、壊れたマーカー、バックアップ欠落を検出した場合は上書き・解除せず停止する。
 - VS Code 更新で管理ブロックのない新しい `editor.css` に置き換わった場合は、それを新しい元ファイルとしてバックアップし直して再適用する。
 - provider の JavaScript、package.json、Webview HTML は変更しない。
 - `markdown.editor.highlightActiveBlock=false` で強調表示自体を消さない。
 - `--md-block-active-background` の色を固定色へ置き換えず、背景と影の不透明度だけを変更する。
-- `noctisBlue.markdownActiveBlockOpacity` は自動適用する Markdown Editor CSS の設定として扱う。
+- `noctisBlue.markdownActiveBlockOpacity` は複数ウィンドウが共有する `editor.css` の設定なので `scope: application` とする。ウィンドウごとに異なる値を共有 CSS へ上書きさせない。
+- Markdown Editor CSS は `body[data-vscode-theme-id]` で Noctis Blue 2テーマに限定し、ウィンドウのテーマ切替だけで共有 CSS を削除しない。テーマの識別子は `package.json` の themes[].id と一致させる。
+- 内蔵 Markdown CSS の有効化は `noctisBlue.markdownEditorAppearanceEnabledTargets` に接続先ごと保存する。旧単一真偽値は別の接続先に対する許可とみなさず、新しい対象では利用者に再有効化してもらう。
 - Noctis Blue のアンインストール前には Markdown Editor Appearance を解除する。
 
 ## 開発用診断
@@ -89,9 +94,9 @@
 ## リモート Markdown Editor と権限
 
 - 統合で Noctis Blue の拡張実行場所を Mac 側 UI host へ変更した。VS Code Server 側の内蔵 Markdown Editor CSS は別の場所にある。
-- `src/markdownEditorRemote.js` はローカル `product.json` から VS Code commit を取得し、既知の Dev Container / Remote server ディレクトリの **存在を確認したファイル** のみを `vscode.workspace.fs` で扱う。パスの推測による書き込みは行わない。
+- `src/markdownEditorRemote.js` は観測済みの `/vscode/extensions/...` と、ローカル `product.json` の commit に対応する既知の Remote server ディレクトリを `workspace.fs` で調べる。候補が一つだけのときに操作し、複数見つかれば止める。Webview が実際に読み込んだ URI との照合は実機で行う。
 - `src/markdownEditorPatch.js` は共通の安全な CSS バックアップ・検証・復元ロジックとする。ローカル `node:fs` とリモート `workspace.fs` はファイル操作の実装だけを分ける。
-- `workspace.fs` に `chmod` はない。自動 `chown` / `sudo` / 権限緩和を追加しない。コンテナの root 所有ディレクトリへの書き込み失敗は **未解決の運用問題** として、実機で検証する。権限がない場合はエラーで停止し、状態の変更・バックアップ破壊を避ける。
+- `workspace.fs` に `chmod` も排他的 `writeFile` もない。バックアップ作成は `workspace.fs.copy(overwrite: false)` を使う。自動 `chown` / `sudo` / 権限緩和を追加しない。コンテナの root 所有ディレクトリへの書き込み失敗は **未解決の運用問題** として、実機で検証する。権限がない場合はエラーで停止し、状態の変更・バックアップ破壊を避ける。
 - VS Code 更新・違う remote server 配置は実機の場所と権限を調査してから候補を増やす。検証していない環境に動くと断定しない。
 - 内蔵 Markdown Editor は組み込み Webview。標準 Markdown Preview や外部 Live Preview と混同しない。
 
