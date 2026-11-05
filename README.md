@@ -140,6 +140,7 @@ npm test
 
 - [docs/wallpaper-spec.md](docs/wallpaper-spec.md)
 - [docs/markdown-editor.md](docs/markdown-editor.md)
+- [docs/markdown-showcase.md](docs/markdown-showcase.md): Markdown Editor / Preview の見た目確認用ショーケース。
 - [VS Code Theme Color](https://code.visualstudio.com/api/references/theme-color)
 - [VS Code Markdown Extension API](https://code.visualstudio.com/api/extension-guides/markdown-extension)
 
