@@ -142,6 +142,7 @@ function buildTheme(p,transparent){
   }
 
   const rule=(name,scope,foreground,fontStyle)=>({name,scope,settings:{...(foreground?{foreground}:{}),...(fontStyle!==undefined?{fontStyle}:{})}});
+  // Keep frequent function names in the base blue and types in the subdued purple.
   const tokenColors=[
     rule("Comments",["comment","punctuation.definition.comment","string.comment"],p.comment,""),
     rule("Strings",["string","string.quoted","string.template","string.regexp"],p.white),
@@ -149,8 +150,8 @@ function buildTheme(p,transparent){
     rule("Punctuation",["punctuation","meta.brace","meta.brackets","meta.parentheses"],p.punctuation),
     rule("Keywords",["keyword","storage.type","storage.modifier"],p.pale,"bold"),
     rule("Numbers",["constant.numeric","constant.language","constant.other","constant.character"],p.gold),
-    rule("Functions",["entity.name.function","support.function","meta.function-call","meta.method-call"],p.function,"bold"),
-    rule("Types",["entity.name.type","entity.name.class","support.type","support.class","meta.return-type"],p.typeBright,"bold"),
+    rule("Functions",["entity.name.function","support.function","meta.function-call","meta.method-call"],p.foreground,"bold"),
+    rule("Types",["entity.name.type","entity.name.class","support.type","support.class","meta.return-type"],p.type,"bold"),
     rule("Variables",["variable","support.variable","meta.definition.variable.name"],p.pale),
     rule("JSON properties",[
       "support.type.property-name.json",
@@ -166,10 +167,10 @@ function buildTheme(p,transparent){
     rule("Invalid",["invalid","invalid.illegal"],p.cursor,"underline")
   ];
   const semanticTokenColors={
-    namespace:p.typeBright,type:p.typeBright,class:p.typeBright,enum:p.typeBright,
-    interface:p.typeBright,struct:p.typeBright,typeParameter:p.typeBright,
+    namespace:p.type,type:p.type,class:p.type,enum:p.type,
+    interface:p.type,struct:p.type,typeParameter:p.type,
     parameter:p.pale,variable:p.light,property:p.pale,
-    enumMember:p.gold,function:p.function,method:p.function,macro:p.foreground,
+    enumMember:p.gold,function:p.foreground,method:p.foreground,macro:p.foreground,
     keyword:p.pale,modifier:p.foreground,comment:p.comment,string:p.white,
     number:p.gold,regexp:p.white,operator:p.operator,decorator:p.gold
   };

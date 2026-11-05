@@ -90,6 +90,22 @@ test('palette white aliases fg-pale while editor text keeps the base blue', () =
     withAlpha(palette.markdownCodeBlockBackground, 'BF'));
 });
 
+test('functions use the base blue and types use the subdued purple', () => {
+  for (const theme of [opaque, transparent]) {
+    const functions = theme.tokenColors.find(rule => rule.name === 'Functions');
+    const types = theme.tokenColors.find(rule => rule.name === 'Types');
+    assert.equal(functions.settings.foreground, palette.foreground);
+    assert.equal(types.settings.foreground, palette.type);
+    for (const role of ['function', 'method']) {
+      assert.equal(theme.semanticTokenColors[role], palette.foreground, role);
+    }
+    for (const role of ['namespace', 'type', 'class', 'enum',
+      'interface', 'struct', 'typeParameter']) {
+      assert.equal(theme.semanticTokenColors[role], palette.type, role);
+    }
+  }
+});
+
 test('JSON property names use the base editor blue without changing global property semantics', () => {
   const jsonRule = opaque.tokenColors.find(rule => rule.name === 'JSON properties');
   assert.ok(jsonRule);

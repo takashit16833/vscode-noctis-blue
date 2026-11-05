@@ -267,7 +267,7 @@
         "meta.method-call"
       ],
       "settings": {
-        "foreground": "#87CEEB",
+        "foreground": "#5EAFFF",
         "fontStyle": "bold"
       }
     },
@@ -281,7 +281,7 @@
         "meta.return-type"
       ],
       "settings": {
-        "foreground": "#B07CFF",
+        "foreground": "#8A5EC0",
         "fontStyle": "bold"
       }
     },
@@ -379,19 +379,19 @@
     }
   ],
   "semanticTokenColors": {
-    "namespace": "#B07CFF",
-    "type": "#B07CFF",
-    "class": "#B07CFF",
-    "enum": "#B07CFF",
-    "interface": "#B07CFF",
-    "struct": "#B07CFF",
-    "typeParameter": "#B07CFF",
+    "namespace": "#8A5EC0",
+    "type": "#8A5EC0",
+    "class": "#8A5EC0",
+    "enum": "#8A5EC0",
+    "interface": "#8A5EC0",
+    "struct": "#8A5EC0",
+    "typeParameter": "#8A5EC0",
     "parameter": "#A6CAFF",
     "variable": "#7CBEFF",
     "property": "#A6CAFF",
     "enumMember": "#FFD700",
-    "function": "#87CEEB",
-    "method": "#87CEEB",
+    "function": "#5EAFFF",
+    "method": "#5EAFFF",
     "macro": "#5EAFFF",
     "keyword": "#A6CAFF",
     "modifier": "#5EAFFF",

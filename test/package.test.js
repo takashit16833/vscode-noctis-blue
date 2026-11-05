@@ -57,7 +57,7 @@ test('背景管理を内包するため UI host を優先する', () => {
 
 test('統合した壁紙の実装と設定を同じ VSIX に含む', () => {
   const manifest = require('../package.json');
-  assert.equal(manifest.version, '0.12.9');
+  assert.equal(manifest.version, '0.12.10');
   assert.equal(manifest.extensionDependencies, undefined);
   for (const name of ['auto-apply', 'renderer-loader', 'wallpaper', 'workspace-id']) {
     assert.ok(fs.existsSync(path.join(root, 'src', 'workbench', name + '.js')));
