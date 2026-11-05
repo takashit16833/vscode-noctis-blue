@@ -71,7 +71,7 @@ VS Code の
 
 ## Dev Container の権限と制約
 
-統合後の拡張は、ローカル Mac 側 UI host で背景処理を担当する。
+Noctis Blue は、ローカル Mac 側 UI host で背景処理を担当する。
 リモート側 Markdown Editor の `editor.css` は VS Code リモートファイル操作 API 経由で読み書きする。
 
 `workspace.fs` は `chmod` を提供しない。root 所有ディレクトリでファイルを新規作成できない場合、
