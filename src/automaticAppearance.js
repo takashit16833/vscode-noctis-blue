@@ -32,7 +32,6 @@ function currentCss(vscode) {
 
 function currentWallpaperCss(vscode) {
   const modern = vscode.workspace.getConfiguration('noctisBlue.wallpaper');
-  const legacy = vscode.workspace.getConfiguration('vscodeWallpaper');
   // Keep existing installations working until the user's settings are migrated.
   // inspect() distinguishes an explicit empty value from the default empty value.
   const settings = readSettings({
