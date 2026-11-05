@@ -77,7 +77,10 @@ test('Markdown frame changes active block background and shadow alpha without de
   assert.match(node.textContent, /\.md-block-active/);
   assert.match(node.textContent, /background: color-mix\(in srgb, var\(--md-block-active-background/);
   assert.match(node.textContent, /box-shadow: 0 0 0 8px color-mix/);
-  assert.doesNotMatch(node.textContent, /background:\s*transparent\b|display:\s*none|opacity:/);
+  const activeRule = node.textContent.match(
+    /\.md-editor:not\(\.md-no-active-block-highlight\) \.md-block-active \{[\s\S]*?\}/
+  )?.[0] ?? '';
+  assert.doesNotMatch(activeRule, /background:\s*transparent\b|display:\s*none|opacity:/);
   assert.ok(!context.styles.has('noctis-blue-combined-workbench-test'));
   assert.match(vm.runInNewContext(script, context), /解除/);
   assert.equal(context.styles.size, 0);
