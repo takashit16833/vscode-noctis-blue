@@ -97,7 +97,9 @@ Dev Container ではリモートサーバー上の CSS を VS Code のファイ�
 
 元の `editor.css` は隣にバックアップし、**Noctis Blue: Disable Markdown Editor Appearance** で内容を検証して復元する。VS Code 更新後に未加工の CSS と古いバックアップが残った場合、由来を確認できないため自動削除・再適用せず停止する。Markdown の有効化は接続先ごとの許可で管理し、更新後の新しい接続先では再有効化が必要となる。
 
-Markdown の CSS は Noctis Blue のテーマでだけ効き、不透明度はアプリ全体で共通設定とする。変更後は Markdown Editor を開き直すか **Developer: Reload Window** を実行する。
+Markdown の CSS は Noctis Blue のテーマでだけ効き、不透明度はアプリ全体で共通設定とする。拡張機能の更新後は **Developer: Reload Window** を実行して新しいコードを読み込む。CSS 変更後は Markdown Editor を開き直すかウィンドウを再読み込みして表示を反映する。
+
+旧バージョンで有効にしたローカルの Markdown Editor CSS は、旧形式の有効化記録に加え、既存の Noctis Blue 管理ブロックと検証可能なバックアップがある場合だけ接続先別の記録へ引き継ぐ。旧形式の記録だけでは新規の CSS や Dev Container へ適用しない。引き継げない接続先では **Enable Markdown Editor Appearance** で個別に有効化する。
 
 **Noctis Blue をアンインストールする前には、次の両方を解除する。**
 

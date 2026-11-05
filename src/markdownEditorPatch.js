@@ -199,6 +199,17 @@ async function applyMarkdownEditorCss(filename, css, io = fs) {
   return withLocalLock(filename, io, () => applyUnlocked(filename, css, io));
 }
 
+// For a one-time legacy migration, reuse the same lock and validation but
+// never create a managed block on a file that was not already patched.
+async function updateExistingMarkdownEditorCss(filename, css, io = fs) {
+  return withLocalLock(filename, io, async () => {
+    if (!markerState(await io.readFile(filename, 'utf8')).patched) {
+      return { changed: false, patched: false };
+    }
+    return applyUnlocked(filename, css, io);
+  });
+}
+
 async function removeMarkdownEditorCss(filename, io = fs) {
   return withLocalLock(filename, io, () => removeUnlocked(filename, io));
 }
@@ -210,5 +221,6 @@ module.exports = {
   managedBlock,
   markerState,
   applyMarkdownEditorCss,
+  updateExistingMarkdownEditorCss,
   removeMarkdownEditorCss
 };

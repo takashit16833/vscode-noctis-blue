@@ -41,4 +41,4 @@ if ! printf '%s\n' "$installed_extensions" | grep -Fxi 'takashit16833.noctis-blu
   printf '[noctis-blue] ERROR: Noctis Blue is not listed after installation.\n' >&2
   exit 1
 fi
-printf '[noctis-blue] Noctis Blue installed. Use Developer: Reload Window when you want generated CSS changes to appear.\n'
+printf '[noctis-blue] Noctis Blue installed. Run Developer: Reload Window to load the updated extension; reopen Markdown Editor to see CSS changes.\n'

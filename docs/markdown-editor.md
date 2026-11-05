@@ -90,8 +90,7 @@ VS Code Server の配置が異なれば、対応方法を調査する。
 組み込み CSS を変更する説明を表示し、利用者の確認後に適用する。
 
 有効化状態は `noctisBlue.markdownEditorAppearanceEnabledTargets` で
-ローカル・リモートの接続先別に保存する。以前の単一真偽値を
-新しい Dev Container の許可には流用せず、必要に応じて明示的に再有効化する。
+ローカル・リモートの接続先別に保存する。以前の単一真偽値が `true` で、ローカルの `editor.css` に既存の管理ブロックと検証可能なバックアップが残っている場合だけ、既存 CSS を更新してローカルの有効化状態を引き継ぐ。未加工の CSS や新しい Dev Container への許可には流用しない。検証に失敗すれば安全のため停止する。
 
 `Noctis Blue: Disable Markdown Editor Appearance` は対象の CSS をバックアップから復元する。
 他のウィンドウが別テーマへ切り替わっただけでは共有 CSS を解除しない。

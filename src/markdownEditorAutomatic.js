@@ -3,10 +3,11 @@
 const path = require('node:path');
 const { remoteMarkdownEditorTarget } = require('./markdownEditorRemote');
 const { generateMarkdownCss } = require('./markdownAppearance');
-const { applyMarkdownEditorCss, removeMarkdownEditorCss } = require('./markdownEditorPatch');
+const { applyMarkdownEditorCss, updateExistingMarkdownEditorCss, removeMarkdownEditorCss } = require('./markdownEditorPatch');
 
 const MARKDOWN_EXTENSION_ID = 'vscode.markdown-language-features';
 const STATE_KEY = 'noctisBlue.markdownEditorAppearanceEnabledTargets';
+const LEGACY_STATE_KEY = 'noctisBlue.markdownEditorAppearanceEnabled';
 const NOCTIS_THEMES = new Set(['Noctis Blue', 'Noctis Blue Transparent']);
 
 const pendingByTarget = new Map();
@@ -75,7 +76,20 @@ function enabledTargets(context) {
 async function syncMarkdownEditorAppearance(vscode, context) {
   const scope = targetScope(vscode);
   return withTargetQueue(scope, async () => {
-    if (!enabledTargets(context)[scope]) return false;
+    const state = enabledTargets(context);
+    if (!state[scope]) {
+      // The old single consent flag is only evidence for an existing local
+      // patch. Never use it to apply CSS for the first time or to a remote host.
+      if (Object.hasOwn(state, scope) || !scope.startsWith('local:') ||
+          context.globalState.get(LEGACY_STATE_KEY, false) !== true) return false;
+      const { filename, io } = await cssTarget(vscode);
+      const result = await updateExistingMarkdownEditorCss(
+        filename, currentMarkdownCss(vscode), io
+      );
+      if (!result.patched) return false;
+      await context.globalState.update(STATE_KEY, { ...enabledTargets(context), [scope]: true });
+      return true;
+    }
     const { filename, io } = await cssTarget(vscode);
     // The CSS is shared across windows and scoped to the Noctis Blue themes.
     await applyMarkdownEditorCss(filename, currentMarkdownCss(vscode), io);
@@ -109,7 +123,7 @@ async function disableMarkdownEditorAppearance(vscode, context) {
 }
 
 module.exports = {
-  MARKDOWN_EXTENSION_ID, STATE_KEY, NOCTIS_THEMES,
+  MARKDOWN_EXTENSION_ID, STATE_KEY, LEGACY_STATE_KEY, NOCTIS_THEMES,
   currentTheme, isNoctisTheme, markdownEditorCssPath, remoteFolder, targetScope,
   cssTarget, currentMarkdownCss, enabledTargets,
   syncMarkdownEditorAppearance, enableMarkdownEditorAppearance, disableMarkdownEditorAppearance

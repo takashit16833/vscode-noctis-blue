@@ -8,12 +8,14 @@ const path = require('node:path');
 const {
   MARKDOWN_EXTENSION_ID,
   STATE_KEY,
+  LEGACY_STATE_KEY,
   targetScope,
   markdownEditorCssPath,
   syncMarkdownEditorAppearance,
   enableMarkdownEditorAppearance,
   disableMarkdownEditorAppearance
 } = require('../src/markdownEditorAutomatic');
+const { applyMarkdownEditorCss, BACKUP_SUFFIX } = require('../src/markdownEditorPatch');
 
 function fixture(options = {}) {
   const calls = [];
@@ -141,4 +143,80 @@ test('CSS 自動更新の途中で解除しても、最後は元の CSS に復�
   await assert.rejects(fs.stat(filename + '.noctis-blue.backup'), { code: 'ENOENT' });
   assert.deepEqual(f.state[STATE_KEY], {});
   assert.equal(await syncMarkdownEditorAppearance(f.vscode, f.context), false);
+});
+
+function withLegacyConsent(f) {
+  const get = f.context.globalState.get;
+  f.context.globalState.get = (key, fallback) =>
+    key === LEGACY_STATE_KEY ? true : get(key, fallback);
+}
+
+async function legacyLocalFixture(t) {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'noctis-legacy-css-'));
+  t.after(() => fs.rm(dir, { recursive: true, force: true }));
+  const extensionDir = path.join(dir, 'markdown-language-features');
+  const filename = path.join(extensionDir, 'markdown-editor-out', 'editor.css');
+  const original = 'body { color: red; }\n';
+  await fs.mkdir(path.dirname(filename), { recursive: true });
+  await fs.writeFile(filename, original);
+  const f = fixture();
+  f.vscode.extensions.getExtension = () => ({ extensionUri: { fsPath: extensionDir } });
+  withLegacyConsent(f);
+  return { ...f, filename, original };
+}
+
+test('旧形式の許可は検証できる既存ローカル管理 CSS だけに引き継ぐ', async t => {
+  const f = await legacyLocalFixture(t);
+  await applyMarkdownEditorCss(f.filename, '.md-heading { color: red; }');
+  assert.equal(await syncMarkdownEditorAppearance(f.vscode, f.context), true);
+  const content = await fs.readFile(f.filename, 'utf8');
+  assert.match(content, /#001947/);
+  assert.doesNotMatch(content, /\.md-heading \{ color: red; \}/);
+  assert.equal(await fs.readFile(f.filename + BACKUP_SUFFIX, 'utf8'), f.original);
+  assert.deepEqual(f.state[STATE_KEY], { 'local:/app': true });
+  assert.equal(await syncMarkdownEditorAppearance(f.vscode, f.context), true);
+});
+
+test('旧形式の許可だけでは未加工のローカル CSS に初回適用しない', async t => {
+  const f = await legacyLocalFixture(t);
+  assert.equal(await syncMarkdownEditorAppearance(f.vscode, f.context), false);
+  assert.equal(await fs.readFile(f.filename, 'utf8'), f.original);
+  await assert.rejects(fs.stat(f.filename + BACKUP_SUFFIX), { code: 'ENOENT' });
+  assert.deepEqual(f.state[STATE_KEY], {});
+});
+
+test('旧形式の許可があってもバックアップ欠落時には停止する', async t => {
+  const f = await legacyLocalFixture(t);
+  await applyMarkdownEditorCss(f.filename, '.md-heading { color: red; }');
+  await fs.unlink(f.filename + BACKUP_SUFFIX);
+  await assert.rejects(syncMarkdownEditorAppearance(f.vscode, f.context), /バックアップがありません/);
+  assert.deepEqual(f.state[STATE_KEY], {});
+});
+
+test('旧形式の許可はリモート接続先に流用しない', async () => {
+  const f = fixture();
+  withLegacyConsent(f);
+  f.vscode.workspace.workspaceFolders = [{
+    uri: { scheme: 'vscode-remote', authority: 'dev-container+second' }
+  }];
+  assert.equal(await syncMarkdownEditorAppearance(f.vscode, f.context), false);
+  assert.equal(f.calls.length, 0);
+});
+
+test('新形式で明示的に無効化した接続先に旧形式の許可を流用しない', async t => {
+  const f = await legacyLocalFixture(t);
+  f.state[STATE_KEY] = { 'local:/app': false };
+  await applyMarkdownEditorCss(f.filename, '.md-heading { color: red; }');
+  assert.equal(await syncMarkdownEditorAppearance(f.vscode, f.context), false);
+  assert.match(await fs.readFile(f.filename, 'utf8'), /\.md-heading \{ color: red; \}/);
+  assert.deepEqual(f.state[STATE_KEY], { 'local:/app': false });
+});
+
+test('旧形式が残っていても明示的な解除後に自動再適用しない', async t => {
+  const f = await legacyLocalFixture(t);
+  await applyMarkdownEditorCss(f.filename, '.md-heading { color: red; }');
+  await disableMarkdownEditorAppearance(f.vscode, f.context);
+  assert.equal(await syncMarkdownEditorAppearance(f.vscode, f.context), false);
+  assert.equal(await fs.readFile(f.filename, 'utf8'), f.original);
+  await assert.rejects(fs.stat(f.filename + BACKUP_SUFFIX), { code: 'ENOENT' });
 });

@@ -10,6 +10,7 @@ const {
   END_MARKER,
   BACKUP_SUFFIX,
   applyMarkdownEditorCss,
+  updateExistingMarkdownEditorCss,
   removeMarkdownEditorCss
 } = require('../src/markdownEditorPatch');
 
@@ -150,4 +151,19 @@ test('管理ブロックのない解除は既存バックアップに触れな�
     patched: false
   });
   assert.equal(await fs.readFile(f.filename + BACKUP_SUFFIX, 'utf8'), 'old backup');
+});
+
+test('既存 CSS 専用の更新は初回適用せず管理ブロックだけを更新する', async t => {
+  const f = await fixture(t);
+  assert.deepEqual(await updateExistingMarkdownEditorCss(f.filename, '.new{}'), {
+    changed: false, patched: false
+  });
+  assert.equal(await fs.readFile(f.filename, 'utf8'), f.content);
+  await assert.rejects(fs.stat(f.filename + BACKUP_SUFFIX), { code: 'ENOENT' });
+  await applyMarkdownEditorCss(f.filename, '.old{}');
+  assert.deepEqual(await updateExistingMarkdownEditorCss(f.filename, '.new{}'), {
+    changed: true, patched: true
+  });
+  assert.match(await fs.readFile(f.filename, 'utf8'), /\.new\{\}/);
+  assert.doesNotMatch(await fs.readFile(f.filename, 'utf8'), /\.old\{\}/);
 });
