@@ -107,6 +107,7 @@ async function applyMarkdownEditorCss(filename, css, io = fs) {
   const current = await io.readFile(filename, 'utf8');
   const state = markerState(current);
   let original;
+  let createdBackup = false;
 
   if (state.patched) {
     const backup = await readBackup(filename, io);
@@ -122,10 +123,22 @@ async function applyMarkdownEditorCss(filename, css, io = fs) {
     const existing = await readBackup(filename, io);
     if (existing) throw new Error('Markdown Editor CSS の既存バックアップの由来が分かりません。削除・上書きせず停止します。');
     await createBackupExclusive(filename, filename + BACKUP_SUFFIX, original, io);
+    createdBackup = true;
   }
 
   const next = original + separatorFor(original) + managedBlock(css);
-  if (next !== current) await atomicWrite(filename, next, stat.mode, io);
+  try {
+    if (next !== current) await atomicWrite(filename, next, stat.mode, io);
+  } catch (error) {
+    // Roll back a backup created by this attempt only if the original CSS
+    // is still untouched. Never remove a pre-existing or changed backup.
+    if (createdBackup &&
+        await io.readFile(filename, 'utf8').catch(() => null) === original &&
+        await io.readFile(filename + BACKUP_SUFFIX, 'utf8').catch(() => null) === original) {
+      await io.unlink(filename + BACKUP_SUFFIX).catch(() => {});
+    }
+    throw error;
+  }
   return { changed: next !== current, patched: true };
 }
 
