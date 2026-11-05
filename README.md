@@ -98,6 +98,8 @@ Noctis Blue が無効化・アンインストールされた場合は、Wallpape
 
 VS Code 内蔵のリッチ Markdown Editor（`vscode.markdown.editor`）は独立した Webview である。
 
+Noctis Blue では、本文と見出しの基準色に Emacs 版 Retro Hacker Blue の `fg-pale` と同じ `#A6CAFF` を使う。コードブロック背景は Emacs 版の `org-block-bg` と同じ `#0A1A36` を基準にし、Transparent 版では 75% 不透明（`#0A1A36BF`）で描画する。
+
 テーマ色による背景透過は利用できるが、編集中ブロックの
 `--md-block-active-background` は公開 theme color ではない。
 現行 VS Code の公開 API には、別拡張からこの Webview 本体へ CSS を追加する拡張点もない。
