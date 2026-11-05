@@ -246,3 +246,10 @@ test('初回導入中に別の loader が現れても巻き戻しで消さない
   assert.equal(await fs.readFile(files.loader, 'utf8'), 'unrelated loader');
   assert.equal(await fs.readFile(files.html, 'utf8'), original);
 });
+
+test('元 HTML と同一の無関係なバックアップ単体は削除しない', async t => {
+  const { root, files } = await fixture(t);
+  await fs.writeFile(files.backup, original);
+  await assert.rejects(repairStale(root), /管理ローダー|所有を確認/);
+  assert.equal(await fs.readFile(files.backup, 'utf8'), original);
+});

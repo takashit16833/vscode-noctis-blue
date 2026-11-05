@@ -291,6 +291,12 @@ async function repairStaleUnlocked(appRoot) {
     return { changed: false, installed: false };
   }
 
+  // A backup filename alone cannot establish ownership, even when the
+  // contents resemble the original HTML. Require a known loader as evidence.
+  if (!loaderStat) {
+    throw new Error('管理ローダーがなく、バックアップの所有を確認できません。自動削除しません。');
+  }
+
   if (backupStat) {
     const backup = await fs.readFile(files.backup, 'utf8');
     if (backup.includes('vscode-wallpaper') ||
