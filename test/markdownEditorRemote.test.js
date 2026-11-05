@@ -44,6 +44,9 @@ async function fixture(t, found = true) {
         }),
         readFile: uri => safe(() => fs.readFile(local(uri.path))),
         writeFile: (uri, bytes) => safe(() => fs.writeFile(local(uri.path), bytes)),
+        copy: (a, b, options) => safe(() => fs.copyFile(
+          local(a.path), local(b.path), options?.overwrite ? 0 : require('node:fs').constants.COPYFILE_EXCL
+        )),
         rename: (a, b) => safe(() => fs.rename(local(a.path), local(b.path))),
         delete: uri => safe(() => fs.unlink(local(uri.path)))
       }
@@ -85,7 +88,7 @@ test('候補が見つからなければ CSS やバックアップを生成しな
 test('権限エラーは説明を返し、自動的な chmod や chown をしない', async t => {
   const f = await fixture(t);
   const io = remoteFileOperations(f.vscode, f.vscode.workspace.workspaceFolders[0].uri);
-  f.vscode.workspace.fs.writeFile = async () => {
+  f.vscode.workspace.fs.copy = async () => {
     const error = new Error('Permission denied');
     error.code = 'NoPermissions';
     throw error;
