@@ -3,8 +3,8 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 const {
-  STATE_KEY, currentWallpaperCss, styles, ensureNoLegacyExtension,
-  syncAutomaticAppearance, enableAutomaticAppearance, disableAutomaticAppearance
+  STATE_KEY, currentWallpaperCss, styles,
+  syncAutomaticAppearance, enableAutomaticAppearance
 } = require('../src/automaticAppearance');
 
 function fixture(options = {}) {
@@ -18,18 +18,13 @@ function fixture(options = {}) {
         if (section === 'workbench') return { get: () => options.theme || 'Noctis Blue Transparent' };
         if (section === 'noctisBlue') return { get: () => ({ editor: 0.91 }) };
         if (section === 'noctisBlue.wallpaper') return {
-          inspect: key => options.modernSettings ? { globalValue: options.modernSettings[key] } : undefined,
-          get: (key, fallback) => options.modernSettings?.[key] ?? ({
+          get: (key, fallback) => options.wallpaperSettings?.[key] ?? ({
             enabled: true, image: 'https://example.org/blue.png'
           })[key] ?? fallback
-        };
-        if (section === 'vscodeWallpaper') return {
-          get: (key, fallback) => options.legacySettings?.[key] ?? fallback
         };
         throw new Error('unexpected config: ' + section);
       }
     },
-    extensions: { getExtension: () => options.legacy ? { id: 'old' } : undefined },
     window: { showWarningMessage: async () => options.agreed ? '自動適用を有効にする' : undefined }
   };
   const context = {
@@ -60,21 +55,9 @@ test('リモートワークスペースの URI を Mac の画像パスとして�
   assert.match(currentWallpaperCss(f.vscode), /https:\/\/example\.org\/blue\.png/);
 });
 
-test('移行前の wallpaper 設定を読み、移行後は新しい設定を優先する', () => {
-  const old = fixture({ legacySettings: {
-    enabled: true, image: 'https://example.org/old.png'
-  } });
-  assert.ok(currentWallpaperCss(old.vscode).includes('old.png'));
-  const modern = fixture({
-    legacySettings: { enabled: true, image: 'https://example.org/old.png' },
-    modernSettings: { enabled: true, image: 'https://example.org/new.png' }
-  });
-  assert.ok(currentWallpaperCss(modern.vscode).includes('new.png'));
-  assert.ok(!currentWallpaperCss(modern.vscode).includes('old.png'));
-});
-
-test('旧拡張のインストール中は二重に workbench を管理しない', () => {
-  assert.throws(() => ensureNoLegacyExtension(fixture({ legacy: true }).vscode), /旧 VS Code Wallpaper/);
+test('壁紙設定は noctisBlue.wallpaper のみを使用する', () => {
+  const f = fixture({ wallpaperSettings: { enabled: true, image: 'https://example.org/current.png' } });
+  assert.ok(currentWallpaperCss(f.vscode).includes('current.png'));
 });
 
 test('自動適用が無効なら VS Code 本体には触れない', async () => {
@@ -88,8 +71,3 @@ test('利用者が同意しなかった場合は有効状態を変更しない',
   assert.equal(f.state[STATE_KEY], false);
 });
 
-test('旧 Wallpaper が残っている場合は無効状態に変更しない', async () => {
-  const f = fixture({ legacy: true });
-  await assert.rejects(disableAutomaticAppearance(f.vscode, f.context), /旧 VS Code Wallpaper/);
-  assert.equal(f.state[STATE_KEY], true);
-});

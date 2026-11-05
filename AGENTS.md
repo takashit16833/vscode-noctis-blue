@@ -25,20 +25,19 @@
 - `src/workbench/wallpaper.js`: 背景画像パス、画像切替、乗算 CSS の正本。透過の CSS をここへ混ぜない。
 - `src/appearance.js`: エディタ・パネル・補完・Sticky Scroll などの透過とぼかしの正本。
 - `src/automaticAppearance.js`: 設定を読み、上記2つの CSS を組み合わせ、保存状態と安全な適用を制御する。
-- `src/workbench/auto-apply.js`: workbench.html の導入・検証・同期・解除・修復だけを担当。バックアップと旧ローダー互換性を維持する。
+- `src/workbench/auto-apply.js`: workbench.html の導入・検証・同期・解除・修復だけを担当。管理外のローダー・バックアップを上書きしない。
 - `src/workbench/renderer-loader.js`: CSS を起動時に読み込む。タイマーやポーリングを増やさない。
 - `src/workbench/workspace-id.js`: VS Code renderer 側と同一の作業領域 ID を生成する。
-- 旧 Wallpaper の管理済み `workbench.html`・`vscode-wallpaper-*.css`・`vscode-wallpaper-layers-*.css` を検査後に引き継ぐ。ファイル名は下位互換性のため維持し、安易に一括改名しない。
-- 旧拡張 `takashit16833.vscode-wallpaper` がインストールされている間は、CSS の二重書き込みを防ぐため管理を拒否する。
-- 旧 `vscodeWallpaper.*` 設定は `noctisBlue.wallpaper.*` へ移行する。移行途中は新設定に明示値がない場合のみ旧設定を読み取る。旧設定の新規追加は禁止。
+- 現在の管理対象 CSS は `vscode-wallpaper-*.css` と `vscode-wallpaper-layers-*.css`、読み込みスクリプトは `vscode-wallpaper-loader.js` という実際のファイル名を使用している。これは現行の読み込み経路であり、名称だけを変えると既存インストールの表示が壊れる。名称を変更する場合は HTML・バックアップ・読み込み側を含めた安全な切り替えが必要。
+- 背景画像設定は `noctisBlue.wallpaper.*` のみ読み取る。存在しない設定や別拡張の設定から値を推測しない。
 - `Noctis Blue Transparent` のときだけ領域透過 CSS を追加する。背景画像自体は `noctisBlue.wallpaper.enabled` で制御する。
-- 自動適用の保存状態は `noctisBlue.automaticAppearanceEnabled` (`globalState`) を継続利用する。旧 Wallpaper の有効状態は直接取得できないため、初回に管理済み HTML・バックアップ・ローダーを検査できたときだけ `noctisBlue.workbenchMigrationChecked` を記録して引き継ぐ。解除後に再自動有効化しない。
+- 自動適用の保存状態は `noctisBlue.automaticAppearanceEnabled` (`globalState`) だけで判定する。管理ファイルが存在するという理由で、利用者の同意や無効化状態を上書きしない。
 - ユーザーの明示的な同意なしに workbench.html を初回変更しない。設定変更時は管理 CSS だけ更新する。
 - `Developer: Reload Window` はユーザーが選ぶ。勝手に実行せず、タイマー・通知の連発をしない。
 - VS Code の整合性警告は隠さない。所有不明の HTML / loader / CSS は上書きも削除もしない。
 - workbench への変更はインストール単位の `.noctis-blue-workbench.lock` で排他制御する。ロックが残っていても勝手に奪わない。解除後の後片付けが失敗した場合、元 HTML とローダーの所有を確認できる限り再実行可能にする。証拠のない単独バックアップは削除しない。
 - 一時ファイルの無条件削除、予測可能な固定一時ファイル名、管理外バックアップの自動削除を禁止する。
-- 旧2拡張の内部コマンド橋渡しと提供元の孤児レイヤー整理は統合後は不要。再導入しない。
+- CSS の読み込み口は Noctis Blue 内で一元管理し、同じ CSS の二重適用や別拡張との連携機構を増やさない。
 
 ## 領域別透過
 
@@ -102,10 +101,9 @@
 
 ## 統合テストとリリース
 
-- `npm run build && npm test`。移植した Wallpaper の画像・画面切替・ローダー・作業領域 ID・バックアップ安全性テストを維持する。
-- Mac 実機背景、Dev Container の Markdown Editor、旧管理ファイルの移行を検証する。実機を利用できない場合は、未検証項目と確認方法を明記し、テスト成功を実機成功と混同しない。
+- `npm run build && npm test`。画像・画面切替・ローダー・作業領域 ID・バックアップ安全性テストを維持する。
+- Mac 実機背景、Dev Container の Markdown Editor、workbench 管理ファイルの解除・再適用を検証する。実機を利用できない場合は、未検証項目と確認方法を明記し、テスト成功を実機成功と混同しない。
 - dotfiles の設定の正本は `takashit16833/dotfiles` の `.config/vscode/settings.json`。初期導入と `AGENTS.md` も同時変更する。
-- 独立した `vscode-wallpaper` リポジトリは履歴・復旧のため保管し、新規の実装先にはしない。
 - 現時点で確認できない環境依存の項目は、必ず未検証と明記する。
 
 ## 実測ルール

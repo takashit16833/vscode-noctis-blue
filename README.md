@@ -17,7 +17,7 @@ Emacs版 [Retro Hacker Blue](https://github.com/takashit16833/emacs-retro-hacker
 利用者が導入する拡張機能は **Noctis Blue ひとつ**。
 内部では配色、壁紙、透過・ぼかし、Markdown Editor の処理を分けて保守する。
 
-## インストール・旧 Wallpaper からの移行
+## インストール
 
 Mac 側で実行する。
 
@@ -28,8 +28,8 @@ git pull --ff-only
 bash ./install.sh
 ```
 
-`install.sh` はテスト・VSIX 作成・ローカル VS Code への導入を行い、旧 Wallpaper 拡張はインストールに成功した後でアンインストールする。
-既存の workbench 管理ファイルは、バックアップと読み込みスクリプトを検証できた場合だけ引き継ぐ。確認できない場合は停止し、無断で修正・削除しない。
+`install.sh` はテスト・VSIX 作成・ローカル VS Code への導入を行う。ほかの拡張のインストール状態は変更しない。
+workbench の管理ファイルは、バックアップと読み込みスクリプトを検証できた場合だけ変更する。検証できない場合は停止し、無断で修正・削除しない。
 
 ## 基本設定
 
@@ -52,11 +52,11 @@ bash ./install.sh
 }
 ```
 
-従来の `vscodeWallpaper.*` は互換性のため読み取り可能。キーごとに、新設定の明示値がある場合は新設定を優先し、なければ旧設定を読む。新しく記述するときは `noctisBlue.wallpaper.*` だけを使う。
+背景画像の設定は `noctisBlue.wallpaper.*` を使用する。
 
 ## 自動適用
 
-初回は **Noctis Blue: Enable Automatic Appearance** を実行して本体変更への同意を確認する。旧 Wallpaper の管理済みローダーが検証できる場合は初回起動でその有効状態を引き継ぐ。
+初回は **Noctis Blue: Enable Automatic Appearance** を実行して本体変更への同意を確認する。明示的に有効化していない場合、ファイルが存在するだけでは自動適用を開始しない。
 その後は `Developer: Reload Window` で反映する。
 
 設定変更は生成 CSS だけを更新し、勝手にウィンドウを再読み込みしない。
