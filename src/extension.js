@@ -10,6 +10,11 @@ const {
   enableAutomaticAppearance,
   disableAutomaticAppearance
 } = require('./automaticAppearance');
+const {
+  syncMarkdownEditorAppearance,
+  enableMarkdownEditorAppearance,
+  disableMarkdownEditorAppearance
+} = require('./markdownEditorAutomatic');
 
 function currentTheme() {
   return vscode.workspace.getConfiguration('workbench').get('colorTheme');
@@ -36,6 +41,12 @@ function registerCommand(context, id, handler) {
 function reportSyncError(error) {
   void vscode.window.showWarningMessage(
     'Noctis Blue の自動表示 CSS を更新できませんでした: ' + error.message
+  );
+}
+
+function reportMarkdownSyncError(error) {
+  void vscode.window.showWarningMessage(
+    'Noctis Blue の Markdown Editor CSS を更新できませんでした: ' + error.message
   );
 }
 
@@ -113,17 +124,46 @@ function activate(context) {
     }
   });
 
-  context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event => {
-    if (!event.affectsConfiguration('noctisBlue.opacity') &&
-        !event.affectsConfiguration('workbench.colorTheme')) {
-      return;
+  registerCommand(context, 'noctisBlue.enableMarkdownEditorAppearance', async () => {
+    const choice = await vscode.window.showWarningMessage(
+      'Markdown Editor の自動CSSでは、VS Code 組み込み Markdown 拡張の editor.css に ' +
+      'Noctis Blue 管理ブロックを追記します。元ファイルはバックアップし、解除時に復元します。' +
+      'VS Code 更新後は新しい editor.css へ再適用されます。',
+      { modal: true },
+      'Markdown Editor CSS を有効にする'
+    );
+    if (choice !== 'Markdown Editor CSS を有効にする') return;
+
+    try {
+      await enableMarkdownEditorAppearance(vscode, context);
+    } catch (error) {
+      void vscode.window.showErrorMessage('Noctis Blue: ' + error.message);
     }
-    syncAutomaticAppearance(vscode, context).catch(reportSyncError);
+  });
+
+  registerCommand(context, 'noctisBlue.disableMarkdownEditorAppearance', async () => {
+    try {
+      await disableMarkdownEditorAppearance(vscode, context);
+    } catch (error) {
+      void vscode.window.showErrorMessage('Noctis Blue: ' + error.message);
+    }
+  });
+
+  context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event => {
+    const themeChanged = event.affectsConfiguration('workbench.colorTheme');
+
+    if (event.affectsConfiguration('noctisBlue.opacity') || themeChanged) {
+      syncAutomaticAppearance(vscode, context).catch(reportSyncError);
+    }
+    if (event.affectsConfiguration('noctisBlue.markdownActiveBlockOpacity') || themeChanged) {
+      syncMarkdownEditorAppearance(vscode, context).catch(reportMarkdownSyncError);
+    }
   }));
 
-  // Configuration changes update the generated CSS only.
-  // The user decides when to Reload Window.
+  // Configuration changes update managed CSS only.
+  // The user decides when to Reload Window / reopen the Markdown Editor.
   syncAutomaticAppearance(vscode, context).catch(reportSyncError);
+  syncMarkdownEditorAppearance(vscode, context).catch(reportMarkdownSyncError);
 }
 
 function deactivate() {}
