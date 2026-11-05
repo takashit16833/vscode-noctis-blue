@@ -93,8 +93,10 @@ async function repairAutomaticAppearance(vscode, context) {
     { modal: true }, '背景読み込みを修復する'
   );
   if (choice !== '背景読み込みを修復する') return false;
-  await automatic.repairStale(vscode.env.appRoot);
+  // Validate all settings and generate CSS before removing stale files.
+  // A malformed image path must never leave the installation half-repaired.
   const { wallpaper, workspaceId, layers } = await styles(vscode);
+  await automatic.repairStale(vscode.env.appRoot);
   await automatic.enable(vscode.env.appRoot, wallpaper, workspaceId, layers);
   await context.globalState.update(STATE_KEY, true);
   return true;
