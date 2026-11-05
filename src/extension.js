@@ -6,6 +6,7 @@ const { generateTemporaryMarkdownScript } = require('./markdownAppearance');
 const { generateCombinedTestScript } = require('./combinedTest');
 const {
   TRANSPARENT_THEME,
+  adoptInstalledWallpaper,
   syncAutomaticAppearance,
   enableAutomaticAppearance,
   disableAutomaticAppearance,
@@ -162,7 +163,8 @@ function activate(context) {
     const themeChanged = event.affectsConfiguration('workbench.colorTheme');
 
     if (event.affectsConfiguration('noctisBlue.opacity') ||
-        event.affectsConfiguration('noctisBlue.wallpaper') || themeChanged) {
+        event.affectsConfiguration('noctisBlue.wallpaper') ||
+        event.affectsConfiguration('vscodeWallpaper') || themeChanged) {
       syncAutomaticAppearance(vscode, context).catch(reportSyncError);
     }
     if (event.affectsConfiguration('noctisBlue.markdownActiveBlockOpacity')) {
@@ -172,7 +174,9 @@ function activate(context) {
 
   // Configuration changes update managed CSS only.
   // The user decides when to Reload Window / reopen the Markdown Editor.
-  syncAutomaticAppearance(vscode, context).catch(reportSyncError);
+  adoptInstalledWallpaper(vscode, context)
+    .then(() => syncAutomaticAppearance(vscode, context))
+    .catch(reportSyncError);
   syncMarkdownEditorAppearance(vscode, context).catch(reportMarkdownSyncError);
 }
 
