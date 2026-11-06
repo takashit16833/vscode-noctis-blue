@@ -17,13 +17,13 @@ test('Markdown Editor CSS follows the Emacs document palette', () => {
   assert.match(css, new RegExp('color: ' + palette.pale.replace('#', '\\#') + ' !important;', 'i'));
 
   // H1 uses the same border color as the editor split, without changing its width.
-  assert.match(css, /h1\\.md-heading \\{\\n  border-bottom-color: var\\(--vscode-editorGroup-border, #153A75\\) !important;/i);
+  assert.match(css, /h1\.md-heading \{\n  border-bottom-color: var\(--vscode-editorGroup-border, #153A75\) !important;/i);
   // H2 retains its original underline and shares the left stripe with H1/H3.
-  assert.doesNotMatch(css, /h2\\.md-heading \\{\\n  border-bottom: none !important;/);
-  assert.match(css, /h3\\.md-heading::before/);
-  assert.match(css, /h3\\.md-heading \\{\\n  border-bottom: none !important;/);
+  assert.doesNotMatch(css, /h2\.md-heading \{\n  border-bottom: none !important;/);
+  assert.match(css, /h3\.md-heading::before/);
+  assert.match(css, /h3\.md-heading \{\n  border-bottom: none !important;/);
 
-  assert.match(css, /pre\\.md-code-block \\{/);
+  assert.match(css, /pre\.md-code-block \{/);
   assert.match(css, /border: none !important;/);
 
   assert.match(css, /blockquote\.md-blockquote \{/);
