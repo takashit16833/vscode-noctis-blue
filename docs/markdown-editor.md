@@ -63,7 +63,7 @@ VS Code の
 `src/markdownEditorPatch.js` が変更を管理する。
 
 - ローカル CSS は組み込み拡張の `extensionUri` から解決する。
-- Remote/Dev Container では `src/markdownEditorRemote.js` が観測済みパスと既知のサーバー配置を `workspace.fs` で調べる。複数あるときは書き込まない。
+- Remote/Dev Container では `src/markdownEditorRemote.js` が観測済みの `/vscode/` 配置を優先し、該当しない場合だけホームディレクトリの既知の配置を調べる。Dev Container では両者が同じ CSS への別名パスになることが実測されたため、重複を避ける。各優先度内で複数候補がある場合は、書き込み先を推測せず停止する。
 - 初回適用は `editor.css.noctis-blue.backup` を排他的に作成する。既存バックアップがある場合、現在の CSS と同一内容でも由来不明のため触らず停止する。
 - 一時ファイルは操作ごとに乱数名を付け、実際に作成したファイルだけ後始末する。
 - 元 CSS を検証できない、マーカーが壊れている、バックアップが欠落した場合は変更しない。
