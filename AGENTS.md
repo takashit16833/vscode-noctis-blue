@@ -99,7 +99,7 @@
 ## リモート Markdown Editor と権限
 
 - Noctis Blue は Mac 側 UI host で実行する。VS Code Server 側の内蔵 Markdown Editor CSS は別の場所にある。
-- `src/markdownEditorRemote.js` は観測済みの `/vscode/extensions/...` と、ローカル `product.json` の commit に対応する既知の Remote server ディレクトリを `workspace.fs` で調べる。候補が一つだけのときに操作し、複数見つかれば止める。Webview が実際に読み込んだ URI との照合は実機で行う。
+- `src/markdownEditorRemote.js` は観測済みの `/vscode/` 配置を優先し、見つからない場合だけ既知の `~/.vscode-server/bin/` 配置を調べる。両者が同じファイルへの別名パスである実測例があるため、別の優先度の候補を同時に数えない。各優先度内に複数の候補があれば書き込まず止める。Webview が実際に読み込んだ URI との照合は実機で行う。
 - `src/markdownEditorPatch.js` は CSS のバックアップ・検証・復元ロジックを共通化する。ローカルでは同じ CSS に対する操作を排他し、リモートでは `workspace.fs` を使用する。リモートの別ウィンドウ間の排他は保証しない。
 - `workspace.fs` に `chmod` も排他的 `writeFile` もない。バックアップ作成は `workspace.fs.copy(overwrite: false)` を使う。自動 `chown` / `sudo` / 権限緩和を追加しない。コンテナで書き込み権限がない場合はエラーで停止し、所有者や設定を勝手に変更しない。
 - VS Code 更新・違う remote server 配置は実機の場所と権限を調査してから候補を増やす。検証していない環境に動くと断定しない。
