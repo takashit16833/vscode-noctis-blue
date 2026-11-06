@@ -121,6 +121,54 @@ VS Code の `settings.json` で設定します。
 | **Noctis Blue: Disable Markdown Editor Appearance** | 内蔵 Markdown Editor の装飾を解除 |
 | **Noctis Blue: Repair Background Loader** | VS Code 更新後、背景が適用されなくなった場合の修復 |
 
+## トラブルシューティング
+
+### Dev Container で Markdown Editor の装飾が反映されない
+
+VS Code の更新後などに、**Noctis Blue: Enable Markdown Editor Appearance** を実行して再読み込みしても、装飾が反映されない場合があります。Dev Container 内の VS Code Server の CSS が `root` 所有で、通常ユーザーから変更できない事例を確認しています。更新のたびに必ず発生するわけではありません。
+
+まず、Noctis Blue のテーマを選択していることを確認し、Dev Container のターミナルで次を実行してください。**確認だけでファイルは変更しません。**
+
+```bash
+code --version
+case "$(uname -m)" in
+  aarch64|arm64) arch=linux-arm64 ;;
+  x86_64) arch=linux-x64 ;;
+  *) echo "未対応のCPU構成です"; exit 1 ;;
+esac
+commit="$(code --version | sed -n '2p')"
+css="/vscode/vscode-server/bin/$arch/$commit/extensions/markdown-language-features/markdown-editor-out/editor.css"
+
+if [ -f "$css" ]; then
+  id
+  stat -c 'CSS: %U:%G %A %n' "$css"
+  stat -c 'Directory: %U:%G %A %n' "$(dirname "$css")"
+  [ -w "$css" ] && echo 'CSS writable: yes' || echo 'CSS writable: no'
+  [ -w "$(dirname "$css")" ] && echo 'Directory writable: yes' || echo 'Directory writable: no'
+  grep -Fq '/* >>> Noctis Blue Markdown Editor CSS >>> */' "$css" \
+    && echo 'Noctis Blue CSS: present' || echo 'Noctis Blue CSS: absent'
+  [ -e "$css.noctis-blue.backup" ] \
+    && echo 'Backup: present' || echo 'Backup: absent'
+else
+  echo "このパスには CSS がありません: $css"
+fi
+```
+
+- **書き込み不可・CSS 未適用**：権限が原因の可能性があります。CSS 本体だけでなく、バックアップや一時ファイルを作るための親ディレクトリの権限も必要です。
+- **CSS 適用済みなのに表示が変わらない**：Markdown Editor を開発者ツールで選び、実際に読み込んでいる `editor.css` の URL とテーマ名を確認してください。
+- **CSS が見つからない、候補が複数、バックアップのエラーが出る**：推測で場所を決めたり、ファイルやバックアップを削除したりせず、エラー内容を確認してください。
+
+**実際に読み込まれているファイルが上記の `$css` と一致し、所有者・権限が原因だと確認できた場合に限り**、そのファイルと親ディレクトリの所有者を変更する方法があります。これは VS Code Server の管理ファイルを変更する操作です。影響を了承して実行してください。同じターミナルで、上の `$css` を確認した後に実行します。
+
+```bash
+[ -n "${css:-}" ] && [ -f "$css" ] && \
+  sudo chown "$(id -un):$(id -gn)" "$(dirname "$css")" "$css"
+```
+
+`/vscode` 全体への `chown -R` や、起動時の自動権限変更は行わないでください。変更後は **Noctis Blue: Enable Markdown Editor Appearance** を再実行し、Markdown Editor を開き直すか **Developer: Reload Window** を実行します。
+
+VS Code Server の更新で別の版のファイルが作られると、再発する可能性があります。新しい版を `root` が作成した理由は未特定です。表示が直らない場合は、診断結果と **Dev Containers: Show Container Log** の内容を確認してください。
+
 ## 更新・アンインストール
 
 VS Code 本体の更新によって背景や Markdown Editor の装飾が反映されなくなる場合があります。問題があるときは、上記の有効化・修復コマンドを使用してください。
