@@ -104,6 +104,28 @@ test('product.json に含まれる VS Code コミット番号を使う', async t
   assert.equal(await currentCommit(f.root), COMMIT);
 });
 
+test('同じ CSS への別名パスがあれば /vscode の実測済み配置を優先する', async t => {
+  const f = await fixture(t, false);
+  const primary = remoteServerPaths(COMMIT)[1];
+  const alias = remoteServerPaths(COMMIT)[3];
+  await fs.mkdir(path.dirname(f.local(primary)), { recursive: true });
+  await fs.writeFile(f.local(primary), '/* current server */');
+  await fs.mkdir(path.dirname(f.local(alias)), { recursive: true });
+  await fs.symlink(f.local(primary), f.local(alias));
+  assert.equal((await fs.stat(f.local(primary))).ino, (await fs.stat(f.local(alias))).ino);
+  const target = await remoteMarkdownEditorTarget(f.vscode, COMMIT);
+  assert.equal(target.filename, primary);
+});
+
+test('実測済み配置が存在しなければ別名側の候補を使用する', async t => {
+  const f = await fixture(t, false);
+  const alias = remoteServerPaths(COMMIT)[3];
+  await fs.mkdir(path.dirname(f.local(alias)), { recursive: true });
+  await fs.writeFile(f.local(alias), '/* fallback server */');
+  const target = await remoteMarkdownEditorTarget(f.vscode, COMMIT);
+  assert.equal(target.filename, alias);
+});
+
 test('複数の CSS 候補があれば書き込み先を推測しない', async t => {
   const f = await fixture(t);
   const second = remoteServerPaths(COMMIT)[1];
