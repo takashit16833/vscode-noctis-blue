@@ -69,16 +69,27 @@ function remoteFileOperations(vscode, workspaceUri) {
   };
 }
 
-function remoteServerPaths(commit) {
+function remoteServerPathGroups(commit) {
   if (!/^[a-f0-9]{40}$/.test(commit)) throw new Error('VS Code のコミット番号が不正です。');
   return [
-    // Observed in an actual Debian Dev Container Webview (not a guess).
-    '/vscode/' + TAIL,
-    '/vscode/vscode-server/bin/linux-arm64/' + commit + '/' + TAIL,
-    '/vscode/vscode-server/bin/linux-x64/' + commit + '/' + TAIL,
-    '/home/vscode/.vscode-server/bin/' + commit + '/' + TAIL,
-    '/root/.vscode-server/bin/' + commit + '/' + TAIL
+    // Observed CSS locations. Multiple distinct matches here remain ambiguous.
+    [
+      '/vscode/' + TAIL,
+      '/vscode/vscode-server/bin/linux-arm64/' + commit + '/' + TAIL,
+      '/vscode/vscode-server/bin/linux-x64/' + commit + '/' + TAIL
+    ],
+    // On Dev Containers, these are often aliases of the /vscode paths.
+    // workspace.fs.stat cannot compare file identities, so use them only
+    // when no observed /vscode location exists.
+    [
+      '/home/vscode/.vscode-server/bin/' + commit + '/' + TAIL,
+      '/root/.vscode-server/bin/' + commit + '/' + TAIL
+    ]
   ];
+}
+
+function remoteServerPaths(commit) {
+  return remoteServerPathGroups(commit).flat();
 }
 async function currentCommit(appRoot) {
   const product = JSON.parse(await fs.readFile(path.join(appRoot, 'product.json'), 'utf8'));
@@ -91,21 +102,23 @@ async function remoteMarkdownEditorTarget(vscode, commit = null) {
   const folder = vscode.workspace.workspaceFolders?.find(f => f.uri.scheme !== 'file' && f.uri.authority);
   if (!folder) throw new Error('リモートの接続先 URI が分かりません。');
   const version = commit || await currentCommit(vscode.env.appRoot);
-  const matches = [];
-  for (const filename of remoteServerPaths(version)) {
-    try {
-      const stat = await vscode.workspace.fs.stat(remoteUri(vscode, folder.uri, filename));
-      if ((stat.type & 1) && !(stat.type & 64)) matches.push(filename);
-    } catch (error) {
-      if (errorCode(error) === 'FileNotFound') continue;
-      throw error;
+  for (const paths of remoteServerPathGroups(version)) {
+    const matches = [];
+    for (const filename of paths) {
+      try {
+        const stat = await vscode.workspace.fs.stat(remoteUri(vscode, folder.uri, filename));
+        if ((stat.type & 1) && !(stat.type & 64)) matches.push(filename);
+      } catch (error) {
+        if (errorCode(error) === 'FileNotFound') continue;
+        throw error;
+      }
     }
-  }
-  if (matches.length > 1) {
-    throw new Error('Markdown Editor CSS の候補が複数あります。実際に読み込まれている URI を確認するまで変更しません: ' + matches.join(', '));
-  }
-  if (matches.length === 1) {
-    return { filename: matches[0], io: remoteFileOperations(vscode, folder.uri) };
+    if (matches.length > 1) {
+      throw new Error('Markdown Editor CSS の候補が複数あります。実際に読み込まれている URI を確認するまで変更しません: ' + matches.join(', '));
+    }
+    if (matches.length === 1) {
+      return { filename: matches[0], io: remoteFileOperations(vscode, folder.uri) };
+    }
   }
   throw new Error('接続先の Markdown Editor CSS が見つかりません。実際の Webview で読み込んだファイルを確認してください。');
 }
