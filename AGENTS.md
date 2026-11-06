@@ -11,12 +11,12 @@
 - Apc へ依存しない。公開 API だけでは不可能な workbench 背景 CSS は、利用者の明示許可後に `src/workbench/auto-apply.js` だけが安全に導入する。
 - VS Code の組み込み Markdown Editor だけは別の管理対象である。CSS 追記は明示許可が必要で、元ファイルとバックアップを検証する。
 - Noctis Blue は `extensionKind: ["ui"]` とし、Mac 側 UI host のみで実行する。workbench とローカル背景画像をコンテナ側から変更しない。
-- リモート Markdown Editor CSS は、ローカルの `fs` ではなく `src/markdownEditorRemote.js` の `workspace.fs` を使う。実機で観測された `/vscode/extensions/markdown-language-features/markdown-editor-out/editor.css` と既知の VS Code Server 配置を確認し、候補がゼロ件または複数件なら書き込まず停止する。探索結果だけでは Webview が使用中の CSS と同一であることは保証できない。
+- リモート Markdown Editor CSS は、ローカルの `fs` ではなく `src/markdownEditorRemote.js` の `workspace.fs` を使う。観測済みの `/vscode/` 配置を優先し、見つからない場合だけ既知のホーム側配置を探す。同一優先度内で候補が複数ある場合や候補がゼロ件の場合は、書き込み先を推測せず停止する。探索結果だけでは Webview が使用中の CSS と同一であることは保証できない。
 
 ## 情報の置き場所
 
 - `AGENTS.md` には長期的に維持する設計・実装ルールだけを書く。
-- README.md は利用者向けのインストール・設定・操作・更新・解除の手順に限定する。実装構造、CSS セレクタ、配色管理や生成方法、開発・診断コマンド、設計判断の説明は AGENTS.md または設計資料に置き、重複記載しない。
+- README.md は利用者向けのインストール・設定・操作・更新・解除・トラブルシューティングの手順に限定する。実装構造、CSS セレクタ、配色管理や生成方法、開発・診断コマンド、設計判断の説明は AGENTS.md または設計資料に置き、重複記載しない。
 - 実機確認の途中経過、未確認一覧、次の作業を長期資料へ蓄積しない。
 - 実測から恒久的な設計判断が得られた場合だけ、その判断と根拠を設計資料へ残す。
 
@@ -104,6 +104,17 @@
 - `workspace.fs` に `chmod` も排他的 `writeFile` もない。バックアップ作成は `workspace.fs.copy(overwrite: false)` を使う。自動 `chown` / `sudo` / 権限緩和を追加しない。コンテナで書き込み権限がない場合はエラーで停止し、所有者や設定を勝手に変更しない。
 - VS Code 更新・違う remote server 配置は実機の場所と権限を調査してから候補を増やす。検証していない環境に動くと断定しない。
 - 内蔵 Markdown Editor は組み込み Webview。標準 Markdown Preview や外部 Live Preview と混同しない。
+
+## Dev Container の Markdown Editor CSS が適用できない場合
+
+- **実測済みの障害**：Dev Container で VS Code Server の実行プロセスは `vscode`（UID 1000）なのに、`/vscode/vscode-server/bin/linux-arm64/<commit>/extensions/markdown-language-features/markdown-editor-out/editor.css` とその親ディレクトリが `root:root` となり、`vscode` から書き込めない事例があった。該当 CSS は未加工で、以前の別コミットの CSS にだけ Noctis Blue の管理ブロックとバックアップが残っていた。現在の版が未適用なら、古い版の適用履歴で成功と判断しない。
+- `/vscode` は Dev Containers が `--mount type=volume,source=vscode,target=/vscode,external=true` として使用する Docker の共有ボリュームだった。実測では `root:root` 所有、`ext4`。`remoteUser: "vscode"` と Dockerfile の `USER vscode` は既に指定済みで、サーバープロセスも `vscode` で動作していた。従って、`remoteUser` 未設定を原因と断定しない。
+- Dev Containers の起動ログには `docker exec -u root` による起動準備があったが、当該ログでは VS Code Server はインストール済みだった。**サーバーの CSS が root 所有で生成された正確な経路・タイミングまでは未確認**。将来の原因分析では新規展開時のログを取得し、推測を事実として記載しない。
+- `code --version` のコミット番号と `uname -m` から現在のサーバー候補を特定する。実際に Webview が読み込む `editor.css` は、Markdown Editor の開発者ツールで `document.styleSheets` の `href` と `document.body.getAttribute('data-vscode-theme-id')` を実測して照合する。通常の Markdown Preview と混同しない。
+- `stat -c '%d:%i %U:%G %A %n'` と `readlink -f` で対象ファイルの実体、`stat` と `test -w` でファイル・親ディレクトリの権限を調べる。バックアップ `editor.css.noctis-blue.backup` と Noctis Blue 管理マーカーの有無も確認する。**ファイルへの書き込み権限だけでは、新規バックアップや一時ファイルを親ディレクトリに作成できるとは限らない**。
+- `/vscode/vscode-server/bin/linux-arm64/<commit>/...` と `/home/vscode/.vscode-server/bin/<commit>/...` が、同じデバイス番号・inode の実体を指すことも確認済み。`src/markdownEditorRemote.js` は `/vscode/` 側を優先して二重候補に数えないが、同一優先度内で複数存在する場合は引き続き中止する。無条件に重複候補をまとめたり、最新らしいファイルを推測して選んだりしない。
+- 権限修復を提案するのは、現在利用中の CSS の実体、所有者、書き込み不可を確認し、ユーザーが明示的に了承した場合のみとする。対応例は **現在の `editor.css` とその親ディレクトリだけ**に限定した `sudo chown`。共有ボリューム全体の `chown -R`、自動 `sudo`、`chmod 777`、バックアップ削除、起動時の恒常的な権限修正はしない。状況によっては修復せず停止する。
+- 修復後は接続先で **Noctis Blue: Enable Markdown Editor Appearance** を再実行し、Markdown Editor を開き直すか再読み込みして確認する。再発したらまず上記の実測を繰り返す。README.md には利用者がすぐ実行できる最小限の確認・対応手順だけを載せ、内部の理由はここで管理する。
 
 ## テストとリリース
 
