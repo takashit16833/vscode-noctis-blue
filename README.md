@@ -12,15 +12,16 @@ macOS のターミナルで実行します。VS Code と Node.js（npm）が必�
 初めて導入する場合：
 
 ```bash
-git clone git@github.com:takashit16833/vscode-noctis-blue.git ~/vscode-noctis-blue
-cd ~/vscode-noctis-blue
+mkdir -p ~/workspace
+git clone git@github.com:takashit16833/vscode-noctis-blue.git ~/workspace/vscode-noctis-blue
+cd ~/workspace/vscode-noctis-blue
 bash ./install.sh
 ```
 
 既に導入している場合：
 
 ```bash
-cd ~/vscode-noctis-blue
+cd ~/workspace/vscode-noctis-blue
 git pull --ff-only
 bash ./install.sh
 ```
