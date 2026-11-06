@@ -41,7 +41,7 @@ VS Code の
 生成元は `src/markdownAppearance.js` の `generateMarkdownCss` である。
 ここに CSS 全文を重複掲載せず、意図と実機確認済みの対象だけを記載する。
 
-- 見出し：H1/H2 の左側に縦線を付け、H2 の下線は非表示にする。H1/H3 以降の下線は維持する。
+- 見出し：H1〜H3 の左側に共通の縦線を付ける。H1 の下線色は `editorGroup.border` と共通にし、元の太さを保つ。H2 は標準の下線を復活させ、H3 の下線は非表示にする。
 - コードブロック：枠線を消し、背景は `textCodeBlock.background` を使用する。
 - 引用：Obsidian と同じ `#001947` の背景、`#4C9EEB` の文字、`#5EAFFF` の枠色を使用する。左の枠は Obsidian 標準と同じ `2px` にする。
 - インラインコード：Obsidian と同じ `#052A59` の背景、`#7CBEFF` の文字色を使用し、読みやすい余白を付ける。コードブロックには適用しない。
