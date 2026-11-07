@@ -172,6 +172,12 @@ test('Sticky Scroll uses wallpaper-proven backdrop blur without dimming pinned t
   assert.doesNotMatch(css, /\.sticky-widget:not\(\.peek\).*opacity:/);
 });
 
+test('tree Sticky Scroll blurs behind pinned rows even when Explorer is docked in the Panel', () => {
+  const css = generateCss({ panel: 0.5 });
+  assert.match(css, /:is\(\.part\.sidebar, \.part\.auxiliarybar, \.part\.panel\) \.monaco-tree-sticky-container:not\(\.empty\) \{ backdrop-filter: blur\(12px\) !important; \}/);
+  assert.doesNotMatch(css, /\.monaco-tree-sticky-row[^{}]*\{[^{}]*backdrop-filter:/);
+});
+
 test('suggest popup blurs the background and clears list layers without fading rows', () => {
   const css = generateCss({ editor: 0.5 });
   assert.match(css, /\.monaco-editor \.suggest-widget/);

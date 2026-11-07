@@ -160,6 +160,10 @@ function buildConnectedTabRules() {
 function buildStickyRules() {
   return [
     ROOT + ' .part.editor .monaco-editor .sticky-widget:not(.peek)' +
+      ' { backdrop-filter: blur(12px) !important; }',
+    // Explorer can be docked in the Panel or Auxiliary Bar. Blur only the
+    // pinned tree surface, leaving its text and the rest of the part sharp.
+    ROOT + ' :is(.part.sidebar, .part.auxiliarybar, .part.panel) .monaco-tree-sticky-container:not(.empty)' +
       ' { backdrop-filter: blur(12px) !important; }'
   ];
 }

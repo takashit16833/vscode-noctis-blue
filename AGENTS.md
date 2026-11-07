@@ -53,7 +53,7 @@
 - 文字・アイコン・選択範囲へ要素全体の `opacity` を指定しない。
 - `src/appearance.js` を領域背景・重複下地透明化・ぼかしの CSS 生成元とする。DOM 依存セレクタは editor / panel / sidebar / SCM / Sticky / suggest / gap の機能単位で分け、処理内容ではなく必要理由をコメントする。
 - Source Control メッセージ欄は外側 `.scm-editor` の背景を残し、内部 Monaco の重複背景だけを透明化する。
-- Sticky Scroll は `.sticky-widget:not(.peek)` の背後だけを `blur(12px)` し、固定文字は薄くしない。
+- Sticky Scroll はエディタの `.sticky-widget:not(.peek)` とツリーの `.monaco-tree-sticky-container:not(.empty)` の背後を `blur(12px)` し、固定文字は薄くしない。ツリーは Sidebar / Auxiliary Bar / Panel のいずれに配置されても適用する。
 - 補完候補はポップアップ背後だけをぼかし、文字・選択・ホバー・枠線を維持する。
 - Modern UI、Chat、SCM 等で問題が出た場合は Computed Style で背景レイヤーを実測してから修正する。
 
