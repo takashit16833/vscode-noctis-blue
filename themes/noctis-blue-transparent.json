@@ -88,7 +88,7 @@
     "terminal.ansiBrightCyan": "#00FFFF",
     "terminal.ansiGreen": "#7ED9B5",
     "terminal.ansiBrightGreen": "#7ED9B5",
-    "terminal.ansiMagenta": "#8A5EC0",
+    "terminal.ansiMagenta": "#966CCA",
     "terminal.ansiBrightMagenta": "#B07CFF",
     "terminal.ansiRed": "#FF4DE1",
     "terminal.ansiBrightRed": "#FF80EB",
@@ -290,7 +290,7 @@
         "meta.return-type"
       ],
       "settings": {
-        "foreground": "#8A5EC0",
+        "foreground": "#966CCA",
         "fontStyle": "bold"
       }
     },
@@ -388,13 +388,13 @@
     }
   ],
   "semanticTokenColors": {
-    "namespace": "#8A5EC0",
-    "type": "#8A5EC0",
-    "class": "#8A5EC0",
-    "enum": "#8A5EC0",
-    "interface": "#8A5EC0",
-    "struct": "#8A5EC0",
-    "typeParameter": "#8A5EC0",
+    "namespace": "#966CCA",
+    "type": "#966CCA",
+    "class": "#966CCA",
+    "enum": "#966CCA",
+    "interface": "#966CCA",
+    "struct": "#966CCA",
+    "typeParameter": "#966CCA",
     "parameter": "#A6CAFF",
     "variable": "#7CBEFF",
     "property": "#A6CAFF",
