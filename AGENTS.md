@@ -67,7 +67,7 @@
 - 内蔵 Markdown Editor の本文基準色は標準テーマ色 `editor.foreground` を通じて通常の `palette.foreground` を使う。見出しだけを `palette.pale`（Emacs 版 `fg-pale`）へ分離できる公開テーマ色があるかは、推測せず実機と上流 CSS で確認する。
 - コードブロック背景は標準テーマ色 `textCodeBlock.background` を使う。基準色は Emacs 版 `org-block-bg` と揃え、Transparent 版ではアルファ値だけを下げる。
 - コードブロック枠線は Markdown Editor 側が汎用 `widget.border` を使うため、テーマ色 `widget.border` は変更せず `pre.md-code-block` だけ CSS で枠線を消す。
-- H1/H2/H3 は文字位置を動かさず、`::before` を `left: -14px` に絶対配置して左縦線を付ける。縦線は `top: 0.6em` / `height: 1em` / `translateY(-50%)` で文字行の中心に合わせる。H1 の下線色は `editorGroup.border` と共通の `palette.border` を使い、太さは変えない。H2 は標準の下線を表示し、H3 の下線だけを非表示にする。
+- H1/H2/H3 は文字位置を動かさず、`::before` を `left: -14px` に絶対配置して左縦線を付ける。縦線は `top: 0.6em` / `height: 1em` / `translateY(-50%)` で文字行の中心に合わせる。H1 の下線色はエディタの分割線より明るい `palette.muted` を使い、太さは変えない。H2 は標準の下線を表示し、H3 の下線だけを非表示にする。
 - 引用・インラインコード・リンク・表など Markdown Editor 固有要素は、実DOMと Computed Style を確認してから個別に上書きする。推測したクラス名や `background: transparent` のような色を消す指定を入れない。
 - 引用は実機で `BLOCKQUOTE.md-block.md-blockquote` を確認済み。背景・前景・枠色は Obsidian の配色に揃え、コードブロックとは分ける。
 - インラインコードは実機で `CODE`、fenced code は `PRE.md-code-block > CODE` と確認済み。非 `PRE` 配下の `CODE` に Obsidian と同じ文字・背景色を適用し、左右の余白を確保する。

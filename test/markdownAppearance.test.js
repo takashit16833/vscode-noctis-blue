@@ -16,8 +16,8 @@ test('Markdown Editor CSS follows the Emacs document palette', () => {
   for (const theme of manifest.contributes.themes) assert.equal(theme.id, theme.label);
   assert.match(css, new RegExp('color: ' + palette.pale.replace('#', '\\#') + ' !important;', 'i'));
 
-  // H1 uses the same border color as the editor split, without changing its width.
-  assert.match(css, /h1\.md-heading \{\n  border-bottom-color: var\(--vscode-editorGroup-border, #153A75\) !important;/i);
+  // H1 uses a brighter palette blue without changing its underline width.
+  assert.ok(css.includes('h1.md-heading {\n  border-bottom-color: ' + palette.muted + ' !important;'));
   // H2 retains its original underline and shares the left stripe with H1/H3.
   assert.doesNotMatch(css, /h2\.md-heading \{\n  border-bottom: none !important;/);
   assert.match(css, /h3\.md-heading::before/);

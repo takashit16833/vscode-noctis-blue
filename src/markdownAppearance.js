@@ -49,9 +49,9 @@ function generateMarkdownCss(opacity) {
     '  border-radius: 999px;',
     '}',
     '',
-    // Keep H1's existing underline thickness; use the editor split border color.
+    // Keep H1's underline thickness; use the next brighter blue in the palette.
     scoped('h1.md-heading') + ' {',
-    '  border-bottom-color: var(--vscode-editorGroup-border, ' + palette.border + ') !important;',
+    '  border-bottom-color: ' + palette.muted + ' !important;',
     '}',
     '',
     // H2 regains its original underline. H3 takes over H2's stripe-only style.
