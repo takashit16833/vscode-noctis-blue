@@ -164,7 +164,7 @@ function buildStickyRules() {
     // Explorer can be docked in the Panel or Auxiliary Bar. Blur only the
     // pinned tree surface, leaving its text and the rest of the part sharp.
     ROOT + ' :is(.part.sidebar, .part.auxiliarybar, .part.panel) .monaco-tree-sticky-container:not(.empty)' +
-      ' { backdrop-filter: blur(12px) !important; }'
+      ' { backdrop-filter: blur(40px) !important; }'
   ];
 }
 
