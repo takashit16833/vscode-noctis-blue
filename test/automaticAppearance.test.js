@@ -71,3 +71,11 @@ test('利用者が同意しなかった場合は有効状態を変更しない',
   assert.equal(f.state[STATE_KEY], false);
 });
 
+
+test('new transparent theme shares the workbench loader without copying classic colors', async () => {
+  const f = fixture({ theme: 'Noctis Blue One Dark Transparent' });
+  const s = await styles(f.vscode);
+  assert.match(s.layers['takashit16833.noctis-blue'], /#161C28 91%, transparent/);
+  const normal = await styles(fixture({ theme: 'Noctis Blue One Dark' }).vscode);
+  assert.deepEqual(normal.layers, {});
+});
