@@ -8,7 +8,7 @@ const { applyMarkdownEditorCss, updateExistingMarkdownEditorCss, removeMarkdownE
 const MARKDOWN_EXTENSION_ID = 'vscode.markdown-language-features';
 const STATE_KEY = 'noctisBlue.markdownEditorAppearanceEnabledTargets';
 const LEGACY_STATE_KEY = 'noctisBlue.markdownEditorAppearanceEnabled';
-const NOCTIS_THEMES = new Set(['Noctis Blue', 'Noctis Blue Transparent']);
+const NOCTIS_THEMES = new Set(require('../package.json').contributes.themes.map(theme => theme.id));
 
 const pendingByTarget = new Map();
 
@@ -99,7 +99,7 @@ async function syncMarkdownEditorAppearance(vscode, context) {
 
 async function enableMarkdownEditorAppearance(vscode, context) {
   if (!isNoctisTheme(vscode)) {
-    throw new Error('Noctis Blue または Noctis Blue Transparent を選択してから有効にしてください。');
+    throw new Error('Noctis Blue のいずれかのテーマを選択してから有効にしてください。');
   }
   const scope = targetScope(vscode);
   return withTargetQueue(scope, async () => {
