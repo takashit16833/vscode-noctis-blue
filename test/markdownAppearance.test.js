@@ -129,3 +129,15 @@ test('generated JavaScript refuses non-Markdown context without mutation', () =>
   };
   assert.throws(() => vm.runInNewContext(script, context), /Markdown Editor/);
 });
+
+test('One Dark Markdown Editor CSS follows its colors and is scoped to its two themes', () => {
+  const css = generateMarkdownCss(0.65);
+  assert.match(css, /data-vscode-theme-id="Noctis Blue One Dark"/);
+  assert.match(css, /data-vscode-theme-id="Noctis Blue One Dark Transparent"/);
+  assert.match(css, /background-color: #243247 !important;/);
+  assert.match(css, /background-color: color-mix\(in srgb, #243247 45%, transparent\) !important;/);
+  assert.match(css, /background-color: #34465F !important;/);
+  assert.match(css, /color: #A6CAFF !important;/);
+  assert.match(css, /var\(--vscode-editor-foreground, #A6CAFF\)/);
+  assert.match(css, /65%, transparent/);
+});
