@@ -4,7 +4,7 @@ Emacs 版 [Retro Hacker Blue](https://github.com/takashit16833/emacs-retro-hacke
 
 - **Noctis Blue**：通常版
 - **Noctis Blue Transparent**：背景画像と透過表示に対応する版
-- **Noctis Blue One Dark**：落ち着いた紺色の背景と pale（青白い文字）を主体にした版
+- **Noctis Blue One Dark**：One Dark の構文色の使い分けを Noctis Blue のパレットで再現した版。背景は暗い紺色、通常文字は pale、変数・タグはサイバーピンク
 - **Noctis Blue One Dark Transparent**：上記の透過版
 
 ## インストール
