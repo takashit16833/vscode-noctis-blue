@@ -34,5 +34,28 @@
   "cyanDim": "#00CED1",
   "selectionUi": "#173366",
   "markdownCodeBlockBackground": "#0A1A36",
-  "markdownQuoteBackground": "#001947"
+  "markdownQuoteBackground": "#001947",
+  "oneDark": {
+    "background": "#161C28",
+    "sidebar": "#181F2B",
+    "backgroundDeep": "#1D2635",
+    "panel": "#222D3C",
+    "focus": "#34465F",
+    "border": "#3A4B64",
+    "foreground": "#A6CAFF",
+    "dim": "#8290B1",
+    "muted": "#8290B1",
+    "comment": "#8290B1",
+    "punctuation": "#7189AA",
+    "function": "#5EAFFF",
+    "line": "#202B3B",
+    "selection": "#354866",
+    "match": "#28384E",
+    "hover": "#27364A",
+    "inactiveBackground": "#1B2533",
+    "inactiveForeground": "#8290B1",
+    "selectionUi": "#354866",
+    "markdownCodeBlockBackground": "#1F2A3A",
+    "markdownQuoteBackground": "#243247"
+  }
 }
