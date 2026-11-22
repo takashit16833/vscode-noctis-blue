@@ -3,6 +3,7 @@
 const { generateCss } = require('./appearance');
 const { generateMarkdownCss } = require('./markdownAppearance');
 const opaqueTheme = require('../themes/noctis-blue.json');
+const oneDarkOpaqueTheme = require('../themes/noctis-blue-one-dark.json');
 
 // A single script is pasted twice: once in top, once in Markdown Editor.
 // Both locations are actual VS Code contexts, not a simulated preview.
@@ -18,18 +19,20 @@ const TEST_OPACITY = Object.freeze({
 });
 const MARKDOWN_TEST_OPACITY = 0.65;
 
-function generateCombinedTestScript() {
+function generateCombinedTestScript(themeName = 'Noctis Blue Transparent') {
+  const activeTheme = themeName === 'Noctis Blue One Dark Transparent'
+    ? oneDarkOpaqueTheme : opaqueTheme;
   // Visible diagnostic stripes, not a real wallpaper and not multiply blending.
   const stripes = [
     '/* Diagnostic stripes in the actual VS Code workbench. */',
     '.monaco-workbench {',
     '  background-image: repeating-linear-gradient(45deg, #10244C 0 24px, #285A83 24px 48px) !important;',
-    '  background-color: ' + opaqueTheme.colors['editor.background'] + ' !important;',
+    '  background-color: ' + activeTheme.colors['editor.background'] + ' !important;',
     '  background-blend-mode: normal !important;',
     '}',
     ''
   ].join('\n');
-  const workbenchCss = stripes + generateCss(TEST_OPACITY);
+  const workbenchCss = stripes + generateCss(TEST_OPACITY, themeName);
   const markdownCss = generateMarkdownCss(MARKDOWN_TEST_OPACITY);
 
   return [
