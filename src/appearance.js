@@ -3,6 +3,7 @@
 // Shared workbench appearance CSS for the automatic layer and temporary
 // renderer-side verification. Use the opaque theme's colors and avoid repainting text.
 const theme = require('../themes/noctis-blue.json');
+const oneDarkTheme = require('../themes/noctis-blue-one-dark.json');
 const manifest = require('../package.json');
 
 const OPACITY_KEYS = ['editor', 'gutter', 'minimap', 'tabs', 'breadcrumbs', 'sidebar', 'panel', 'auxiliaryBar', 'chrome', 'gap'];
@@ -25,8 +26,8 @@ function normalizeOpacity(value = {}) {
   return result;
 }
 
-function color(key) {
-  const value = theme.colors[key];
+function color(key, activeTheme = theme) {
+  const value = activeTheme.colors[key];
   if (!/^#[0-9a-f]{6}$/i.test(value || '')) {
     throw new Error('通常版テーマに有効な背景色がありません: ' + key);
   }
@@ -42,23 +43,23 @@ function rule(selectors, value, opacity) {
   return selectors + ' { background-color: ' + mix(value, opacity) + ' !important; }';
 }
 
-function buildSurfaceRules(op) {
+function buildSurfaceRules(op, activeTheme = theme) {
   const lines = [
-    rule(ROOT + ' .part.editor', color('editor.background'), op.editor),
+    rule(ROOT + ' .part.editor', color('editor.background', activeTheme), op.editor),
     // Monaco's .margin is the gutter paint surface. Its duplicate base is
     // cleared below, then this more specific rule restores one adjustable
     // background without changing line numbers or current-line highlights.
     rule(ROOT + ' .part.editor .monaco-editor .margin',
-      color('editorGutter.background'), op.gutter),
+      color('editorGutter.background', activeTheme), op.gutter),
     // The minimap canvas uses a transparent theme background. Paint its own
     // adjustable surface behind the canvas, without dimming content or sliders.
-    rule(ROOT + ' .part.editor .monaco-editor .minimap', color('minimap.background'), op.minimap),
+    rule(ROOT + ' .part.editor .monaco-editor .minimap', color('minimap.background', activeTheme), op.minimap),
     rule(ROOT + ' .part.sidebar, ' + ROOT + '.floating-panels .part.sidebar',
-      color('sideBar.background'), op.sidebar),
+      color('sideBar.background', activeTheme), op.sidebar),
     rule(ROOT + ' .part.auxiliarybar, ' + ROOT + '.floating-panels .part.auxiliarybar',
-      color('auxiliaryBar.background'), op.auxiliaryBar),
+      color('auxiliaryBar.background', activeTheme), op.auxiliaryBar),
     rule(ROOT + ' .part.panel, ' + ROOT + '.floating-panels .part.panel',
-      color('panel.background'), op.panel)
+      color('panel.background', activeTheme), op.panel)
   ];
 
   for (const [part, themeKey] of [
@@ -71,7 +72,7 @@ function buildSurfaceRules(op) {
   // VS Code sets .inactive when focus leaves the window. Preserve its
   // distinct theme color instead of applying active titlebar color in both states.
   lines.push(rule(ROOT + ' .part.titlebar.inactive',
-    color('titleBar.inactiveBackground'), op.chrome));
+    color('titleBar.inactiveBackground', activeTheme), op.chrome));
   return lines;
 }
 
@@ -134,15 +135,15 @@ function buildClearBackgroundRules() {
   ];
 }
 
-function buildEditorHeaderRules(op) {
+function buildEditorHeaderRules(op, activeTheme = theme) {
   // Tabs and breadcrumbs share .title but have separate containers. Keep the
   // parent transparent so either background can be adjusted independently.
   // Internal tab fills and breadcrumb controls retain their own styling.
   return [
     rule(ROOT + ' .part.editor .editor-group-container > .title.tabs > .tabs-and-actions-container',
-      color('editorGroupHeader.tabsBackground'), op.tabs),
+      color('editorGroupHeader.tabsBackground', activeTheme), op.tabs),
     rule(ROOT + ' .part.editor .editor-group-container > .title .breadcrumbs-below-tabs',
-      color('editorGroupHeader.tabsBackground'), op.breadcrumbs)
+      color('editorGroupHeader.tabsBackground', activeTheme), op.breadcrumbs)
   ];
 }
 
@@ -187,7 +188,7 @@ function buildSuggestRules() {
   ];
 }
 
-function buildGapRules(op) {
+function buildGapRules(op, activeTheme = theme) {
   if (op.gap <= 0) return [];
 
   // Floating-panel spacing is a margin outside the parts. Paint only those
@@ -200,7 +201,7 @@ function buildGapRules(op) {
       ' --nb-right: var(--modern-ui-floating-card-inner-margin, 0px);' +
       ' --nb-top: var(--modern-ui-floating-card-inner-margin, 0px);' +
       ' --nb-bottom: var(--modern-ui-floating-card-margin, 0px);' +
-      ' --nb-gap-color: ' + mix(color('editor.background'), op.gap) + '; }',
+      ' --nb-gap-color: ' + mix(color('editor.background', activeTheme), op.gap) + '; }',
     floating + '.split-view-view:has(> .part.floating-part-outer-right),' +
       floating + '.split-view-view:has(> .part.editor.floating-editor-outer-right) {' +
       ' --nb-right: var(--modern-ui-floating-card-outer-margin, 0px); }',
@@ -228,21 +229,22 @@ function buildGapRules(op) {
   ];
 }
 
-function generateCss(input = {}) {
+function generateCss(input = {}, themeName = 'Noctis Blue Transparent') {
   const op = normalizeOpacity(input);
+  const activeTheme = themeName === 'Noctis Blue One Dark Transparent' ? oneDarkTheme : theme;
   const lines = ['/* Noctis Blue workbench appearance: no wallpaper image or tint. */'];
-  lines.push(...buildSurfaceRules(op));
+  lines.push(...buildSurfaceRules(op, activeTheme));
   lines.push(...buildClearBackgroundRules());
-  lines.push(...buildEditorHeaderRules(op));
+  lines.push(...buildEditorHeaderRules(op, activeTheme));
   lines.push(...buildConnectedTabRules());
   lines.push(...buildStickyRules());
   lines.push(...buildSuggestRules());
-  lines.push(...buildGapRules(op));
+  lines.push(...buildGapRules(op, activeTheme));
   return lines.join('\n') + '\n';
 }
 
-function generateTemporaryScript(input = {}) {
-  const css = generateCss(input);
+function generateTemporaryScript(input = {}, themeName) {
+  const css = generateCss(input, themeName);
   return [
     '/* Run in Developer Tools Console with top as the execution context. */',
     '(() => {',
