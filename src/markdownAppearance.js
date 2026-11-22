@@ -9,8 +9,11 @@ const SELECTOR = '.md-editor:not(.md-no-active-block-highlight) .md-block-active
 const STYLE_ID = 'noctis-blue-markdown-active-test';
 const THEME_ROOT = 'body:is([data-vscode-theme-id="Noctis Blue"], ' +
   '[data-vscode-theme-id="Noctis Blue Transparent"])';
-const scoped = selector => THEME_ROOT + ' ' + selector;
 const TRANSPARENT_THEME_ROOT = 'body[data-vscode-theme-id="Noctis Blue Transparent"]';
+const ONE_DARK_THEME_ROOT = 'body:is([data-vscode-theme-id="Noctis Blue One Dark"], ' +
+  '[data-vscode-theme-id="Noctis Blue One Dark Transparent"])';
+const ONE_DARK_TRANSPARENT_THEME_ROOT =
+  'body[data-vscode-theme-id="Noctis Blue One Dark Transparent"]';
 
 function validateOpacity(value) {
   if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 1) {
@@ -19,7 +22,8 @@ function validateOpacity(value) {
   return value;
 }
 
-function generateMarkdownCss(opacity) {
+function generateThemeCss(opacity, palette, themeRoot, TRANSPARENT_THEME_ROOT) {
+  const scoped = selector => themeRoot + ' ' + selector;
   const percent = Math.round(validateOpacity(opacity) * 10000) / 100;
   const activeBackground =
     'color-mix(in srgb, ' + CSS_VARIABLE + ' ' + percent + '%, transparent)';
@@ -118,6 +122,14 @@ function generateMarkdownCss(opacity) {
     '  box-shadow: 0 0 0 8px ' + activeBackground + ' !important;',
     '}',
     ''
+  ].join('\n');
+}
+
+function generateMarkdownCss(opacity) {
+  return [
+    generateThemeCss(opacity, palette, THEME_ROOT, TRANSPARENT_THEME_ROOT),
+    generateThemeCss(opacity, { ...palette, ...palette.oneDark },
+      ONE_DARK_THEME_ROOT, ONE_DARK_TRANSPARENT_THEME_ROOT)
   ].join('\n');
 }
 
