@@ -5,6 +5,7 @@
 - Noctis Blue は配色・背景画像・画像切り替え・背景透過・ぼかしの唯一の拡張とする。
 - 役割の分離は拡張機能単位ではなく、内部のモジュールで行う。背景画像用の別拡張を再導入しない。
 - `palette/colors.json` を配色の唯一の管理元とする。実行時コードから参照するため VSIX に必ず含め、`.vscodeignore` で除外しない。
+- `oneDark` の配色は同じ `palette/colors.json` の差分定義を使用する。従来の2テーマと One Dark 通常版・透過版の4テーマを `scripts/theme.js` から生成する。WezTerm に合わせた新テーマ背景は `#161C28`。既存2テーマの配色は変更しない。
 - JSON / JSONC / JSON Lines のプロパティ名は `support.type.property-name.json*` を `palette.foreground` に揃える。グローバルな semantic token の `property` 色は変更しない。
 - `themes/*.json` は生成物。変更後は `npm run build && npm test` を実行する。
 - VS Code 標準のテーマ機能・公開 API を最優先する。
@@ -30,7 +31,7 @@
 - `src/workbench/workspace-id.js`: VS Code renderer 側と同一の作業領域 ID を生成する。
 - 現在の管理対象 CSS は `noctis-blue-*.css` と `noctis-blue-layers-*.css`、読み込みスクリプトは `noctis-blue-loader.js` という実際のファイル名を使用している。これらのファイルは Noctis Blue が所有する。管理ファイル名の変更は読み込み・検証・解除・復元とテストを含めて整合性を保つ。
 - 背景画像設定は `noctisBlue.wallpaper.*` のみ読み取る。存在しない設定や別拡張の設定から値を推測しない。
-- `Noctis Blue Transparent` のときだけ領域透過 CSS を追加する。背景画像自体は `noctisBlue.wallpaper.enabled` で制御する。
+- `Noctis Blue Transparent` と `Noctis Blue One Dark Transparent` のときだけ、それぞれの通常版背景色から領域透過 CSS を追加する。背景画像自体は `noctisBlue.wallpaper.enabled` で制御する。
 - 自動適用の保存状態は `noctisBlue.automaticAppearanceEnabled` (`globalState`) だけで判定する。管理ファイルが存在するという理由で、利用者の同意や無効化状態を上書きしない。
 - ユーザーの明示的な同意なしに workbench.html を初回変更しない。設定変更時は管理 CSS だけ更新する。
 - `Developer: Reload Window` はユーザーが選ぶ。勝手に実行せず、タイマー・通知の連発をしない。
@@ -83,7 +84,7 @@
 - `markdown.editor.highlightActiveBlock=false` で強調表示自体を消さない。
 - `--md-block-active-background` の色を固定色へ置き換えず、背景と影の不透明度だけを変更する。
 - `noctisBlue.markdownActiveBlockOpacity` は複数ウィンドウが共有する `editor.css` の設定なので `scope: application` とする。ウィンドウごとに異なる値を共有 CSS へ上書きさせない。
-- Markdown Editor CSS は `body[data-vscode-theme-id]` で Noctis Blue 2テーマに限定し、ウィンドウのテーマ切替だけで共有 CSS を削除しない。テーマの識別子は `package.json` の themes[].id と一致させる。
+- Markdown Editor CSS は `body[data-vscode-theme-id]` で Noctis Blue 4テーマに限定し、各配色を分離する。ウィンドウのテーマ切替だけで共有 CSS を削除しない。テーマの識別子は `package.json` の themes[].id と一致させる。
 - 内蔵 Markdown CSS の有効化は `noctisBlue.markdownEditorAppearanceEnabledTargets` に接続先ごと保存する。許可が確認できない接続先では適用せず、利用者の明示的な有効化を求める。
 - Noctis Blue のアンインストール前には Markdown Editor Appearance を解除する。
 
