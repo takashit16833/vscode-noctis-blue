@@ -5,8 +5,8 @@
 - Noctis Blue は配色・背景画像・画像切り替え・背景透過・ぼかしの唯一の拡張とする。
 - 役割の分離は拡張機能単位ではなく、内部のモジュールで行う。背景画像用の別拡張を再導入しない。
 - `palette/colors.json` を配色の唯一の管理元とする。実行時コードから参照するため VSIX に必ず含め、`.vscodeignore` で除外しない。
-- `oneDark` の配色は同じ `palette/colors.json` の差分定義を使用する。従来の2テーマと One Dark 通常版・透過版の4テーマを `scripts/theme.js` から生成する。WezTerm に合わせた新テーマ背景は `#161C28`。既存2テーマの配色は変更しない。
-- JSON / JSONC / JSON Lines のプロパティ名は `support.type.property-name.json*` を `palette.foreground` に揃える。グローバルな semantic token の `property` 色は変更しない。
+- `oneDark` の配色は同じ `palette/colors.json` の差分定義を使用する。従来の2テーマと One Dark 通常版・透過版の4テーマを `scripts/theme.js` から生成する。One Dark の構文規則は `scripts/one-dark-syntax.js` で分離し、Atom One Dark の `styles/syntax/_base.less` と言語別定義を VS Code の TextMate・semantic token に対応付ける。使用する色は Noctis Blue のパレットからのみ選ぶ。WezTerm に合わせた新テーマ背景は `#161C28`。既存2テーマの構文色を変更しない。
+- 通常の Noctis Blue では JSON / JSONC / JSON Lines のプロパティ名 `support.type.property-name.json*` を `palette.foreground` に揃える。One Dark 版では原典の JSON キーの赤系を踏襲し `palette.cursor`（サイバーピンク）を使う。一般のプロパティは `pale` のままにし、言語別 semantic token 規則が使える場合は JSON のキーだけ上書きする。
 - `themes/*.json` は生成物。変更後は `npm run build && npm test` を実行する。
 - VS Code 標準のテーマ機能・公開 API を最優先する。
 - Apc へ依存しない。公開 API だけでは不可能な workbench 背景 CSS は、利用者の明示許可後に `src/workbench/auto-apply.js` だけが安全に導入する。
