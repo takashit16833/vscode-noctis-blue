@@ -220,3 +220,11 @@ test('旧形式が残っていても明示的な解除後に自動再適用し�
   assert.equal(await fs.readFile(f.filename, 'utf8'), f.original);
   await assert.rejects(fs.stat(f.filename + BACKUP_SUFFIX), { code: 'ENOENT' });
 });
+
+test('new One Dark variants are recognized as supported Markdown Editor themes', () => {
+  const { NOCTIS_THEMES, isNoctisTheme } = require('../src/markdownEditorAutomatic');
+  for (const name of ['Noctis Blue One Dark', 'Noctis Blue One Dark Transparent']) {
+    assert.ok(NOCTIS_THEMES.has(name));
+    assert.equal(isNoctisTheme(fixture({ theme: name }).vscode), true);
+  }
+});
