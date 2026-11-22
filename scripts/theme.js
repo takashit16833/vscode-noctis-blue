@@ -10,44 +10,46 @@ function buildTheme(p,transparent,variant='classic'){
   const oneDark = variant === 'one-dark';
   if (!oneDark && variant !== 'classic') throw new Error('Unknown theme variant: ' + variant);
   if (oneDark) p = { ...p, ...p.oneDark };
+  // One Dark uses blue for the caret/accent, while red syntax roles stay pink.
+  const accent = oneDark ? p.function : p.cursor;
 
   const colors={
-    "foreground":p.dim,"descriptionForeground":p.foreground,"focusBorder":p.foreground,"errorForeground":p.cursor,
+    "foreground":p.dim,"descriptionForeground":p.foreground,"focusBorder":oneDark?accent:p.foreground,"errorForeground":p.cursor,
     "widget.border":p.border,"selection.background":withAlpha(p.selectionUi,"B2"),
-    "editor.foreground":p.foreground,"textCodeBlock.background":p.markdownCodeBlockBackground,"editorCursor.foreground":p.cursor,"editorCursor.background":p.background,
+    "editor.foreground":p.foreground,"textCodeBlock.background":p.markdownCodeBlockBackground,"editorCursor.foreground":accent,"editorCursor.background":p.background,
     "editor.lineHighlightBackground":p.line,"editor.lineHighlightBorder":p.border,"editor.selectionBackground":p.selection,
     "editor.inactiveSelectionBackground":withAlpha(p.selection,"88"),"editor.selectionHighlightBackground":withAlpha(p.focus,"50"),
     "editor.wordHighlightBackground":p.match,"editor.wordHighlightStrongBackground":withAlpha(p.focus,"80"),
-    "editor.findMatchBackground":withAlpha(p.gold,"55"),"editor.findMatchHighlightBackground":p.hover,
+    "editor.findMatchBackground":oneDark?withAlpha(accent,"3D"):withAlpha(p.gold,"55"),"editor.findMatchHighlightBackground":oneDark?withAlpha(accent,"3D"):p.hover,
     "editor.findRangeHighlightBackground":p.match,"editor.hoverHighlightBackground":p.hover,
     "editorLineNumber.foreground":p.muted,"editorLineNumber.activeForeground":p.foreground,
     "editorGutter.modifiedBackground":p.gold,"editorGutter.addedBackground":p.green,"editorGutter.deletedBackground":p.cursor,
     "editorWhitespace.foreground":withAlpha(p.muted,"55"),"editorIndentGuide.background1":withAlpha(p.border,"70"),
     "editorIndentGuide.activeBackground1":p.dim,"editorBracketMatch.background":p.match,
-    "editorBracketMatch.border":p.border,"editorError.foreground":p.cursor,"editorWarning.foreground":p.gold,
+    "editorBracketMatch.border":oneDark?accent:p.border,"editorError.foreground":p.cursor,"editorWarning.foreground":p.gold,
     "editorInfo.foreground":p.foreground,"editorHint.foreground":p.muted,"editorCodeLens.foreground":p.muted,
     "editorRuler.foreground":withAlpha(p.border,"66"),
     "sideBar.foreground":p.foreground,"sideBar.border":p.border,"sideBarTitle.foreground":p.dim,
     "sideBarSectionHeader.foreground":p.light,"sideBarSectionHeader.border":p.border,
     "activityBar.foreground":p.foreground,"activityBar.inactiveForeground":p.muted,"activityBar.border":p.border,
-    "activityBar.activeBorder":p.foreground,"activityBarBadge.background":p.foreground,
+    "activityBar.activeBorder":oneDark?accent:p.foreground,"activityBarBadge.background":p.foreground,
     "activityBarBadge.foreground":p.background,
     "editorGroup.border":p.border,"editorGroupHeader.tabsBorder":p.border,
     "tab.activeForeground":p.foreground,"tab.inactiveForeground":p.muted,
     "tab.hoverBackground":p.focus,"tab.hoverForeground":p.white,
-    "tab.border":p.border,"tab.activeBorderTop":p.foreground,"tab.activeModifiedBorder":p.gold,
+    "tab.border":p.border,"tab.activeBorderTop":oneDark?accent:p.foreground,"tab.activeModifiedBorder":p.gold,
     "titleBar.activeForeground":p.foreground,"titleBar.inactiveForeground":p.muted,"titleBar.border":p.border,
     "statusBar.foreground":p.dim,"statusBar.border":p.border,
     "statusBar.debuggingForeground":p.white,"statusBarItem.hoverBackground":p.match,
     "statusBarItem.remoteBackground":p.foreground,"statusBarItem.remoteForeground":p.background,
     "panel.border":p.border,"panelTitle.activeForeground":p.white,
-    "panelTitle.inactiveForeground":p.muted,"panelTitle.activeBorder":p.foreground,
+    "panelTitle.inactiveForeground":p.muted,"panelTitle.activeBorder":oneDark?accent:p.foreground,
     "panelSectionHeader.foreground":p.foreground,"panelSectionHeader.border":p.border,
     "auxiliaryBar.foreground":p.foreground,"auxiliaryBar.border":p.border,
-    "terminal.foreground":p.foreground,"terminalCursor.foreground":p.cursor,
+    "terminal.foreground":p.foreground,"terminalCursor.foreground":accent,
     "terminalCursor.background":p.background,
     "terminal.ansiBlack":p.black,"terminal.ansiBrightBlack":p.inactiveForeground,
-    "terminal.ansiBlue":p.dim,"terminal.ansiBrightBlue":p.foreground,
+    "terminal.ansiBlue":oneDark?p.function:p.dim,"terminal.ansiBrightBlue":oneDark?p.light:p.foreground,
     "terminal.ansiCyan":p.cyanDim,"terminal.ansiBrightCyan":p.cyan,
     "terminal.ansiGreen":p.green,"terminal.ansiBrightGreen":p.green,
     "terminal.ansiMagenta":p.type,"terminal.ansiBrightMagenta":p.typeBright,
@@ -115,6 +117,7 @@ function buildTheme(p,transparent,variant='classic'){
     "auxiliaryBarSectionHeader.background":"panel"
   };
   for(const [key,role] of Object.entries(surfaces)) colors[key]=p[role]+(transparent?"00":"");
+  if (oneDark) colors["editor.findMatchBorder"] = accent;
   // These are content highlights and controls, not full workbench surfaces.
   // In the transparent variant retain their original blue and reduce only
   // the background alpha. Borders, text, icons and opaque variant stay intact.
