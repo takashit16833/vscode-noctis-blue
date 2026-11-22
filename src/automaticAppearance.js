@@ -7,6 +7,8 @@ const { readSettings, generateCss: generateWallpaperCss } = require('./workbench
 
 const STATE_KEY = 'noctisBlue.automaticAppearanceEnabled';
 const TRANSPARENT_THEME = 'Noctis Blue Transparent';
+const ONE_DARK_TRANSPARENT_THEME = 'Noctis Blue One Dark Transparent';
+const TRANSPARENT_THEMES = new Set([TRANSPARENT_THEME, ONE_DARK_TRANSPARENT_THEME]);
 const LAYER_ID = 'takashit16833.noctis-blue';
 
 function currentTheme(vscode) {
@@ -14,12 +16,12 @@ function currentTheme(vscode) {
 }
 
 function isTransparentTheme(vscode) {
-  return currentTheme(vscode) === TRANSPARENT_THEME;
+  return TRANSPARENT_THEMES.has(currentTheme(vscode));
 }
 
 function currentCss(vscode) {
   const opacity = vscode.workspace.getConfiguration('noctisBlue').get('opacity', {});
-  return generateAppearanceCss(opacity);
+  return generateAppearanceCss(opacity, currentTheme(vscode));
 }
 
 function currentWallpaperCss(vscode) {
@@ -80,7 +82,7 @@ async function repairAutomaticAppearance(vscode, context) {
 }
 
 module.exports = {
-  STATE_KEY, TRANSPARENT_THEME, LAYER_ID,
+  STATE_KEY, TRANSPARENT_THEME, ONE_DARK_TRANSPARENT_THEME, TRANSPARENT_THEMES, LAYER_ID,
   currentTheme, isTransparentTheme, currentCss, currentWallpaperCss,
   styles, syncAutomaticAppearance,
   enableAutomaticAppearance, disableAutomaticAppearance, repairAutomaticAppearance
