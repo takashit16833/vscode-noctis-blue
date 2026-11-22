@@ -6,6 +6,7 @@ const { generateTemporaryMarkdownScript } = require('./markdownAppearance');
 const { generateCombinedTestScript } = require('./combinedTest');
 const {
   TRANSPARENT_THEME,
+  ONE_DARK_TRANSPARENT_THEME,
   syncAutomaticAppearance,
   enableAutomaticAppearance,
   disableAutomaticAppearance,
@@ -22,7 +23,7 @@ function currentTheme() {
 }
 
 function ensureTransparentTheme(message) {
-  if (currentTheme() === TRANSPARENT_THEME) return true;
+  if ([TRANSPARENT_THEME, ONE_DARK_TRANSPARENT_THEME].includes(currentTheme())) return true;
   void vscode.window.showWarningMessage(message);
   return false;
 }
@@ -58,7 +59,7 @@ function activate(context) {
     )) return;
 
     try {
-      await showScript(generateCombinedTestScript());
+      await showScript(generateCombinedTestScript(currentTheme()));
       void vscode.window.showInformationMessage(
         'この同じコードを開発者ツールの top と Markdown Editor で一回ずつ実行してください。' +
         ' 背景の縞模様と半透明の領域を同時に確認できます。'
@@ -77,7 +78,7 @@ function activate(context) {
 
     try {
       const opacity = vscode.workspace.getConfiguration('noctisBlue').get('opacity', {});
-      await showScript(generateTemporaryScript(opacity));
+      await showScript(generateTemporaryScript(opacity, currentTheme()));
       void vscode.window.showInformationMessage(
         '表示されたJavaScriptを、開発者ツールのtopフレームのConsoleで実行してください。' +
         ' VS Code本体やユーザー設定は変更しません。'
