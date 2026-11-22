@@ -209,3 +209,14 @@ test('temporary script toggles off; never edits user settings or VS Code files',
   assert.ok(!script.includes('vscode.workspace.getConfiguration'));
   assert.ok(!script.includes('require('));
 });
+
+test('One Dark transparency uses its own opaque backgrounds', () => {
+  const { generateCss } = require('../src/appearance');
+  const oneDark = require('../themes/noctis-blue-one-dark.json');
+  const css = generateCss({ editor: 0.75, panel: 0.5, sidebar: 0.75 },
+    'Noctis Blue One Dark Transparent');
+  assert.match(css, new RegExp(oneDark.colors['editor.background'] + ' 75%, transparent'));
+  assert.match(css, new RegExp(oneDark.colors['panel.background'] + ' 50%, transparent'));
+  assert.match(css, new RegExp(oneDark.colors['sideBar.background'] + ' 75%, transparent'));
+  assert.doesNotMatch(css, /#010111 75%, transparent/);
+});
