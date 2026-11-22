@@ -6,9 +6,13 @@ const {buildTheme}=require('./theme');
 const root=path.join(__dirname,'..');
 const check=process.argv.includes('--check');
 let outdated=false;
-for(const [transparent,name] of [[false,'noctis-blue.json'],[true,'noctis-blue-transparent.json']]){
+for(const [transparent,name,variant] of [
+  [false,'noctis-blue.json','classic'], [true,'noctis-blue-transparent.json','classic'],
+  [false,'noctis-blue-one-dark.json','one-dark'],
+  [true,'noctis-blue-one-dark-transparent.json','one-dark']
+]){
   const target=path.join(root,'themes',name);
-  const content=JSON.stringify(buildTheme(palette,transparent),null,2)+'\n';
+  const content=JSON.stringify(buildTheme(palette,transparent,variant),null,2)+'\n';
   if(check){if(!fs.existsSync(target)||fs.readFileSync(target,'utf8')!==content){console.error('Outdated theme:',name);outdated=true;}}
   else{fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,content);}
 }
