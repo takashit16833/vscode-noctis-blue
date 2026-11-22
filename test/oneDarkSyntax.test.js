@@ -99,7 +99,14 @@ test('One Dark normal and transparent themes share syntax but not surfaces', () 
   assert.equal(normal.colors['editor.background'], '#161C28');
   assert.equal(transparent.colors['editor.background'], '#161C2800');
   assert.equal(normal.colors['editor.foreground'], palette.pale);
-  assert.equal(normal.colors['editorCursor.foreground'], palette.cursor);
+  assert.equal(normal.colors['editorCursor.foreground'], palette.oneDark.function);
+  assert.equal(transparent.colors['editorCursor.foreground'], palette.oneDark.function);
+  assert.equal(normal.colors['terminalCursor.foreground'], palette.oneDark.function);
+  assert.equal(normal.colors['editorBracketMatch.border'], palette.oneDark.function);
+  assert.equal(normal.colors['editor.findMatchBorder'], palette.oneDark.function);
+  assert.equal(normal.colors['editor.findMatchBackground'], palette.oneDark.function + '3D');
+  assert.equal(normal.colors['editorError.foreground'], palette.cursor);
+  assert.equal(normal.colors['terminal.ansiRed'], palette.cursor);
 });
 
 test('original Noctis Blue syntax remains unchanged by the One Dark rules', () => {
