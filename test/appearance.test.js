@@ -219,4 +219,8 @@ test('One Dark transparency uses its own opaque backgrounds', () => {
   assert.match(css, new RegExp(oneDark.colors['panel.background'] + ' 50%, transparent'));
   assert.match(css, new RegExp(oneDark.colors['sideBar.background'] + ' 75%, transparent'));
   assert.doesNotMatch(css, /#010111 75%, transparent/);
+  assert.ok(css.includes('titlebar { background-color: color-mix(in srgb, ' +
+    oneDark.colors['titleBar.activeBackground'] + ' 93%, transparent)'));
+  assert.ok(css.includes('activitybar { background-color: color-mix(in srgb, ' +
+    oneDark.colors['activityBar.background'] + ' 93%, transparent)'));
 });
