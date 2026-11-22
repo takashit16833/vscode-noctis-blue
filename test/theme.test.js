@@ -169,14 +169,16 @@ test('One Dark variants keep pale as foreground, pink as cursor, and One Dark sy
   assert.deepEqual(normal.semanticTokenColors, translucent.semanticTokenColors);
   for (const [name, expected] of [
     ['Strings', palette.green], ['Keywords', palette.typeBright],
-    ['Functions', palette.oneDark.function], ['Numbers', palette.orange],
-    ['HTML tags', palette.cursor], ['Variables', palette.pale]
+    ['Functions', palette.oneDark.function], ['Constants', palette.orange],
+    ['HTML tags', palette.cursor], ['Variables', palette.cursor]
   ]) {
     assert.equal(normal.tokenColors.find(rule => rule.name === name).settings.foreground, expected);
   }
   assert.equal(normal.semanticTokenColors.string, palette.green);
   assert.equal(normal.semanticTokenColors.keyword, palette.typeBright);
-  assert.equal(normal.semanticTokenColors.variable, palette.pale);
+  assert.equal(normal.semanticTokenColors.variable, palette.cursor);
+  assert.equal(normal.semanticTokenColors.parameter, palette.pale);
+  assert.equal(normal.semanticTokenColors['property:json'], palette.cursor);
   assert.equal(normal.semanticTokenColors.class, palette.gold);
   assert.equal(normal.semanticTokenColors.property, palette.pale);
   for (const value of Object.values(normal.colors)) {
