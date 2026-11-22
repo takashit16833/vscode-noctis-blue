@@ -147,7 +147,39 @@ test('all contributed theme files match generator', () => {
     assert.equal(theme.name, contribution.label);
     assert.deepEqual(
       theme,
-      buildTheme(palette, contribution.label.endsWith('Transparent'))
+      buildTheme(palette, contribution.label.endsWith('Transparent'),
+        contribution.label.includes('One Dark') ? 'one-dark' : 'classic')
     );
+  }
+});
+
+test('One Dark variants keep pale as foreground, pink as cursor, and One Dark syntax roles', () => {
+  const normal = buildTheme(palette, false, 'one-dark');
+  const translucent = buildTheme(palette, true, 'one-dark');
+  assert.equal(normal.name, 'Noctis Blue One Dark');
+  assert.equal(translucent.name, 'Noctis Blue One Dark Transparent');
+  assert.equal(normal.colors['editor.background'], '#161C28');
+  assert.equal(normal.colors['editor.foreground'], palette.pale);
+  assert.equal(normal.colors['editorCursor.foreground'], palette.cursor);
+  assert.equal(normal.colors['editorError.foreground'], palette.cursor);
+  assert.equal(normal.colors['sideBar.background'], palette.oneDark.sidebar);
+  assert.equal(translucent.colors['editor.background'], '#161C2800');
+  assert.equal(translucent.colors['panel.background'], palette.oneDark.panel + '00');
+  assert.deepEqual(normal.tokenColors, translucent.tokenColors);
+  assert.deepEqual(normal.semanticTokenColors, translucent.semanticTokenColors);
+  for (const [name, expected] of [
+    ['Strings', palette.green], ['Keywords', palette.typeBright],
+    ['Functions', palette.oneDark.function], ['Numbers', palette.orange],
+    ['HTML tags', palette.cursor], ['Variables', palette.pale]
+  ]) {
+    assert.equal(normal.tokenColors.find(rule => rule.name === name).settings.foreground, expected);
+  }
+  assert.equal(normal.semanticTokenColors.string, palette.green);
+  assert.equal(normal.semanticTokenColors.keyword, palette.typeBright);
+  assert.equal(normal.semanticTokenColors.variable, palette.pale);
+  assert.equal(normal.semanticTokenColors.class, palette.gold);
+  assert.equal(normal.semanticTokenColors.property, palette.pale);
+  for (const value of Object.values(normal.colors)) {
+    assert.match(value, /^#[0-9a-f]{6}([0-9a-f]{2})?$/i);
   }
 });
