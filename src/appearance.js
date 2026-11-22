@@ -67,7 +67,7 @@ function buildSurfaceRules(op, activeTheme = theme) {
     ['statusbar', 'statusBar.background'],
     ['activitybar', 'activityBar.background']
   ]) {
-    lines.push(rule(ROOT + ' .part.' + part, color(themeKey), op.chrome));
+    lines.push(rule(ROOT + ' .part.' + part, color(themeKey, activeTheme), op.chrome));
   }
   // VS Code sets .inactive when focus leaves the window. Preserve its
   // distinct theme color instead of applying active titlebar color in both states.
