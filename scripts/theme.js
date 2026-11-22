@@ -5,7 +5,11 @@ function withAlpha(color, alpha) {
   return color + alpha;
 }
 
-function buildTheme(p,transparent){
+function buildTheme(p,transparent,variant='classic'){
+  const oneDark = variant === 'one-dark';
+  if (!oneDark && variant !== 'classic') throw new Error('Unknown theme variant: ' + variant);
+  if (oneDark) p = { ...p, ...p.oneDark };
+
   const colors={
     "foreground":p.dim,"descriptionForeground":p.foreground,"focusBorder":p.foreground,"errorForeground":p.cursor,
     "widget.border":p.border,"selection.background":withAlpha(p.selectionUi,"B2"),
@@ -148,21 +152,23 @@ function buildTheme(p,transparent){
   // Keep frequent function names in the base blue and types in the subdued purple.
   const tokenColors=[
     rule("Comments",["comment","punctuation.definition.comment","string.comment"],p.comment,""),
-    rule("Strings",["string","string.quoted","string.template","string.regexp"],p.white),
+    rule("Strings",["string","string.quoted","string.template","string.regexp"],oneDark?p.green:p.white),
     rule("Operators",["keyword.operator","punctuation.separator"],p.operator),
     rule("Punctuation",["punctuation","meta.brace","meta.brackets","meta.parentheses"],p.punctuation),
-    rule("Keywords",["keyword","storage.type","storage.modifier"],p.pale,"bold"),
-    rule("Numbers",["constant.numeric","constant.language","constant.other","constant.character"],p.gold),
-    rule("Functions",["entity.name.function","support.function","meta.function-call","meta.method-call"],p.foreground,"bold"),
-    rule("Types",["entity.name.type","entity.name.class","support.type","support.class","meta.return-type"],p.type,"bold"),
+    rule("Keywords",["keyword","storage.type","storage.modifier"],oneDark?p.typeBright:p.pale,oneDark?undefined:"bold"),
+    rule("Numbers",["constant.numeric","constant.language","constant.other","constant.character"],oneDark?p.orange:p.gold),
+    rule("Functions",["entity.name.function","support.function","meta.function-call","meta.method-call"],oneDark?p.function:p.foreground,oneDark?undefined:"bold"),
+    rule("Types",oneDark?["entity.name.type","support.type","meta.return-type"]:["entity.name.type","entity.name.class","support.type","support.class","meta.return-type"],p.type,oneDark?undefined:"bold"),
+    ...(oneDark?[rule("Classes",["entity.name.class","support.class"],p.gold)]:[]),
     rule("Variables",["variable","support.variable","meta.definition.variable.name"],p.pale),
     rule("JSON properties",[
       "support.type.property-name.json",
       "support.type.property-name.json.comments",
       "support.type.property-name.json.lines"
     ],p.foreground),
-    rule("HTML tags",["entity.name.tag","entity.other.attribute-name","meta.tag"],p.foreground),
-    rule("CSS properties",["support.type.property-name.css","support.constant.property-value"],p.light),
+    rule("HTML tags",oneDark?["entity.name.tag","meta.tag"]:["entity.name.tag","entity.other.attribute-name","meta.tag"],oneDark?p.cursor:p.foreground),
+    ...(oneDark?[rule("HTML attributes",["entity.other.attribute-name"],p.orange)]:[]),
+    rule("CSS properties",["support.type.property-name.css","support.constant.property-value"],oneDark?p.pale:p.light),
     rule("Markdown heading",["markup.heading"],p.pale,"bold"),
     rule("Markdown inline code",["markup.inline.raw","markup.fenced_code.block"],p.light),
     rule("Markdown emphasis",["markup.italic"],undefined,"italic"),
@@ -177,7 +183,16 @@ function buildTheme(p,transparent){
     keyword:p.pale,modifier:p.foreground,comment:p.comment,string:p.white,
     number:p.gold,regexp:p.white,operator:p.operator,decorator:p.gold
   };
-  return {name:transparent?"Noctis Blue Transparent":"Noctis Blue",type:"dark",semanticHighlighting:true,colors,tokenColors,semanticTokenColors};
+  if (oneDark) Object.assign(semanticTokenColors, {
+    namespace:p.type,type:p.type,class:p.gold,enum:p.type,
+    interface:p.type,struct:p.type,typeParameter:p.type,
+    parameter:p.pale,variable:p.pale,property:p.pale,
+    enumMember:p.orange,function:p.function,method:p.function,macro:p.function,
+    keyword:p.typeBright,modifier:p.typeBright,comment:p.comment,
+    string:p.green,number:p.orange,regexp:p.green,operator:p.operator,decorator:p.gold
+  });
+  const name = oneDark ? 'Noctis Blue One Dark' : 'Noctis Blue';
+  return {name:name+(transparent?' Transparent':''),type:"dark",semanticHighlighting:true,colors,tokenColors,semanticTokenColors};
 }
 
 module.exports = { withAlpha, buildTheme };
