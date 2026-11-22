@@ -92,3 +92,14 @@ test('script rejects unknown contexts without modifying DOM', () => {
   assert.throws(() => vm.runInNewContext(script, context), /top または Markdown Editor/);
   assert.equal(context.styles.size, 0);
 });
+
+test('One Dark combined test uses the matching workbench background', () => {
+  const script = generateCombinedTestScript('Noctis Blue One Dark Transparent');
+  const context = makeContext('top');
+  assert.match(vm.runInNewContext(script, context), /適用/);
+  const node = context.styles.get('noctis-blue-combined-workbench-test');
+  assert.ok(node);
+  assert.match(node.textContent, /#161C28/);
+  assert.match(node.textContent, /#222D3C 50%, transparent/);
+  assert.doesNotMatch(node.textContent, /#001E4A 50%, transparent/);
+});
