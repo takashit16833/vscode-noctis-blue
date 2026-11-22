@@ -2,7 +2,7 @@
   "name": "noctis-blue",
   "displayName": "Noctis Blue",
   "description": "A blue VS Code theme with customizable translucent surfaces.",
-  "version": "0.12.10",
+  "version": "0.13.0",
   "publisher": "takashit16833",
   "private": true,
   "engines": {
@@ -41,6 +41,18 @@
         "uiTheme": "vs-dark",
         "path": "./themes/noctis-blue-transparent.json",
         "id": "Noctis Blue Transparent"
+      },
+      {
+        "label": "Noctis Blue One Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/noctis-blue-one-dark.json",
+        "id": "Noctis Blue One Dark"
+      },
+      {
+        "label": "Noctis Blue One Dark Transparent",
+        "uiTheme": "vs-dark",
+        "path": "./themes/noctis-blue-one-dark-transparent.json",
+        "id": "Noctis Blue One Dark Transparent"
       }
     ],
     "commands": [
