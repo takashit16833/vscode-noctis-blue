@@ -4,6 +4,8 @@ Emacs 版 [Retro Hacker Blue](https://github.com/takashit16833/emacs-retro-hacke
 
 - **Noctis Blue**：通常版
 - **Noctis Blue Transparent**：背景画像と透過表示に対応する版
+- **Noctis Blue One Dark**：落ち着いた紺色の背景と pale（青白い文字）を主体にした版
+- **Noctis Blue One Dark Transparent**：上記の透過版
 
 ## インストール
 
@@ -30,13 +32,13 @@ bash ./install.sh
 
 ## 有効化
 
-1. VS Code のテーマを **Noctis Blue** または **Noctis Blue Transparent** に変更します。
+1. VS Code のテーマを上記4種類から選択します。透過を使う場合は名前に **Transparent** が付く方を選びます。
 2. 背景画像・透過・ぼかしを使う場合は、コマンドパレットから **Noctis Blue: Enable Automatic Appearance** を実行し、確認画面を承認します。
 3. **Developer: Reload Window** で表示を更新します。
 
 背景画像・透過機能は VS Code 本体のファイルを変更するため、初回の明示的な許可が必要です。テーマを選ぶだけでは自動的に有効になりません。
 
-内蔵 Markdown Editor の装飾を使う場合は、別途 **Noctis Blue: Enable Markdown Editor Appearance** を実行して確認画面を承認してください。Dev Container などの接続先では、その接続先ごとに有効化が必要です。
+内蔵 Markdown Editor の装飾は4テーマ共通で利用できます。使う場合は、別途 **Noctis Blue: Enable Markdown Editor Appearance** を実行して確認画面を承認してください。Dev Container などの接続先では、その接続先ごとに有効化が必要です。
 
 ## 基本設定
 
