@@ -153,14 +153,25 @@ test('all contributed theme files match generator', () => {
   }
 });
 
-test('One Dark variants keep pale as foreground, pink as cursor, and One Dark syntax roles', () => {
+test('One Dark variants keep pale as foreground, blue caret, and One Dark syntax roles', () => {
   const normal = buildTheme(palette, false, 'one-dark');
   const translucent = buildTheme(palette, true, 'one-dark');
   assert.equal(normal.name, 'Noctis Blue One Dark');
   assert.equal(translucent.name, 'Noctis Blue One Dark Transparent');
   assert.equal(normal.colors['editor.background'], '#161C28');
   assert.equal(normal.colors['editor.foreground'], palette.pale);
-  assert.equal(normal.colors['editorCursor.foreground'], palette.cursor);
+  assert.equal(normal.colors['editorCursor.foreground'], palette.oneDark.function);
+  assert.equal(translucent.colors['editorCursor.foreground'], palette.oneDark.function);
+  assert.equal(normal.colors['terminalCursor.foreground'], palette.oneDark.function);
+  assert.equal(normal.colors['editorBracketMatch.border'], palette.oneDark.function);
+  assert.equal(normal.colors['editor.findMatchBorder'], palette.oneDark.function);
+  assert.equal(normal.colors['editor.findMatchBackground'],
+    withAlpha(palette.oneDark.function, '3D'));
+  assert.equal(normal.colors['editor.findMatchHighlightBackground'],
+    withAlpha(palette.oneDark.function, '3D'));
+  assert.equal(normal.colors.focusBorder, palette.oneDark.function);
+  assert.equal(normal.colors['terminal.ansiBlue'], palette.oneDark.function);
+  assert.equal(normal.colors['terminal.ansiRed'], palette.cursor);
   assert.equal(normal.colors['editorError.foreground'], palette.cursor);
   assert.equal(normal.colors['sideBar.background'], palette.oneDark.sidebar);
   assert.equal(translucent.colors['editor.background'], '#161C2800');
